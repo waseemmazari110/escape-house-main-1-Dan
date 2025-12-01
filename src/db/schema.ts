@@ -33,6 +33,9 @@ export const user = sqliteTable("user", {
     .$defaultFn(() => false)
     .notNull(),
   image: text("image"),
+  role: text("role").notNull().default("guest"), // 'guest', 'owner', 'admin'
+  phone: text("phone"),
+  companyName: text("company_name"), // For owners
   createdAt: integer("created_at", { mode: "timestamp" })
     .$defaultFn(() => new Date())
     .notNull(),
@@ -113,6 +116,7 @@ export const properties = sqliteTable('properties', {
   floorplanURL: text('floorplan_url'),
   mapLat: real('map_lat'),
   mapLng: real('map_lng'),
+  ownerId: text('owner_id').references(() => user.id, { onDelete: 'set null' }), // Link to owner user
   ownerContact: text('owner_contact'),
   featured: integer('featured', { mode: 'boolean' }).default(false),
   isPublished: integer('is_published', { mode: 'boolean' }).default(true),

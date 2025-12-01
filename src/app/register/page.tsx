@@ -241,7 +241,7 @@ export default function RegisterPage() {
             </form>
 
             {/* Login Link */}
-            <div className="text-center pt-4 border-t border-gray-200">
+            <div className="text-center pt-4 border-t border-gray-200 space-y-2">
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}
                 <Link
@@ -249,6 +249,15 @@ export default function RegisterPage() {
                   className="font-semibold text-[var(--color-accent-sage)] hover:text-[var(--color-accent-gold)] transition-colors"
                 >
                   Log In
+                </Link>
+              </p>
+              <p className="text-sm text-gray-600">
+                Want to list your property?{" "}
+                <Link
+                  href="/owner/signup"
+                  className="font-semibold text-[var(--color-accent-sage)] hover:text-[var(--color-accent-gold)] transition-colors"
+                >
+                  Become an Owner
                 </Link>
               </p>
             </div>

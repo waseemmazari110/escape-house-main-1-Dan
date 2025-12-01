@@ -22,6 +22,13 @@
       "when": 1762722087330,
       "tag": "0002_married_iron_lad",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1764612912889,
+      "tag": "0003_salty_ares",
+      "breakpoints": true
     }
   ]
 }
