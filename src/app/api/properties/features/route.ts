@@ -1,13 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
-import { contactMessages } from '@/db/schema';
-import { sendEmail } from '@/lib/email';
-import { checkRateLimit, containsSpamKeywords, sanitizeInput } from '@/lib/spam-protection';
-
-export async function POST(request: NextRequest) {
-  try {
-    const body import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/db';
 import { propertyFeatures, properties } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 

@@ -27,64 +27,8 @@ import {
   Loader2,
 } from "lucide-react";
 
-// Add metadata generation for SEO
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://groupescapehouses.co.uk';
-    const response = await fetch(`${baseUrl}/api/properties?slug=${params.slug}`, {
-      cache: 'no-store'
-    });
-    
-    if (!response.ok) {
-      return {
-        title: 'Property Not Found | Group Escape Houses',
-        description: 'Luxury hen party houses across the UK with hot tubs, pools, and stylish interiors.',
-      };
-    }
-
-    const properties = await response.json();
-    const property = properties[0];
-
-    if (!property) {
-      return {
-        title: 'Property Not Found | Group Escape Houses',
-        description: 'Luxury hen party houses across the UK with hot tubs, pools, and stylish interiors.',
-      };
-    }
-
-    const title = `${property.title} - Sleeps ${property.sleepsMax} | ${property.location}`;
-    const description = property.description 
-      ? property.description.substring(0, 155) + '...'
-      : `Luxury hen party house in ${property.location} sleeping ${property.sleepsMax} guests. ${property.bedrooms} bedrooms, from £${property.priceFromWeekend} per weekend.`;
-
-    return {
-      title,
-      description,
-      openGraph: {
-        title,
-        description,
-        images: [property.heroImage],
-        url: `${baseUrl}/properties/${params.slug}`,
-        type: 'website',
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title,
-        description,
-        images: [property.heroImage],
-      },
-      alternates: {
-        canonical: `${baseUrl}/properties/${params.slug}`,
-      },
-    };
-  } catch (error) {
-    console.error('Error generating metadata:', error);
-    return {
-      title: 'Property | Group Escape Houses',
-      description: 'Luxury hen party houses across the UK with hot tubs, pools, and stylish interiors.',
-    };
-  }
-}
+// Metadata cannot be exported from client components
+// Move to a separate layout.tsx or remove "use client"
 
 export default function PropertyDetailPage({ params }: { params: { slug: string } }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
