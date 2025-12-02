@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
@@ -30,7 +31,8 @@ import {
 // Metadata cannot be exported from client components
 // Move to a separate layout.tsx or remove "use client"
 
-export default function PropertyDetailPage({ params }: { params: { slug: string } }) {
+export default function PropertyDetailPage() {
+  const params = useParams();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSaved, setIsSaved] = useState(false);
   const [property, setProperty] = useState<any>(null);
@@ -46,7 +48,7 @@ export default function PropertyDetailPage({ params }: { params: { slug: string 
         setError(null);
 
         // Fetch the specific property by slug
-        const propertyResponse = await fetch(`/api/properties?slug=${params.slug}`);
+        const propertyResponse = await fetch(`/api/properties?slug=${params.slug as string}`);
         
         if (!propertyResponse.ok) {
           throw new Error('Failed to fetch property');

@@ -1,5 +1,6 @@
 "use client";
 
+import { useParams } from "next/navigation";
 import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -10,13 +11,15 @@ import { Clock, Users, Check, Calendar, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { experiencesData, relatedExperiences } from "@/data/experiences";
 
-export default function ExperienceDetailPage({ params }: { params: { slug: string } }) {
-  const experience = experiencesData[params.slug] || experiencesData["private-chef"];
+export default function ExperienceDetailPage() {
+  const params = useParams();
+  const slug = params.slug as string;
+  const experience = experiencesData[slug] || experiencesData["private-chef"];
   const Icon = experience.icon;
 
   // Filter related experiences excluding current one
   const filteredRelated = relatedExperiences
-    .filter(exp => exp.slug !== params.slug)
+    .filter(exp => exp.slug !== slug)
     .slice(0, 3);
 
   return (

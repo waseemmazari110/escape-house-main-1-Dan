@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle, Loader2 } from "lucide-react";
 
 interface PropertyData {
   title: string;
@@ -368,7 +368,7 @@ export default function EditPropertyPage() {
                   </>
                 ) : (
                   <>
-                    <Save className="w-5 h-5 mr-2" />
+                    <CheckCircle className="w-5 h-5 mr-2" />
                     Save Changes
                   </>
                 )}
