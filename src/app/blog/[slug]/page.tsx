@@ -1,9 +1,9 @@
 "use client";
 
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Footer from "@/components/Footer"; // Import Footer
 import Link from "next/link";
-import { Calendar, ArrowLeft, Share2 } from "lucide-react";
+import { Calendar, ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 
 // Blog posts data (should match the listing page)
@@ -537,8 +537,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               onClick={handleShare}
               className="flex items-center gap-2 hover:text-[var(--color-accent-sage)] transition-colors"
             >
-              <Share2 className="w-5 h-5" />
-              <span>Share</span>
+              <span>📤 Share</span>
             </button>
           </div>
         </div>

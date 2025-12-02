@@ -28,7 +28,8 @@ import {
   LogOut,
   CreditCard,
   Phone,
-  ChevronDown
+  ChevronDown,
+  Trash2
 } from "lucide-react";
 
 interface UserProfile {
@@ -111,6 +112,29 @@ export default function OwnerDashboard() {
       }
     } catch (error) {
       console.error("Failed to fetch properties:", error);
+    }
+  };
+
+  const handleDeleteProperty = async (propertyId: number, propertyTitle: string) => {
+    if (!confirm(`Are you sure you want to delete "${propertyTitle}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/properties?id=${propertyId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        alert("Property deleted successfully!");
+        fetchProperties(); // Refresh the list
+      } else {
+        const error = await response.json();
+        alert(`Failed to delete property: ${error.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Failed to delete property. Please try again.");
     }
   };
 
@@ -422,14 +446,14 @@ export default function OwnerDashboard() {
                           £{property.priceFromMidweek} / night
                         </p>
                       )}
-                      <div className="flex gap-2">
+                      <div className="grid grid-cols-3 gap-2">
                         <Button
                           onClick={() =>
                             router.push(`/owner/properties/${property.id}/edit`)
                           }
                           variant="outline"
                           size="sm"
-                          className="flex-1 rounded-full"
+                          className="rounded-full"
                         >
                           <Edit className="w-4 h-4 mr-1" />
                           Edit
@@ -440,10 +464,17 @@ export default function OwnerDashboard() {
                           }
                           variant="outline"
                           size="sm"
-                          className="flex-1 rounded-full"
+                          className="rounded-full"
                         >
                           <Calendar className="w-4 h-4 mr-1" />
-                          Calendar
+                        </Button>
+                        <Button
+                          onClick={() => handleDeleteProperty(property.id, property.title)}
+                          variant="outline"
+                          size="sm"
+                          className="rounded-full text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-600"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
