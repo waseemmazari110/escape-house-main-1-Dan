@@ -1,5 +1,3 @@
-"use client";
-
 import Header from "@/components/Header";
 import Footer from "@/components/Footer"; // Import Footer
 import Link from "next/link";
@@ -491,18 +489,6 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     .filter((p) => p.category === post.category && p.slug !== post.slug)
     .slice(0, 3);
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: post.title,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert("Link copied to clipboard!");
-    }
-  };
-
   return (
     <div className="min-h-screen">
       <Header />
@@ -540,12 +526,6 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
               <Calendar className="w-5 h-5" />
               <span>{post.date}</span>
             </div>
-            <button
-              onClick={handleShare}
-              className="flex items-center gap-2 hover:text-[var(--color-accent-sage)] transition-colors"
-            >
-              <span>📤 Share</span>
-            </button>
           </div>
         </div>
       </section>
