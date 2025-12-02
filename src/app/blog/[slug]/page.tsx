@@ -470,153 +470,214 @@ const posts = [
   },
 ];
 
-// Generate static params for all blog posts
-export async function generateStaticParams() {
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+// // Generate static params for all blog posts
+// export async function generateStaticParams() {
+//   return posts.map((post) => ({
+//     slug: post.slug,
+//   }));
+// }
+
+// export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
+//   const { slug } = await params;
+//   const post = posts.find((p) => p.slug === slug);
+
+//   if (!post) {
+//     notFound();
+//   }
+
+//   // Get related posts (same category, excluding current)
+//   const relatedPosts = posts
+//     .filter((p) => p.category === post.category && p.slug !== post.slug)
+//     .slice(0, 3);
+
+//   return (
+//     <div className="min-h-screen">
+//       <Header />
+
+//       {/* Hero */}
+//       <section className="pt-32 pb-16 bg-gradient-to-br from-[var(--color-bg-primary)] to-[var(--color-bg-secondary)]">
+//         <div className="max-w-[900px] mx-auto px-6">
+//           <Link
+//             href="/blog"
+//             className="inline-flex items-center gap-2 text-[var(--color-accent-sage)] hover:text-[var(--color-accent-gold)] transition-colors mb-8 font-medium"
+//           >
+//             <ArrowLeft className="w-4 h-4" />
+//             Back to Blog
+//           </Link>
+
+//           <div
+//             className="inline-block px-3 py-1 rounded-full text-sm font-medium mb-6"
+//             style={{
+//               background: "var(--color-accent-sage)",
+//               color: "white",
+//             }}
+//           >
+//             {post.category}
+//           </div>
+
+//           <h1
+//             className="mb-6"
+//             style={{ fontFamily: "var(--font-display)" }}
+//           >
+//             {post.title}
+//           </h1>
+
+//           <div className="flex items-center gap-6 text-[var(--color-neutral-dark)]">
+//             <div className="flex items-center gap-2">
+//               <Calendar className="w-5 h-5" />
+//               <span>{post.date}</span>
+//             </div>
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Featured Image */}
+//       <section className="py-12 bg-white">
+//         <div className="max-w-[1200px] mx-auto px-6">
+//           <div className="aspect-[16/9] rounded-3xl overflow-hidden shadow-xl">
+//             <img
+//               src={post.image}
+//               alt={post.title}
+//               className="w-full h-full object-cover"
+//             />
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Content */}
+//       <section className="py-16 bg-white">
+//         <div className="max-w-[800px] mx-auto px-6">
+//           <div
+//             className="prose prose-lg max-w-none"
+//             style={{
+//               color: "var(--color-neutral-dark)",
+//               fontFamily: "var(--font-body)",
+//             }}
+//             dangerouslySetInnerHTML={{ __html: post.content }}
+//           />
+//         </div>
+//       </section>
+
+//       {/* Related Posts */}
+//       {relatedPosts.length > 0 && (
+//         <section className="py-24 bg-[var(--color-bg-primary)]">
+//           <div className="max-w-[1200px] mx-auto px-6">
+//             <h2
+//               className="mb-12 text-center"
+//               style={{ fontFamily: "var(--font-display)" }}
+//             >
+//               Related Articles
+//             </h2>
+
+//             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+//               {relatedPosts.map((relatedPost) => (
+//                 <Link
+//                   key={relatedPost.id}
+//                   href={`/blog/${relatedPost.slug}`}
+//                   className="group cursor-pointer"
+//                 >
+//                   <div className="bg-white rounded-2xl overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
+//                     <div className="aspect-[16/10] overflow-hidden">
+//                       <img
+//                         src={relatedPost.image}
+//                         alt={relatedPost.title}
+//                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+//                       />
+//                     </div>
+
+//                     <div className="p-6">
+//                       <div
+//                         className="inline-block px-3 py-1 rounded-full text-sm font-medium mb-4"
+//                         style={{
+//                           background: "var(--color-accent-sage)",
+//                           color: "white",
+//                         }}
+//                       >
+//                         {relatedPost.category}
+//                       </div>
+
+//                       <h3
+//                         className="text-xl font-semibold mb-3 group-hover:text-[var(--color-accent-sage)] transition-colors"
+//                         style={{ fontFamily: "var(--font-body)" }}
+//                       >
+//                         {relatedPost.title}
+//                       </h3>
+
+//                       <div className="flex items-center gap-2 text-sm text-[var(--color-neutral-dark)]">
+//                         <Calendar className="w-4 h-4" />
+//                         <span>{relatedPost.date}</span>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </Link>
+//               ))}
+//             </div>
+//           </div>
+//         </section>
+//       )}
+
+//       <Footer />
+//     </div>
+//   );
+// }
+
+
+export async function generateMetadata({ params }) {
+  const post = posts.find((p) => p.slug === params.slug);
+  if (!post) return {};
+
+  return {
+    title: post.title,
+    description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      images: [post.image],
+    },
+  };
 }
 
-export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = posts.find((p) => p.slug === slug);
 
-  if (!post) {
-    notFound();
-  }
-
-  // Get related posts (same category, excluding current)
-  const relatedPosts = posts
-    .filter((p) => p.category === post.category && p.slug !== post.slug)
-    .slice(0, 3);
+  if (!post) return notFound();
 
   return (
-    <div className="min-h-screen">
+    <>
       <Header />
 
-      {/* Hero */}
-      <section className="pt-32 pb-16 bg-gradient-to-br from-[var(--color-bg-primary)] to-[var(--color-bg-secondary)]">
-        <div className="max-w-[900px] mx-auto px-6">
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 text-[var(--color-accent-sage)] hover:text-[var(--color-accent-gold)] transition-colors mb-8 font-medium"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Blog
-          </Link>
+      <main className="max-w-3xl mx-auto px-4 py-10">
+        <Link
+          href="/blog"
+          className="inline-flex items-center text-sage hover:underline mb-4"
+        >
+          <ArrowLeft size={18} className="mr-2" />
+          Back to Blog
+        </Link>
 
-          <div
-            className="inline-block px-3 py-1 rounded-full text-sm font-medium mb-6"
-            style={{
-              background: "var(--color-accent-sage)",
-              color: "white",
-            }}
-          >
-            {post.category}
+        <article className="space-y-6">
+          <img
+            src={post.image}
+            alt={post.title}
+            className="w-full h-64 object-cover rounded-xl shadow"
+          />
+
+          <h1 className="text-4xl font-bold leading-tight">{post.title}</h1>
+
+          <div className="flex items-center text-gray-500 text-sm gap-2">
+            <Calendar size={16} />
+            <span>{new Date(post.date).toLocaleDateString("en-GB")}</span>
           </div>
 
-          <h1
-            className="mb-6"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            {post.title}
-          </h1>
-
-          <div className="flex items-center gap-6 text-[var(--color-neutral-dark)]">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              <span>{post.date}</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Image */}
-      <section className="py-12 bg-white">
-        <div className="max-w-[1200px] mx-auto px-6">
-          <div className="aspect-[16/9] rounded-3xl overflow-hidden shadow-xl">
-            <img
-              src={post.image}
-              alt={post.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Content */}
-      <section className="py-16 bg-white">
-        <div className="max-w-[800px] mx-auto px-6">
           <div
             className="prose prose-lg max-w-none"
-            style={{
-              color: "var(--color-neutral-dark)",
-              fontFamily: "var(--font-body)",
-            }}
             dangerouslySetInnerHTML={{ __html: post.content }}
-          />
-        </div>
-      </section>
-
-      {/* Related Posts */}
-      {relatedPosts.length > 0 && (
-        <section className="py-24 bg-[var(--color-bg-primary)]">
-          <div className="max-w-[1200px] mx-auto px-6">
-            <h2
-              className="mb-12 text-center"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Related Articles
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {relatedPosts.map((relatedPost) => (
-                <Link
-                  key={relatedPost.id}
-                  href={`/blog/${relatedPost.slug}`}
-                  className="group cursor-pointer"
-                >
-                  <div className="bg-white rounded-2xl overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
-                    <div className="aspect-[16/10] overflow-hidden">
-                      <img
-                        src={relatedPost.image}
-                        alt={relatedPost.title}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    </div>
-
-                    <div className="p-6">
-                      <div
-                        className="inline-block px-3 py-1 rounded-full text-sm font-medium mb-4"
-                        style={{
-                          background: "var(--color-accent-sage)",
-                          color: "white",
-                        }}
-                      >
-                        {relatedPost.category}
-                      </div>
-
-                      <h3
-                        className="text-xl font-semibold mb-3 group-hover:text-[var(--color-accent-sage)] transition-colors"
-                        style={{ fontFamily: "var(--font-body)" }}
-                      >
-                        {relatedPost.title}
-                      </h3>
-
-                      <div className="flex items-center gap-2 text-sm text-[var(--color-neutral-dark)]">
-                        <Calendar className="w-4 h-4" />
-                        <span>{relatedPost.date}</span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+          ></div>
+        </article>
+      </main>
 
       <Footer />
-    </div>
+    </>
   );
 }
