@@ -60,14 +60,20 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
+      // If already logged in, sign out to allow new registration
+      const sessionRes = await authClient.getSession();
+      if (sessionRes?.data) {
+        await authClient.signOut();
+      }
+
       const { data, error } = await authClient.signUp.email({
         email,
         name,
         password,
       });
 
-      if (error?.code) {
-        toast.error(getErrorMessage(error.code));
+      if (error) {
+        toast.error(error.message || getErrorMessage(error.code));
         setIsLoading(false);
         return;
       }
@@ -79,6 +85,7 @@ export default function RegisterPage() {
     } catch (error) {
       console.error("Registration error:", error);
       toast.error("An error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
     }
   };

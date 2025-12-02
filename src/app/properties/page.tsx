@@ -9,19 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import Link from "next/link";
 import { 
-  SlidersHorizontal, 
-  MapPin, 
-  Users, 
-  PoundSterling,
-  Sparkles,
-  Waves,
-  Gamepad2,
-  PawPrint,
-  Accessibility,
-  Clapperboard,
-  Flame,
-  Trees,
-  Check,
   Loader2
 } from "lucide-react";
 
@@ -64,14 +51,14 @@ const destinations = [
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 const featureOptions = [
-  { icon: Waves, label: "Hot Tub" },
-  { icon: Waves, label: "Pool" },
-  { icon: Gamepad2, label: "Games Room" },
-  { icon: PawPrint, label: "Pet Friendly" },
-  { icon: Accessibility, label: "Accessible" },
-  { icon: Clapperboard, label: "Cinema" },
-  { icon: Flame, label: "BBQ" },
-  { icon: Trees, label: "Garden" },
+  { icon: null, label: "Hot Tub" },
+  { icon: null, label: "Pool" },
+  { icon: null, label: "Games Room" },
+  { icon: null, label: "Pet Friendly" },
+  { icon: null, label: "Accessible" },
+  { icon: null, label: "Cinema" },
+  { icon: null, label: "BBQ" },
+  { icon: null, label: "Garden" },
 ];
 
 // Separate component that uses useSearchParams
@@ -113,14 +100,17 @@ function PropertiesContent() {
 
         const data = await response.json();
 
+        // Handle both array and object response formats
+        const propertiesArray = Array.isArray(data) ? data : (data.properties || []);
+
         // Transform properties data to match PropertyCard props
-        const transformedProperties = data.map((prop: any) => ({
+        const transformedProperties = propertiesArray.map((prop: any) => ({
           id: prop.id.toString(),
           title: prop.title,
           location: prop.location,
           sleeps: prop.sleepsMax,
           bedrooms: prop.bedrooms,
-          priceFrom: prop.priceFromWeekend,
+          priceFrom: prop.priceFromWeekend || prop.priceFromMidweek,
           image: prop.heroImage,
           features: [], // Features will be added when we integrate property_features
           slug: prop.slug,
@@ -237,7 +227,6 @@ function PropertiesContent() {
                 color: "white",
               }}
             >
-              <SlidersHorizontal className="w-5 h-5 mr-2" />
               {showFilters ? "Hide Filters" : "Show Filters"}
             </Button>
           </div>
@@ -248,7 +237,6 @@ function PropertiesContent() {
               <div className="bg-white rounded-2xl p-6 shadow-md sticky top-24">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-semibold flex items-center gap-2" style={{ fontFamily: "var(--font-body)" }}>
-                    <SlidersHorizontal className="w-5 h-5 text-[var(--color-accent-sage)]" />
                     Filters
                   </h3>
                   <Button
@@ -273,7 +261,6 @@ function PropertiesContent() {
                   {/* Location */}
                   <div>
                     <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-[var(--color-accent-pink)]" />
                       Location
                     </label>
                     <select
@@ -293,8 +280,7 @@ function PropertiesContent() {
                   {/* Group Size */}
                   <div>
                     <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                      <Users className="w-4 h-4 text-[var(--color-accent-gold)]" />
-                      Group size: {filters.groupSize > 0 ? `${filters.groupSize}+` : "Any"}
+                      Group size: {filters.groupSize > 0 ? `${filters.groupSize}+ people` : 'Any'}
                     </label>
                     <Slider
                       value={[filters.groupSize]}
@@ -308,7 +294,6 @@ function PropertiesContent() {
                   {/* Price Range */}
                   <div>
                     <label className="block text-sm font-medium mb-2 flex items-center gap-2">
-                      <PoundSterling className="w-4 h-4 text-[var(--color-accent-sage)]" />
                       Price per night: £{filters.priceMin} - £{filters.priceMax}
                     </label>
                     <Slider
@@ -325,7 +310,6 @@ function PropertiesContent() {
                   {/* Features */}
                   <div>
                     <label className="block text-sm font-medium mb-3 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-[var(--color-accent-pink)]" />
                       Features
                     </label>
                     <div className="space-y-2">
@@ -342,7 +326,6 @@ function PropertiesContent() {
                               onChange={() => toggleFeature(feature.label)}
                               className="w-4 h-4 rounded accent-[var(--color-accent-pink)]"
                             />
-                            <Icon className="w-4 h-4 text-[var(--color-accent-sage)]" />
                             <span className="text-sm">{feature.label}</span>
                           </label>
                         );
@@ -359,7 +342,6 @@ function PropertiesContent() {
                         type="checkbox"
                         className="w-4 h-4 rounded accent-[var(--color-accent-pink)]"
                       />
-                      <Check className="w-4 h-4 text-[var(--color-accent-gold)]" />
                       <span className="text-sm font-medium">Instant enquiry only</span>
                     </label>
                   </div>
@@ -379,7 +361,6 @@ function PropertiesContent() {
               {/* Sort and Count */}
               <div className="flex items-center justify-between mb-8">
                 <p className="text-[var(--color-neutral-dark)] flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-[var(--color-accent-gold)]" />
                   {isLoadingData ? (
                     "Loading properties..."
                   ) : (

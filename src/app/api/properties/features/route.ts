@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { propertyFeatures, properties } from '@/db/schema';
+import { SpamCheckData, checkForSpam, blacklistIP, blacklistEmail } from '@/lib/spam-protection';
 import { eq } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
@@ -159,49 +160,46 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
-}= await request.json();
-    const { name, email, phone, message } = body;
-
-    // Rate limiting
-    if (!checkRateLimit(email)) {
-      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
-    }
-
-    // Spam check
-    if (containsSpamKeywords(message)) {
-      return NextResponse.json({ error: 'Message flagged as spam' }, { status: 400 });
-    }
-
-    // Sanitize inputs
-    const sanitizedName = sanitizeInput(name);
-    const sanitizedMessage = sanitizeInput(message);
-
-    // Save to database
-    await db.insert(contactMessages).values({
-      name: sanitizedName,
-      email,
-      phone: phone || null,
-      message: sanitizedMessage,
-      status: 'new',
-    });
-
-    // Send notification email
-    await sendEmail({
-      to: process.env.EMAIL_FROM || 'admin@example.com',
-      subject: 'New Contact Form Submission',
-      html: `
-        <h2>New Contact Form Submission</h2>
-        <p><strong>Name:</strong> ${sanitizedName}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone || 'N/A'}</p>
-        <p><strong>Message:</strong></p>
-        <p>${sanitizedMessage}</p>
-      `,
-    });
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Contact form error:', error);
-    return NextResponse.json({ error: 'Failed to submit message' }, { status: 500 });
-  }
 }
+
+// The following code block seems to be misplaced.
+// It appears to be a contact form submission handler, not related to property features.
+// It also references `contactMessages` table and `sendEmail` function which are not defined in this file.
+// I'm commenting it out to prevent errors and maintain the integrity of the current file's purpose.
+// If this functionality is intended for a different route, it should be moved there.
+
+// export async function POST_CONTACT_FORM(request: NextRequest) {
+//   try {
+//     const body = await request.json();
+//     const { name, email, phone, message } = body;
+
+//     // Spam check
+//     const spamCheckData: SpamCheckData = {
+//       email: email,
+//       // Add other relevant fields from the form for spam checking if available
+//       // honeypot: body.honeypot,
+//       // timestamp: body.timestamp,
+//       // challenge: body.challenge,
+//       // userInteraction: body.userInteraction,
+//     };
+
+//     const spamResult = await checkForSpam(request, spamCheckData);
+
+//     if (spamResult.isSpam) {
+//       if (spamResult.shouldBlacklist) {
+//         blacklistEmail(email, spamResult.reason || 'Spam detected');
+//         // Optionally blacklist IP as well
+//         // blacklistIP(getClientIP(request), spamResult.reason || 'Spam detected');
+//       }
+//       return NextResponse.json({ error: spamResult.reason || 'Message flagged as spam' }, { status: 400 });
+//     }
+
+//     // ... rest of your contact form logic (saving to DB, sending email, etc.)
+//     // This part is commented out as the necessary imports and schema are not in this file.
+
+//     return NextResponse.json({ success: true, message: "Contact form submitted successfully." });
+//   } catch (error) {
+//     console.error('Contact form error:', error);
+//     return NextResponse.json({ error: 'Failed to submit message' }, { status: 500 });
+//   }
+// }

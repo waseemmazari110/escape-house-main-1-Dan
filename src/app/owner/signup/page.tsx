@@ -59,34 +59,53 @@ function OwnerSignupForm() {
     setIsLoading(true);
 
     try {
-      // Register owner account using custom API
-      const response = await fetch("/api/owner/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          phone: formData.phone,
-          companyName: formData.companyName,
-        }),
+      // Sign out if already logged in
+      const sessionRes = await authClient.getSession();
+      if (sessionRes?.data) {
+        await authClient.signOut();
+      }
+
+      // Register using better-auth
+      const { data, error } = await authClient.signUp.email({
+        email: formData.email,
+        name: formData.name,
+        password: formData.password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error(data.error || "Failed to create account");
-        setIsLoading(false);
+      if (error) {
+        toast.error(error.message || "Failed to create account");
         return;
       }
 
-      toast.success("Account created successfully! You can now log in.");
-      router.push("/login?registered=true&tab=owner");
+      // Complete owner profile with additional fields
+      if (data?.user) {
+        const completeResponse = await fetch("/api/owner/complete-signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: data.user.id,
+            phone: formData.phone,
+            companyName: formData.companyName,
+            role: "owner",
+          }),
+        });
+
+        if (!completeResponse.ok) {
+          console.error("Failed to complete owner profile");
+          // Still allow login even if profile completion fails
+        }
+      }
+
+      toast.success("Owner account created successfully! You can now log in.");
+      
+      // Redirect to owner login page
+      router.push("/owner/login?registered=true");
     } catch (error) {
       console.error("Signup error:", error);
       toast.error("An error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
     }
   };

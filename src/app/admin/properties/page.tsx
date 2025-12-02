@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 import { GEH_API } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Edit, Calendar, DollarSign, Search, Filter } from "lucide-react";
+import { Edit, Calendar, DollarSign, Search, Filter, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 
@@ -41,6 +43,7 @@ interface PropertiesResponse {
 }
 
 export default function AdminPropertiesPage() {
+  const router = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -50,6 +53,11 @@ export default function AdminPropertiesPage() {
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [townFilter, setTownFilter] = useState<string>("all");
+
+  const handleSignOut = async () => {
+    await authClient.signOut();
+    router.push("/");
+  };
 
   // Fetch properties
   const fetchProperties = async () => {
@@ -118,13 +126,29 @@ export default function AdminPropertiesPage() {
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Properties Management
-          </h1>
-          <p className="text-gray-600">
-            Manage your property listings, availability, and pricing
-          </p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Properties Management
+            </h1>
+            <p className="text-gray-600">
+              Manage your property listings, availability, and pricing
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-medium text-gray-900">Admin</p>
+              <p className="text-xs text-gray-500">Logged in</p>
+            </div>
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              className="rounded-full border-2 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
         </div>
 
         {/* Filters & Search */}

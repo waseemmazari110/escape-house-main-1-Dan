@@ -131,19 +131,25 @@ export default function Home() {
             reviewsRes.json()
           ]);
 
-          setFeaturedProperties(propertiesData.map((prop: any) => ({
+          // Handle both array and object response formats for properties
+          const propertiesArray = Array.isArray(propertiesData) ? propertiesData : (propertiesData.properties || []);
+
+          setFeaturedProperties(propertiesArray.map((prop: any) => ({
             id: prop.id.toString(),
             title: prop.title,
             location: prop.location,
             sleeps: prop.sleepsMax,
             bedrooms: prop.bedrooms,
-            priceFrom: prop.priceFromWeekend,
+            priceFrom: prop.priceFromWeekend || prop.priceFromMidweek,
             image: prop.heroImage,
             features: [],
             slug: prop.slug,
           })));
 
-          setExperiences(experiencesData.map((exp: any) => ({
+          // Handle both array and object response formats for experiences
+          const experiencesArray = Array.isArray(experiencesData) ? experiencesData : (experiencesData.experiences || []);
+          
+          setExperiences(experiencesArray.map((exp: any) => ({
             title: exp.title,
             duration: exp.duration,
             priceFrom: exp.priceFrom,
@@ -152,7 +158,10 @@ export default function Home() {
             slug: exp.slug,
           })));
 
-          setReviews(reviewsData.map((review: any) => ({
+          // Handle both array and object response formats for reviews
+          const reviewsArray = Array.isArray(reviewsData) ? reviewsData : (reviewsData.reviews || []);
+          
+          setReviews(reviewsArray.map((review: any) => ({
             name: review.guestName,
             rating: review.rating,
             comment: review.comment,

@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
     'http://localhost:3001',
     'http://127.0.0.1:3001',
     'http://10.102.139.2:3001',
+    // Added current LAN IP observed in logs
+    'http://10.102.139.154:3001',
   ],
   images: {
     remotePatterns: [
@@ -40,6 +42,8 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 31536000, // 1 year cache for optimized images
+    // Avoid upstream timeouts in development; keep optimization in production
+    unoptimized: process.env.NODE_ENV === 'development',
   },
   typescript: {
     ignoreBuildErrors: false,

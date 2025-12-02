@@ -6,11 +6,17 @@ import { eq } from "drizzle-orm";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, phone, companyName, role } = body;
+    const { userId, email, phone, propertyName, propertyAddress, companyName, role } = body;
 
-    if (!userId) {
+    // Use either userId or email to find the user
+    let userIdentifier;
+    if (userId) {
+      userIdentifier = eq(user.id, userId);
+    } else if (email) {
+      userIdentifier = eq(user.email, email);
+    } else {
       return NextResponse.json(
-        { error: "User ID is required" },
+        { error: "User ID or email is required" },
         { status: 400 }
       );
     }
@@ -21,10 +27,10 @@ export async function POST(request: NextRequest) {
       .set({
         role: role || "owner",
         phone: phone || null,
-        companyName: companyName || null,
+        companyName: companyName || propertyName || null,
         updatedAt: new Date(),
       })
-      .where(eq(user.id, userId));
+      .where(userIdentifier);
 
     return NextResponse.json({
       success: true,

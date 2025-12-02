@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user with owner role
+    const now = new Date();
     const newUser = await db
       .insert(user)
       .values({
@@ -46,8 +47,8 @@ export async function POST(request: NextRequest) {
         phone: phone || null,
         companyName: companyName || null,
         emailVerified: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: now,
+        updatedAt: now,
       })
       .returning();
 
@@ -62,8 +63,8 @@ export async function POST(request: NextRequest) {
       providerId: "credential",
       userId: newUser[0].id,
       password: hashedPassword,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: now,
+      updatedAt: now,
     });
 
     return NextResponse.json({
@@ -78,8 +79,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Owner signup error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to create owner account";
     return NextResponse.json(
-      { error: "Failed to create owner account" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

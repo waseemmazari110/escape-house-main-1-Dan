@@ -12,6 +12,11 @@ export const auth = betterAuth({
 	emailAndPassword: {    
 		enabled: true
 	},
+	trustedOrigins: [
+		"http://localhost:3000",
+		"http://127.0.0.1:3000",
+		"http://10.102.139.154:3000",
+	],
 	plugins: [bearer()]
 });
 

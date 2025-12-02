@@ -14,6 +14,8 @@ export default function DestinationDetailPage() {
   const [openFaq, setOpenFaq,] = useState<number | null>(null);
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [isLoadingProperties, setIsLoadingProperties] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const params = useParams();
   const slug = params.slug as string;
@@ -21,6 +23,47 @@ export default function DestinationDetailPage() {
   const handleImageError = (imageId: string) => {
     setImageErrors(prev => ({ ...prev, [imageId]: true }));
   };
+
+  // Fetch properties for this destination
+  useEffect(() => {
+    const fetchProperties = async () => {
+      if (!destination) return;
+      
+      try {
+        setIsLoadingProperties(true);
+        const response = await fetch(`/api/properties?isPublished=true&location=${encodeURIComponent(destination.name)}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch properties');
+        }
+
+        const data = await response.json();
+        const propertiesArray = Array.isArray(data) ? data : (data.properties || []);
+
+        // Transform properties data to match PropertyCard props
+        const transformedProperties = propertiesArray.map((prop: any) => ({
+          id: prop.id.toString(),
+          title: prop.title,
+          location: prop.location,
+          sleeps: prop.sleepsMax,
+          bedrooms: prop.bedrooms,
+          priceFrom: prop.priceFromWeekend || prop.priceFromMidweek,
+          image: prop.heroImage,
+          features: [],
+          slug: prop.slug,
+        }));
+
+        setProperties(transformedProperties);
+      } catch (error) {
+        console.error('Error fetching properties:', error);
+        setProperties([]);
+      } finally {
+        setIsLoadingProperties(false);
+      }
+    };
+
+    fetchProperties();
+  }, [destination]);
 
   // Destinations data
   const destinationsData: Record<string, any> = {
@@ -2295,8 +2338,6 @@ export default function DestinationDetailPage() {
 
   const destination = destinationsData[slug] || destinationsData.brighton;
 
-  const properties = propertiesByLocation[slug] || propertiesByLocation.brighton;
-
   const faqs = [
     {
       question: `How far is ${destination.name} from London?`,
@@ -2836,25 +2877,50 @@ export default function DestinationDetailPage() {
           <h2 className="text-3xl font-semibold mb-8" style={{ fontFamily: "var(--font-display)" }}>
             Hen Party Houses in {destination.name}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {properties.map((property) => (
-              <PropertyCard key={property.id} {...property} />
-            ))}
-          </div>
           
-          <div className="text-center mt-12">
-            <Button
-              asChild
-              size="lg"
-              className="rounded-2xl px-10 py-6 font-medium transition-all duration-200 hover:shadow-lg hover:-translate-y-1"
-              style={{
-                background: "var(--color-accent-sage)",
-                color: "white",
-              }}
-            >
-              <Link href="/contact">Check Availability and Book</Link>
-            </Button>
-          </div>
+          {isLoadingProperties ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-accent-sage)]"></div>
+              <p className="mt-4 text-[var(--color-neutral-dark)]">Loading properties...</p>
+            </div>
+          ) : properties.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {properties.map((property) => (
+                  <PropertyCard key={property.id} {...property} />
+                ))}
+              </div>
+              
+              <div className="text-center mt-12">
+                <Button
+                  asChild
+                  size="lg"
+                  className="rounded-2xl px-10 py-6 font-medium transition-all duration-200 hover:shadow-lg hover:-translate-y-1"
+                  style={{
+                    background: "var(--color-accent-sage)",
+                    color: "white",
+                  }}
+                >
+                  <Link href="/contact">Check Availability and Book</Link>
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12 bg-white rounded-xl">
+              <Home className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+              <p className="text-xl font-semibold text-gray-900 mb-2">No properties available yet</p>
+              <p className="text-[var(--color-neutral-dark)] mb-6">
+                We're currently adding properties in {destination.name}. Check back soon!
+              </p>
+              <Button
+                asChild
+                variant="outline"
+                className="rounded-full"
+              >
+                <Link href="/properties">View All Properties</Link>
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 

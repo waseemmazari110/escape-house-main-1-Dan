@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { properties } from '@/db/schema';
 import { eq, like, and, or, desc, asc } from 'drizzle-orm';
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,14 +32,28 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      return NextResponse.json(property[0]);
+      // Map property to include legacy field names
+      const prop = property[0];
+      const mappedProperty = {
+        ...prop,
+        status: prop.isPublished ? 'active' : 'draft',
+        town: prop.location,
+        max_guests: prop.sleepsMax,
+        price_from: prop.priceFromMidweek,
+        updated_at: prop.updatedAt,
+      };
+
+      return NextResponse.json(mappedProperty);
     }
 
     // List properties with pagination, search, filters, and sorting
     const limit = Math.min(parseInt(searchParams.get('limit') ?? '20'), 100);
-    const offset = parseInt(searchParams.get('offset') ?? '0');
+    const page = parseInt(searchParams.get('page') ?? '1');
+    const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset') ?? '0') : (page - 1) * limit;
     const search = searchParams.get('search');
     const region = searchParams.get('region');
+    const town = searchParams.get('town');
+    const status = searchParams.get('status');
     const featured = searchParams.get('featured');
     const isPublished = searchParams.get('isPublished');
     const sortField = searchParams.get('sort') ?? 'createdAt';
@@ -62,6 +78,19 @@ export async function GET(request: NextRequest) {
     // Filter conditions
     if (region) {
       conditions.push(eq(properties.region, region));
+    }
+
+    if (town) {
+      conditions.push(like(properties.location, `%${town}%`));
+    }
+
+    if (status) {
+      // Map status filter to isPublished field
+      if (status === 'active') {
+        conditions.push(eq(properties.isPublished, true));
+      } else if (status === 'draft' || status === 'inactive') {
+        conditions.push(eq(properties.isPublished, false));
+      }
     }
 
     if (featured !== null && featured !== undefined) {
@@ -99,7 +128,30 @@ export async function GET(request: NextRequest) {
     // Apply pagination
     const results = await query.limit(limit).offset(offset);
 
-    return NextResponse.json(results);
+    // Get total count for pagination
+    const countQuery = db.select().from(properties);
+    if (conditions.length > 0) {
+      countQuery.where(and(...conditions));
+    }
+    const totalResults = await countQuery;
+    const total = totalResults.length;
+
+    // Map properties to include legacy field names for backward compatibility
+    const mappedResults = results.map(prop => ({
+      ...prop,
+      status: prop.isPublished ? 'active' : 'draft',
+      town: prop.location,
+      max_guests: prop.sleepsMax,
+      price_from: prop.priceFromMidweek,
+      updated_at: prop.updatedAt,
+    }));
+
+    return NextResponse.json({
+      properties: mappedResults,
+      total,
+      page,
+      limit,
+    });
   } catch (error) {
     console.error('GET error:', error);
     return NextResponse.json(
@@ -111,6 +163,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Get user session for ownerId
+    let ownerId: string | null = null;
+    try {
+      const session = await auth.api.getSession({ headers: await headers() });
+      if (session?.user?.id) {
+        ownerId = session.user.id;
+      }
+    } catch (authError) {
+      console.log('No authenticated user, creating property without owner');
+    }
+
     const body = await request.json();
 
     // Validate required fields
@@ -125,7 +188,6 @@ export async function POST(request: NextRequest) {
       'bathrooms',
       'priceFromMidweek',
       'priceFromWeekend',
-      'description',
       'heroImage',
     ];
 
@@ -202,7 +264,7 @@ export async function POST(request: NextRequest) {
       bathrooms: parseInt(body.bathrooms),
       priceFromMidweek: parseFloat(body.priceFromMidweek),
       priceFromWeekend: parseFloat(body.priceFromWeekend),
-      description: body.description.trim(),
+      description: body.description?.trim() || 'No description provided',
       houseRules: body.houseRules?.trim() || null,
       checkInOut: body.checkInOut?.trim() || null,
       iCalURL: body.iCalURL?.trim() || null,
@@ -211,6 +273,7 @@ export async function POST(request: NextRequest) {
       floorplanURL: body.floorplanURL?.trim() || null,
       mapLat: body.mapLat !== undefined ? parseFloat(body.mapLat) : null,
       mapLng: body.mapLng !== undefined ? parseFloat(body.mapLng) : null,
+      ownerId: ownerId, // Set from session or null
       ownerContact: body.ownerContact?.trim() || null,
       featured: body.featured ?? false,
       isPublished: body.isPublished ?? true,

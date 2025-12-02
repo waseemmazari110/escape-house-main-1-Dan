@@ -9,6 +9,7 @@ import { authClient, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useCustomer } from "autumn-js/react";
+import AuthModal from "@/components/AuthModal";
 
 export default function Header() {
   const router = useRouter();
@@ -25,6 +26,9 @@ export default function Header() {
   const [isMobileDestinationsOpen, setIsMobileDestinationsOpen] = useState(false);
   const [isMobileOccasionsOpen, setIsMobileOccasionsOpen] = useState(false);
   const [isMobileExperiencesOpen, setIsMobileExperiencesOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [authType, setAuthType] = useState<"guest" | "owner">("guest");
 
   // Get current plan name
   const currentPlan = customer?.products?.at(-1);
@@ -485,7 +489,11 @@ export default function Header() {
               ) : (
                 <>
                   <Button
-                    asChild
+                    onClick={() => {
+                      setAuthMode("login");
+                      setAuthType("guest");
+                      setIsAuthModalOpen(true);
+                    }}
                     variant="outline"
                     className="rounded-xl px-6 py-2 font-medium border-2 transition-all duration-200 hover:bg-[var(--color-accent-sage)] hover:text-white hover:border-[var(--color-accent-sage)]"
                     style={{
@@ -493,17 +501,21 @@ export default function Header() {
                       color: "var(--color-text-primary)",
                     }}
                   >
-                    <Link href="/login">Log In</Link>
+                    Log In
                   </Button>
                   <Button
-                    asChild
+                    onClick={() => {
+                      setAuthMode("register");
+                      setAuthType("guest");
+                      setIsAuthModalOpen(true);
+                    }}
                     className="rounded-xl px-6 py-2 text-white font-medium transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
                     style={{
                       background: "var(--color-accent-gold)",
                       fontFamily: "var(--font-body)",
                     }}
                   >
-                    <Link href="/register">Sign Up</Link>
+                    Sign Up
                   </Button>
                 </>
               )}
@@ -811,23 +823,33 @@ export default function Header() {
               <>
                 <div className="grid grid-cols-2 gap-3">
                   <Button
-                    asChild
                     size="lg"
                     variant="outline"
                     className="rounded-2xl px-6 py-3 font-medium bg-white border-2 border-[var(--color-accent-sage)]"
+                    onClick={() => {
+                      setIsAuthModalOpen(true);
+                      setAuthMode("login");
+                      setAuthType("guest");
+                      setIsMobileMenuOpen(false);
+                    }}
                   >
-                    <Link href="/login">Log In</Link>
+                    Log In
                   </Button>
                   <Button
-                    asChild
                     size="lg"
                     className="rounded-2xl px-6 py-3 font-medium"
                     style={{
                       background: "var(--color-accent-gold)",
                       color: "white",
                     }}
+                    onClick={() => {
+                      setIsAuthModalOpen(true);
+                      setAuthMode("register");
+                      setAuthType("guest");
+                      setIsMobileMenuOpen(false);
+                    }}
                   >
-                    <Link href="/register">Sign Up</Link>
+                    Sign Up
                   </Button>
                 </div>
                 <Button
@@ -846,6 +868,13 @@ export default function Header() {
           </div>
         </div>
       )}
+      
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        defaultMode={authMode}
+        defaultType={authType}
+      />
     </>
   );
 }

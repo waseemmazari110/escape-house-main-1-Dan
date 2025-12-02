@@ -203,13 +203,35 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
   const handleSaveDraft = async () => {
     setIsLoading(true);
     try {
+      // Transform form data to API schema
+      const apiData = {
+        title: formData.title,
+        slug: formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+        location: formData.town || formData.address,
+        region: formData.county || formData.country || 'United Kingdom',
+        sleepsMin: 1,
+        sleepsMax: formData.max_guests,
+        bedrooms: formData.bedrooms,
+        bathrooms: formData.bathrooms,
+        priceFromMidweek: formData.base_price,
+        priceFromWeekend: formData.weekend_price || formData.base_price,
+        description: formData.description || 'Property listing',
+        houseRules: formData.house_rules,
+        checkInOut: `Check-in: ${formData.check_in_time}, Check-out: ${formData.check_out_time}`,
+        heroImage: formData.images[0] || '/placeholder-property.jpg',
+        heroVideo: formData.hero_video,
+        mapLat: formData.latitude,
+        mapLng: formData.longitude,
+        isPublished: false,
+      };
+
       if (propertyId) {
         // Update existing property
-        await GEH_API.put(`/properties/${propertyId}`, { ...formData, status: "draft" });
+        await GEH_API.put(`/properties?id=${propertyId}`, apiData);
         toast.success("Property draft saved successfully");
       } else {
         // Create new property as draft
-        const response = await GEH_API.post("/properties", { ...formData, status: "draft" });
+        const response = await GEH_API.post("/properties", apiData);
         toast.success("Property draft created successfully");
         router.push(`/admin/properties/${response.id}/edit`);
       }
@@ -242,14 +264,36 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
 
     setIsLoading(true);
     try {
+      // Transform form data to API schema
+      const apiData = {
+        title: formData.title,
+        slug: formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
+        location: formData.town || formData.address,
+        region: formData.county || formData.country || 'United Kingdom',
+        sleepsMin: 1,
+        sleepsMax: formData.max_guests,
+        bedrooms: formData.bedrooms,
+        bathrooms: formData.bathrooms,
+        priceFromMidweek: formData.base_price,
+        priceFromWeekend: formData.weekend_price || formData.base_price,
+        description: formData.description || 'Property listing',
+        houseRules: formData.house_rules,
+        checkInOut: `Check-in: ${formData.check_in_time}, Check-out: ${formData.check_out_time}`,
+        heroImage: formData.images[0] || '/placeholder-property.jpg',
+        heroVideo: formData.hero_video,
+        mapLat: formData.latitude,
+        mapLng: formData.longitude,
+        isPublished: true,
+      };
+
       if (propertyId) {
         // Update existing property
-        await GEH_API.put(`/properties/${propertyId}`, { ...formData, status: "active" });
+        await GEH_API.put(`/properties?id=${propertyId}`, apiData);
         toast.success("Property published successfully");
         router.push("/admin/properties");
       } else {
         // Create new property
-        await GEH_API.post("/properties", { ...formData, status: "active" });
+        await GEH_API.post("/properties", apiData);
         toast.success("Property published successfully");
         router.push("/admin/properties");
       }

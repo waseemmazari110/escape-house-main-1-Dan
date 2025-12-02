@@ -41,38 +41,43 @@ function OwnerLoginForm() {
         email,
         password,
         rememberMe,
-        callbackURL: activeTab === "owner" ? "/owner/dashboard" : "/bookings",
       });
 
-      if (error?.code) {
+      if (error) {
         toast.error("Invalid email or password");
         setIsLoading(false);
         return;
       }
 
-      // Verify user role matches the selected tab
+      // Verify user role matches owner
       if (data?.user) {
-        // Fetch user role
+        // Check if the logged-in user is an owner
         const userResponse = await fetch("/api/user/profile");
-        const userData = await userResponse.json();
         
-        if (activeTab === "owner" && userData.role !== "owner") {
-          toast.error("Please use the Guest tab to log in");
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          
+          if (userData.role !== "owner" && userData.role !== "admin") {
+            toast.error("This login is for property owners only. Please use the guest login.");
+            await authClient.signOut();
+            setIsLoading(false);
+            return;
+          }
+          
+          toast.success("Welcome back!");
+          
+          // Redirect based on role
+          const redirectUrl = searchParams.get("redirect") || "/owner/dashboard";
+          router.push(redirectUrl);
+        } else {
+          toast.error("Could not verify account. Please try again.");
           await authClient.signOut();
           setIsLoading(false);
-          return;
         }
-        
-        if (activeTab === "guest" && userData.role === "owner") {
-          toast.error("Please use the Owner tab to log in");
-          await authClient.signOut();
-          setIsLoading(false);
-          return;
-        }
+      } else {
+        toast.error("Login failed. Please try again.");
+        setIsLoading(false);
       }
-
-      toast.success("Welcome back!");
-      router.push(activeTab === "owner" ? "/owner/dashboard" : "/bookings");
     } catch (error) {
       console.error("Login error:", error);
       toast.error("An error occurred. Please try again.");
