@@ -4,6 +4,8 @@ import { bearer } from "better-auth/plugins";
 import { NextRequest } from 'next/server';
 import { headers } from "next/headers"
 import { db } from "@/db";
+import { user as userTable } from "@/db/schema";
+import { eq } from "drizzle-orm";
  
 export const auth = betterAuth({
 	database: drizzleAdapter(db, {
@@ -17,7 +19,23 @@ export const auth = betterAuth({
 		"http://127.0.0.1:3000",
 		"http://10.102.139.154:3000",
 	],
-	plugins: [bearer()]
+	plugins: [bearer()],
+	// Add user data to session
+	session: {
+		cookieCache: {
+			enabled: true,
+			maxAge: 5 * 60, // 5 minutes
+		},
+	},
+	user: {
+		additionalFields: {
+			role: {
+				type: "string",
+				required: false,
+				defaultValue: "guest",
+			}
+		}
+	}
 });
 
 // Session validation helper

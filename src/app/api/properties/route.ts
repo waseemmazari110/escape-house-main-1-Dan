@@ -4,11 +4,24 @@ import { properties } from '@/db/schema';
 import { eq, like, and, or, desc, asc } from 'drizzle-orm';
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { 
+  getCurrentUserWithRole, 
+  isAdmin, 
+  isOwner, 
+  canAccessOwnerFeatures,
+  requireRole,
+  unauthorizedResponse,
+  unauthenticatedResponse,
+  isPropertyOwner
+} from "@/lib/auth-roles";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    
+    // Get current user for role-based filtering
+    const currentUser = await getCurrentUserWithRole();
 
     // Single property by ID
     if (id) {
@@ -32,8 +45,21 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      // Map property to include legacy field names
       const prop = property[0];
+      
+      // Role-based access control for property details
+      // Owners can only view their own properties
+      // Admins can view all properties
+      // Guests can view published properties only
+      if (isOwner(currentUser) && !isPropertyOwner(currentUser, prop.ownerId)) {
+        return unauthorizedResponse('You can only view your own properties');
+      }
+      
+      if (!currentUser && !prop.isPublished) {
+        return unauthorizedResponse('Property not found');
+      }
+
+      // Map property to include legacy field names
       const mappedProperty = {
         ...prop,
         status: prop.isPublished ? 'active' : 'draft',
@@ -63,6 +89,17 @@ export async function GET(request: NextRequest) {
 
     // Build where conditions
     const conditions = [];
+
+    // Role-based filtering
+    // Owners: Only see their own properties
+    // Admins: See all properties
+    // Guests/Unauthenticated: Only see published properties
+    if (isOwner(currentUser)) {
+      conditions.push(eq(properties.ownerId, currentUser.id));
+    } else if (!isAdmin(currentUser)) {
+      // Guests and unauthenticated users only see published properties
+      conditions.push(eq(properties.isPublished, true));
+    }
 
     // Search condition
     if (search) {
@@ -163,17 +200,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get user session for ownerId
-    let ownerId: string | null = null;
-    try {
-      const session = await auth.api.getSession({ headers: await headers() });
-      if (session?.user?.id) {
-        ownerId = session.user.id;
-      }
-    } catch (authError) {
-      console.log('No authenticated user, creating property without owner');
-    }
-
+    // Require owner or admin role to create properties
+    const currentUser = await requireRole(['owner', 'admin']);
+    
     const body = await request.json();
 
     // Validate required fields
@@ -273,7 +302,7 @@ export async function POST(request: NextRequest) {
       floorplanURL: body.floorplanURL?.trim() || null,
       mapLat: body.mapLat !== undefined ? parseFloat(body.mapLat) : null,
       mapLng: body.mapLng !== undefined ? parseFloat(body.mapLng) : null,
-      ownerId: ownerId, // Set from session or null
+      ownerId: currentUser.id, // Set from authenticated user
       ownerContact: body.ownerContact?.trim() || null,
       featured: body.featured ?? false,
       isPublished: body.isPublished ?? true,
@@ -287,8 +316,14 @@ export async function POST(request: NextRequest) {
       .returning();
 
     return NextResponse.json(newProperty[0], { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('POST error:', error);
+    if (error.message === 'Authentication required') {
+      return unauthenticatedResponse();
+    }
+    if (error.message?.includes('Unauthorized')) {
+      return unauthorizedResponse(error.message);
+    }
     return NextResponse.json(
       { error: 'Internal server error: ' + (error as Error).message },
       { status: 500 }
@@ -298,6 +333,9 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    // Require owner or admin role to update properties
+    const currentUser = await requireRole(['owner', 'admin']);
+    
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -320,6 +358,11 @@ export async function PUT(request: NextRequest) {
         { error: 'Property not found', code: 'NOT_FOUND' },
         { status: 404 }
       );
+    }
+
+    // Check ownership: owners can only update their own properties
+    if (!isPropertyOwner(currentUser, existingProperty[0].ownerId)) {
+      return unauthorizedResponse('You can only update your own properties');
     }
 
     const body = await request.json();
@@ -431,8 +474,14 @@ export async function PUT(request: NextRequest) {
       .returning();
 
     return NextResponse.json(updated[0]);
-  } catch (error) {
+  } catch (error: any) {
     console.error('PUT error:', error);
+    if (error.message === 'Authentication required') {
+      return unauthenticatedResponse();
+    }
+    if (error.message?.includes('Unauthorized')) {
+      return unauthorizedResponse(error.message);
+    }
     return NextResponse.json(
       { error: 'Internal server error: ' + (error as Error).message },
       { status: 500 }
@@ -442,6 +491,9 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Require owner or admin role to delete properties
+    const currentUser = await requireRole(['owner', 'admin']);
+    
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -466,6 +518,11 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Check ownership: owners can only delete their own properties
+    if (!isPropertyOwner(currentUser, existingProperty[0].ownerId)) {
+      return unauthorizedResponse('You can only delete your own properties');
+    }
+
     const deleted = await db
       .delete(properties)
       .where(eq(properties.id, parseInt(id)))
@@ -475,8 +532,14 @@ export async function DELETE(request: NextRequest) {
       message: 'Property deleted successfully',
       property: deleted[0],
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('DELETE error:', error);
+    if (error.message === 'Authentication required') {
+      return unauthenticatedResponse();
+    }
+    if (error.message?.includes('Unauthorized')) {
+      return unauthorizedResponse(error.message);
+    }
     return NextResponse.json(
       { error: 'Internal server error: ' + (error as Error).message },
       { status: 500 }

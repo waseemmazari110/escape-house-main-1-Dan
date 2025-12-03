@@ -2,9 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { bookings } from '@/db/schema';
 import { eq, gte, count, sum, avg, sql } from 'drizzle-orm';
+import { requireRole } from "@/lib/auth-roles";
 
 export async function GET(request: NextRequest) {
   try {
+    // Only admins can view booking statistics
+    await requireRole(['admin']);
+    
     // Get total bookings count
     const totalBookingsResult = await db
       .select({ count: count() })

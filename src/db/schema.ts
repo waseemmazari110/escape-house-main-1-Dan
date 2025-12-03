@@ -2,6 +2,7 @@ import { sqliteTable, integer, text, real } from 'drizzle-orm/sqlite-core';
 
 export const bookings = sqliteTable('bookings', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  propertyId: integer('property_id').references(() => properties.id, { onDelete: 'cascade' }),
   propertyName: text('property_name').notNull(),
   propertyLocation: text('property_location'),
   guestName: text('guest_name').notNull(),

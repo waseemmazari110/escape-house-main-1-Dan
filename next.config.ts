@@ -48,6 +48,14 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+  swcMinify: true,
+  reactStrictMode: true,
+  poweredByHeader: false,
   eslint: {
     ignoreDuringBuilds: false,
   },

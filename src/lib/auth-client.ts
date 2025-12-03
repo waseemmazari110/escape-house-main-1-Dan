@@ -54,7 +54,13 @@ export function useSession(): SessionData {
    };
 
    useEffect(() => {
-      fetchSession();
+      // Only fetch if token exists to avoid unnecessary API calls
+      const token = typeof window !== 'undefined' ? localStorage.getItem("bearer_token") : null;
+      if (token) {
+         fetchSession();
+      } else {
+         setIsPending(false);
+      }
    }, []);
 
    return { data: session, isPending, error, refetch, isRefetching: false };

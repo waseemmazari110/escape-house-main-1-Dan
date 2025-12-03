@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { formatDatabaseDateToUK } from "@/lib/date-utils";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 interface Booking {
   id: number;
@@ -47,9 +48,22 @@ interface BookingStats {
   upcomingBookings: number;
 }
 
+interface Property {
+  id: number;
+  title: string;
+  location: string;
+  sleepsMax: number;
+  bedrooms: number;
+  priceFromMidweek: number;
+  isPublished: boolean;
+  heroImage?: string;
+}
+
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [stats, setStats] = useState<BookingStats | null>(null);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loadingProperties, setLoadingProperties] = useState(true);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -98,9 +112,28 @@ export default function AdminBookingsPage() {
     }
   };
 
+  // Fetch published properties
+  const fetchProperties = async () => {
+    try {
+      setLoadingProperties(true);
+      const response = await fetch("/api/properties?isPublished=true&limit=100");
+      if (!response.ok) throw new Error("Failed to fetch properties");
+      
+      const data = await response.json();
+      setProperties(data.properties || []);
+    } catch (error) {
+      console.error("Error fetching properties:", error);
+      toast.error("Failed to load properties");
+    } finally {
+      setLoadingProperties(false);
+    }
+  };
+
   useEffect(() => {
     fetchBookings();
     fetchStats();
+    fetchProperties();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter]);
 
   // Filter bookings by search term
@@ -219,19 +252,20 @@ export default function AdminBookingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)]">
-      <Header />
+    <ProtectedRoute allowedRoles={['admin']}>
+      <div className="min-h-screen bg-[var(--color-bg-primary)]">
+        <Header />
 
-      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 mt-20">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>
-            Booking Management
-          </h1>
-          <p className="text-lg text-[var(--color-neutral-dark)]">
-            Manage all your property bookings in one place
-          </p>
-        </div>
+        <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 mt-20">
+          {/* Page Header */}
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>
+              Booking Management
+            </h1>
+            <p className="text-lg text-[var(--color-neutral-dark)]">
+              Manage all your property bookings in one place
+            </p>
+          </div>
 
         {/* Stats Cards */}
         {stats && (
@@ -300,6 +334,45 @@ export default function AdminBookingsPage() {
               </div>
 
               <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="All Bookings" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Bookings</SelectItem>
+                  <SelectItem value="confirmed">Confirmed</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Button
+                onClick={exportToCSV}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Export CSV
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bookings Table */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Input
+                  type="text"
+                  placeholder="Search by guest name, email, or property..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-full md:w-[200px]">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
@@ -348,135 +421,61 @@ export default function AdminBookingsPage() {
           </CardContent>
         </Card>
 
-        {/* Bookings Table */}
-        <Card>
-          <CardContent className="p-0">
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-accent-sage)]"></div>
-              </div>
-            ) : filteredBookings.length === 0 ? (
-              <div className="text-center py-12">
-                <Home className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                <p className="text-gray-600 mb-2">No bookings found</p>
-                <p className="text-sm text-gray-500">Try adjusting your filters or search terms</p>
+        {/* Published Properties Section */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Home className="w-5 h-5" />
+              Published Properties ({properties.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingProperties ? (
+              <div className="text-center py-8 text-gray-500">Loading properties...</div>
+            ) : properties.length === 0 ? (
+              <div className="text-center py-8">
+                <Home className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500">No published properties found</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Guest
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Property
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Dates
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Guests
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Price
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Payment
-                      </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredBookings.map((booking) => (
-                      <tr key={booking.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {booking.guestName}
-                          </div>
-                          <div className="text-sm text-gray-500">{booking.guestEmail}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {booking.propertyName}
-                          </div>
-                          <div className="text-sm text-gray-500">{booking.propertyLocation}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {formatDatabaseDateToUK(booking.checkInDate)}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            to {formatDatabaseDateToUK(booking.checkOutDate)}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {booking.numberOfGuests}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            £{booking.totalPrice}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            Paid: £{booking.depositPaid}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Badge className={getStatusColor(booking.bookingStatus)}>
-                            {booking.bookingStatus}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Badge
-                            className={
-                              booking.paymentStatus === "Paid"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-orange-100 text-orange-800"
-                            }
-                          >
-                            {booking.paymentStatus}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => openDetailsDialog(booking)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => openEditDialog(booking)}
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteBooking(booking.id)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {properties.map((property) => (
+                  <div
+                    key={property.id}
+                    className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                  >
+                    {property.heroImage ? (
+                      <img
+                        src={property.heroImage}
+                        alt={property.title}
+                        className="w-full h-40 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-40 bg-gray-200 flex items-center justify-center">
+                        <Home className="w-12 h-12 text-gray-400" />
+                      </div>
+                    )}
+                    <div className="p-4">
+                      <h3 className="font-semibold text-sm mb-1 truncate">{property.title}</h3>
+                      <p className="text-xs text-gray-600 mb-2 truncate">{property.location}</p>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{property.bedrooms} beds</span>
+                        <span>Sleeps {property.sleepsMax}</span>
+                      </div>
+                      <div className="mt-2 pt-2 border-t">
+                        <p className="text-sm font-bold text-[var(--color-accent-sage)]">
+                          £{property.priceFromMidweek}/night
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
         </Card>
 
+        {/* Popular Properties Stats */}
         {/* Popular Properties */}
         {stats && stats.popularProperties.length > 0 && (
           <Card className="mt-6">
@@ -696,7 +695,8 @@ export default function AdminBookingsPage() {
       </Dialog>
 
       <Footer />
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }
 

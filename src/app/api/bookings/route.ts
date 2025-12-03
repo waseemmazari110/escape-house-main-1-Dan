@@ -3,6 +3,13 @@ import { db } from '@/db';
 import { bookings } from '@/db/schema';
 import { eq, like, and, or, desc, asc, gte, lte } from 'drizzle-orm';
 import { checkForSpam, type SpamCheckData } from '@/lib/spam-protection';
+import { 
+  getCurrentUserWithRole, 
+  isAdmin,
+  requireRole,
+  unauthorizedResponse,
+  unauthenticatedResponse
+} from "@/lib/auth-roles";
 
 // Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -20,6 +27,9 @@ function isValidDate(dateString: string): boolean {
 
 export async function GET(request: NextRequest) {
   try {
+    // Only admins can view bookings list
+    const currentUser = await getCurrentUserWithRole();
+    
     const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get('id');
 
@@ -30,6 +40,11 @@ export async function GET(request: NextRequest) {
           { error: 'Valid ID is required', code: 'INVALID_ID' },
           { status: 400 }
         );
+      }
+      
+      // Require admin role to view booking details
+      if (!isAdmin(currentUser)) {
+        return unauthorizedResponse('Only admins can view booking details');
       }
 
       const booking = await db
@@ -46,6 +61,11 @@ export async function GET(request: NextRequest) {
       }
 
       return NextResponse.json(booking[0], { status: 200 });
+    }
+
+    // List bookings - Only admins can list all bookings
+    if (!isAdmin(currentUser)) {
+      return unauthorizedResponse('Only admins can view all bookings');
     }
 
     // List bookings with filters, search, and pagination
@@ -282,6 +302,9 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    // Only admins can update bookings
+    await requireRole(['admin']);
+    
     const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get('id');
 
@@ -433,6 +456,9 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    // Only admins can delete bookings
+    await requireRole(['admin']);
+    
     const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get('id');
 

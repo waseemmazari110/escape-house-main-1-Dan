@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Menu, X, ChevronDownIcon, LogOut, User as UserIcon, CreditCard, Phone } from "lucide-react";
@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { useCustomer } from "autumn-js/react";
 import AuthModal from "@/components/AuthModal";
 
-export default function Header() {
+function Header() {
   const router = useRouter();
   const { data: session, isPending, refetch } = useSession();
   const { customer, isLoading: isCustomerLoading } = useCustomer();
@@ -29,6 +29,38 @@ export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [authType, setAuthType] = useState<"guest" | "owner">("guest");
+  const [userRole, setUserRole] = useState<'guest' | 'owner' | 'admin'>('guest');
+
+  // Fetch user role from profile API
+  useEffect(() => {
+    async function fetchUserRole() {
+      if (session?.user) {
+        try {
+          const token = localStorage.getItem("bearer_token");
+          const response = await fetch("/api/user/profile", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          
+          if (response.ok) {
+            const profile = await response.json();
+            setUserRole(profile.role || 'guest');
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+        }
+      } else {
+        setUserRole('guest');
+      }
+    }
+    
+    fetchUserRole();
+  }, [session]);
+
+  const isAdmin = userRole === 'admin';
+  const isOwner = userRole === 'owner';
+  const isGuest = userRole === 'guest';
 
   // Get current plan name
   const currentPlan = customer?.products?.at(-1);
@@ -419,18 +451,20 @@ export default function Header() {
                 <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[var(--color-accent-sage)] transition-all duration-200 group-hover:w-full group-hover:left-0"></span>
               </Link>
 
-              {/* Owner Dashboard Link */}
-              <Link
-                href="/owner/dashboard"
-                className="text-[15px] font-medium hover:text-[var(--color-accent-sage)] transition-colors relative group py-8"
-                style={{ fontFamily: "var(--font-body)" }}
-              >
-                Owner Dashboard
-                <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[var(--color-accent-sage)] transition-all duration-200 group-hover:w-full group-hover:left-0"></span>
-              </Link>
+              {/* Owner Dashboard Link - Only for Owners and Admins */}
+              {session?.user && (isOwner || isAdmin) && (
+                <Link
+                  href="/owner/dashboard"
+                  className="text-[15px] font-medium hover:text-[var(--color-accent-sage)] transition-colors relative group py-8"
+                  style={{ fontFamily: "var(--font-body)" }}
+                >
+                  Owner Dashboard
+                  <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[var(--color-accent-sage)] transition-all duration-200 group-hover:w-full group-hover:left-0"></span>
+                </Link>
+              )}
 
-              {/* Admin Link - Only show if authenticated */}
-              {session?.user && (
+              {/* Admin Link - Only for Admins */}
+              {session?.user && isAdmin && (
                 <Link
                   href="/admin/bookings"
                   className="text-[15px] font-medium hover:text-[var(--color-accent-sage)] transition-colors relative group py-8"
@@ -738,13 +772,16 @@ export default function Header() {
                   How It Works
                 </Link>
 
-                <Link
-                  href="/owner/dashboard"
-                  className="block text-2xl font-medium hover:text-[var(--color-accent-sage)] transition-colors text-[var(--color-text-primary)]"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Owner Dashboard
-                </Link>
+                {/* Owner Dashboard - Only for Owners and Admins */}
+                {session?.user && (isOwner || isAdmin) && (
+                  <Link
+                    href="/owner/dashboard"
+                    className="block text-2xl font-medium hover:text-[var(--color-accent-sage)] transition-colors text-[var(--color-text-primary)]"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Owner Dashboard
+                  </Link>
+                )}
 
                 <Link
                   href="/advertise-with-us"
@@ -754,13 +791,16 @@ export default function Header() {
                   Advertise Your Property
                 </Link>
 
-                <Link
-                  href="/admin/bookings"
-                  className="block text-2xl font-medium hover:text-[var(--color-accent-sage)] transition-colors text-[var(--color-text-primary)]"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Admin Dashboard
-                </Link>
+                {/* Admin Dashboard - Only for Admins */}
+                {session?.user && isAdmin && (
+                  <Link
+                    href="/admin/bookings"
+                    className="block text-2xl font-medium hover:text-[var(--color-accent-sage)] transition-colors text-[var(--color-text-primary)]"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
 
                 <Link
                   href="/our-story"
@@ -896,6 +936,8 @@ export default function Header() {
     </>
   );
 }
+
+export default memo(Header);
 
 
 

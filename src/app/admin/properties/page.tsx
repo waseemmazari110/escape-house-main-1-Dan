@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { GEH_API } from "@/lib/api-client";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -42,7 +43,7 @@ interface PropertiesResponse {
   limit: number;
 }
 
-export default function AdminPropertiesPage() {
+function AdminPropertiesPageContent() {
   const router = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,6 +67,7 @@ export default function AdminPropertiesPage() {
       const params = new URLSearchParams({
         limit: "50",
         page: page.toString(),
+        isPublished: "true", // Show only published properties
       });
 
       if (statusFilter !== "all") {
@@ -137,7 +139,7 @@ export default function AdminPropertiesPage() {
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-gray-900">Admin</p>
+              <p className="text-sm font-medium text-gray-900">Owner</p>
               <p className="text-xs text-gray-500">Logged in</p>
             </div>
             <Button
@@ -326,12 +328,20 @@ export default function AdminPropertiesPage() {
                     </Button>
                   </div>
                 </div>
-              )}
+              )}}
             </>
           )}
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AdminPropertiesPage() {
+  return (
+    <ProtectedRoute allowedRoles={['owner', 'admin']}>
+      <AdminPropertiesPageContent />
+    </ProtectedRoute>
   );
 }
 
