@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      query = query.where(and(...conditions)) as any;
     }
 
     // Apply sorting
@@ -88,8 +88,8 @@ export async function GET(request: NextRequest) {
                       partners.name;
 
     query = sortOrder === 'desc' 
-      ? query.orderBy(desc(sortColumn))
-      : query.orderBy(asc(sortColumn));
+      ? query.orderBy(desc(sortColumn)) as any
+      : query.orderBy(asc(sortColumn)) as any;
 
     // Apply pagination
     const results = await query.limit(limit).offset(offset);

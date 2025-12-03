@@ -231,7 +231,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
         toast.success("Property draft saved successfully");
       } else {
         // Create new property as draft
-        const response = await GEH_API.post("/properties", apiData);
+        const response = await GEH_API.post("/properties", apiData) as any;
         toast.success("Property draft created successfully");
         router.push(`/admin/properties/${response.id}/edit`);
       }
@@ -847,3 +847,6 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
     </div>
   );
 }
+
+
+

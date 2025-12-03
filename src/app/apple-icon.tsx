@@ -23,6 +23,7 @@ export default async function AppleIcon() {
         >
           <img
             src={logoUrl}
+            alt="Group Escape Houses Logo"
             width={size.width}
             height={size.height}
             style={{ objectFit: 'contain' }}
@@ -60,3 +61,8 @@ export default async function AppleIcon() {
     );
   }
 }
+
+
+
+
+

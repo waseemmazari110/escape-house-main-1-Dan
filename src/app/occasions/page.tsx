@@ -12,7 +12,7 @@ import {
   PartyPopper, 
   Egg,
   Calendar,
-  ArrowRight,
+  ChevronRightIcon,
   ChevronDown,
   Star,
   Users,
@@ -160,7 +160,7 @@ export default function OccasionsPage() {
               className="inline-flex items-center gap-2 px-8 py-4 bg-[var(--color-accent-sage)] text-white rounded-2xl font-semibold hover:bg-[var(--color-accent-gold)] transition-all duration-300 hover:scale-105"
             >
               Browse All Properties
-              <ArrowRight className="w-5 h-5" />
+              <ChevronRightIcon className="w-5 h-5" />
             </Link>
           </motion.div>
         </div>
@@ -231,7 +231,7 @@ export default function OccasionsPage() {
                       </p>
                       <div className="flex items-center gap-2 text-[var(--color-accent-sage)] font-semibold group-hover:gap-3 transition-all">
                         Explore Houses
-                        <ArrowRight className="w-5 h-5" />
+                        <ChevronRightIcon className="w-5 h-5" />
                       </div>
                     </div>
                   </Link>
@@ -329,7 +329,7 @@ export default function OccasionsPage() {
                   <span className="font-semibold text-[var(--color-text-primary)] pr-4">
                     {faq.question}
                   </span>
-                  <ChevronDown
+                  <ChevronDown 
                     className={`w-5 h-5 text-[var(--color-accent-gold)] flex-shrink-0 transition-transform ${
                       openFaq === index ? "rotate-180" : ""
                     }`}
@@ -352,3 +352,6 @@ export default function OccasionsPage() {
     </div>
   );
 }
+
+
+

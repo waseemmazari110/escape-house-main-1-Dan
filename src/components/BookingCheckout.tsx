@@ -15,6 +15,7 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { formatDateUKLong } from "@/lib/date-utils";
+import { format } from "date-fns";
 import { Calendar as CalendarIcon, Loader2, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 
@@ -447,3 +448,8 @@ export default function BookingCheckout({
     </>
   );
 }
+
+
+
+
+

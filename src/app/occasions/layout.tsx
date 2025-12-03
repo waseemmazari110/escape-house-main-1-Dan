@@ -18,3 +18,8 @@ export default function OccasionsLayout({
 }) {
   return children;
 }
+
+
+
+
+

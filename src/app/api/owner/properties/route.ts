@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Check if user is an owner
-    if (session.user.role !== 'owner') {
+    if ((session.user as any).role !== 'owner') {
       return NextResponse.json(
         { error: 'Access denied. Owner role required.' },
         { status: 403 }
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user is an owner
-    if (session.user.role !== 'owner') {
+    if ((session.user as any).role !== 'owner') {
       return NextResponse.json(
         { error: 'Access denied. Owner role required.' },
         { status: 403 }

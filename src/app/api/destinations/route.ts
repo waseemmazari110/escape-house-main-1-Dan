@@ -61,20 +61,25 @@ export async function GET(request: NextRequest) {
     }
 
     if (isPublished !== null && isPublished !== undefined) {
-      const publishedValue = isPublished === 'true' ? 1 : 0;
+      const publishedValue = isPublished === 'true';
       conditions.push(eq(destinations.isPublished, publishedValue));
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      query = query.where(and(...conditions)) as any;
     }
 
     // Apply sorting
     const validSortFields = ['cityName', 'region', 'createdAt', 'updatedAt'];
     const sortField = validSortFields.includes(sort) ? sort : 'cityName';
     const sortOrder = order.toLowerCase() === 'desc' ? desc : asc;
+    
+    const sortColumn = sortField === 'cityName' ? destinations.cityName :
+                       sortField === 'region' ? destinations.region :
+                       sortField === 'createdAt' ? destinations.createdAt :
+                       destinations.updatedAt;
 
-    query = query.orderBy(sortOrder(destinations[sortField as keyof typeof destinations]));
+    query = query.orderBy(sortOrder(sortColumn)) as any;
 
     // Apply pagination
     const results = await query.limit(limit).offset(offset);

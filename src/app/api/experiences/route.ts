@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      query = query.where(and(...conditions)) as any;
     }
 
     // Apply sorting
@@ -76,9 +76,9 @@ export async function GET(request: NextRequest) {
                       experiences.createdAt;
 
     if (order === 'asc') {
-      query = query.orderBy(asc(sortColumn));
+      query = query.orderBy(asc(sortColumn)) as any;
     } else {
-      query = query.orderBy(desc(sortColumn));
+      query = query.orderBy(desc(sortColumn)) as any;
     }
 
     const results = await query.limit(limit).offset(offset);
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('GET error:', error);
     return NextResponse.json({ 
-      error: 'Internal server error: ' + error.message 
+      error: 'Internal server error: ' + (error as Error).message 
     }, { status: 500 });
   }
 }
@@ -223,7 +223,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('POST error:', error);
     return NextResponse.json({ 
-      error: 'Internal server error: ' + error.message 
+      error: 'Internal server error: ' + (error as Error).message 
     }, { status: 500 });
   }
 }
@@ -355,7 +355,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error('PUT error:', error);
     return NextResponse.json({ 
-      error: 'Internal server error: ' + error.message 
+      error: 'Internal server error: ' + (error as Error).message 
     }, { status: 500 });
   }
 }
@@ -397,7 +397,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error('DELETE error:', error);
     return NextResponse.json({ 
-      error: 'Internal server error: ' + error.message 
+      error: 'Internal server error: ' + (error as Error).message 
     }, { status: 500 });
   }
 }

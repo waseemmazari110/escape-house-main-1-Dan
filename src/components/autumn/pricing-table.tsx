@@ -495,3 +495,8 @@ export const RecommendedBadge = ({ recommended }: { recommended: string }) => {
 };
 
 export { PricingTable };
+
+
+
+
+

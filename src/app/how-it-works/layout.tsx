@@ -18,3 +18,8 @@ export default function HowItWorksLayout({
 }) {
   return children;
 }
+
+
+
+
+

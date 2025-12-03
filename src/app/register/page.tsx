@@ -73,7 +73,7 @@ export default function RegisterPage() {
       });
 
       if (error) {
-        toast.error(error.message || getErrorMessage(error.code));
+        toast.error(error.message || getErrorMessage(error.code || ''));
         setIsLoading(false);
         return;
       }
@@ -275,3 +275,8 @@ export default function RegisterPage() {
     </>
   );
 }
+
+
+
+
+

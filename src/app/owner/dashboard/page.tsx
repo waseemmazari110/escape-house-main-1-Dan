@@ -28,7 +28,7 @@ import {
   LogOut,
   CreditCard,
   Phone,
-  ChevronDown,
+  ChevronDownIcon,
   Trash2
 } from "lucide-react";
 
@@ -193,7 +193,7 @@ export default function OwnerDashboard() {
                         <p className="text-sm font-semibold text-gray-900">{user.name}</p>
                         <p className="text-xs text-gray-500 capitalize">{user.role}</p>
                       </div>
-                      <ChevronDown className="w-4 h-4 text-gray-600" />
+                      <ChevronDownIcon className="w-4 h-4 text-gray-600" />
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
@@ -742,3 +742,8 @@ export default function OwnerDashboard() {
     </div>
   );
 }
+
+
+
+
+

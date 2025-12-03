@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, ChevronDown, LogOut, User as UserIcon, CreditCard, Phone } from "lucide-react";
+import { Menu, X, ChevronDownIcon, LogOut, User as UserIcon, CreditCard, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { authClient, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -189,7 +189,7 @@ export default function Header() {
                   style={{ fontFamily: "var(--font-body)" }}
                 >
                   Properties
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDownIcon className="w-4 h-4" />
                   <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[var(--color-accent-sage)] transition-all duration-200 group-hover:w-full group-hover:left-0"></span>
                 </button>
 
@@ -260,7 +260,7 @@ export default function Header() {
                   style={{ fontFamily: "var(--font-body)" }}
                 >
                   Occasions
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDownIcon className="w-4 h-4" />
                   <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[var(--color-accent-sage)] transition-all duration-200 group-hover:w-full group-hover:left-0"></span>
                 </button>
 
@@ -312,7 +312,7 @@ export default function Header() {
                   style={{ fontFamily: "var(--font-body)" }}
                 >
                   Experiences
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDownIcon className="w-4 h-4" />
                   <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[var(--color-accent-sage)] transition-all duration-200 group-hover:w-full group-hover:left-0"></span>
                 </button>
 
@@ -373,7 +373,7 @@ export default function Header() {
                   style={{ fontFamily: "var(--font-body)" }}
                 >
                   Destinations
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDownIcon className="w-4 h-4" />
                   <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[var(--color-accent-sage)] transition-all duration-200 group-hover:w-full group-hover:left-0"></span>
                 </button>
 
@@ -574,7 +574,7 @@ export default function Header() {
                     className="flex items-center gap-2 text-lg text-[var(--color-neutral-dark)] hover:text-[var(--color-accent-sage)] transition-colors"
                   >
                     House Styles
-                    <ChevronDown className={`w-5 h-5 transition-transform ${isMobileStylesOpen ? "rotate-180" : ""}`} />
+                    <ChevronDownIcon className={`w-5 h-5 transition-transform ${isMobileStylesOpen ? "rotate-180" : ""}`} />
                   </button>
                   {isMobileStylesOpen && (
                     <div className="pl-4 space-y-2 text-[var(--color-neutral-dark)]">
@@ -597,7 +597,7 @@ export default function Header() {
                     className="flex items-center gap-2 text-lg text-[var(--color-neutral-dark)] hover:text-[var(--color-accent-sage)] transition-colors"
                   >
                     Must-Have Features
-                    <ChevronDown className={`w-5 h-5 transition-transform ${isMobileFeaturesOpen ? "rotate-180" : ""}`} />
+                    <ChevronDownIcon className={`w-5 h-5 transition-transform ${isMobileFeaturesOpen ? "rotate-180" : ""}`} />
                   </button>
                   {isMobileFeaturesOpen && (
                     <div className="pl-4 space-y-2 text-[var(--color-neutral-dark)]">
@@ -631,7 +631,7 @@ export default function Header() {
                     className="flex items-center gap-2 text-lg text-[var(--color-neutral-dark)] hover:text-[var(--color-accent-sage)] transition-colors"
                   >
                     View By Occasion
-                    <ChevronDown className={`w-5 h-5 transition-transform ${isMobileOccasionsOpen ? "rotate-180" : ""}`} />
+                    <ChevronDownIcon className={`w-5 h-5 transition-transform ${isMobileOccasionsOpen ? "rotate-180" : ""}`} />
                   </button>
                   {isMobileOccasionsOpen && (
                     <div className="pl-4 space-y-2 text-[var(--color-neutral-dark)]">
@@ -665,7 +665,7 @@ export default function Header() {
                     className="flex items-center gap-2 text-lg text-[var(--color-neutral-dark)] hover:text-[var(--color-accent-sage)] transition-colors"
                   >
                     Popular Experiences
-                    <ChevronDown className={`w-5 h-5 transition-transform ${isMobileExperiencesOpen ? "rotate-180" : ""}`} />
+                    <ChevronDownIcon className={`w-5 h-5 transition-transform ${isMobileExperiencesOpen ? "rotate-180" : ""}`} />
                   </button>
                   {isMobileExperiencesOpen && (
                     <div className="pl-4 space-y-2 text-[var(--color-neutral-dark)]">
@@ -699,7 +699,7 @@ export default function Header() {
                     className="flex items-center gap-2 text-lg text-[var(--color-neutral-dark)] hover:text-[var(--color-accent-sage)] transition-colors"
                   >
                     Popular Locations
-                    <ChevronDown className={`w-5 h-5 transition-transform ${isMobileDestinationsOpen ? "rotate-180" : ""}`} />
+                    <ChevronDownIcon className={`w-5 h-5 transition-transform ${isMobileDestinationsOpen ? "rotate-180" : ""}`} />
                   </button>
                   {isMobileDestinationsOpen && (
                     <div className="pl-4 space-y-2 text-[var(--color-neutral-dark)]">
@@ -878,3 +878,8 @@ export default function Header() {
     </>
   );
 }
+
+
+
+
+

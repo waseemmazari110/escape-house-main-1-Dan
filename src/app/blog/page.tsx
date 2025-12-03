@@ -3,7 +3,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
-import { Calendar, ChevronDown } from "lucide-react";
+import { Calendar, ChevronDownIcon } from "lucide-react";
 import { useState } from "react";
 
 export default function BlogPage() {
@@ -232,7 +232,7 @@ export default function BlogPage() {
                   >
                     {faq.question}
                   </h3>
-                  <ChevronDown
+                  <ChevronDownIcon 
                     className={`w-5 h-5 flex-shrink-0 transition-transform duration-300 ${
                       openFAQ === index ? "rotate-180" : ""
                     }`}
@@ -271,3 +271,8 @@ export default function BlogPage() {
     </div>
   );
 }
+
+
+
+
+

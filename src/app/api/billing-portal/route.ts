@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       return_url: returnUrl || undefined,
     } as any);
 
-    const url = res?.data?.url || res?.url;
+    const url = res?.data?.url;
 
     if (!url) {
       return NextResponse.json(

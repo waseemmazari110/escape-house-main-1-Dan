@@ -340,3 +340,8 @@ export default function WeddingsPage() {
     </div>
   );
 }
+
+
+
+
+

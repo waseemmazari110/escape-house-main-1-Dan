@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
     let query = db.select().from(bookings);
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      query = query.where(and(...conditions)) as any;
     }
 
     // Apply sorting
@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
                       sortField === 'bookingStatus' ? bookings.bookingStatus :
                       bookings.createdAt;
 
-    query = query.orderBy(sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn));
+    query = query.orderBy(sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn)) as any;
 
     // Apply pagination
     const results = await query.limit(limit).offset(offset);

@@ -546,3 +546,8 @@ export default function StructuredData({ type = "home", data }: StructuredDataPr
     </>
   );
 }
+
+
+
+
+

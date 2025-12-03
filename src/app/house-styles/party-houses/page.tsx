@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, ArrowRight, PartyPopper, Music, Users, Droplets, Gamepad2, Film } from "lucide-react";
+import { Check, ChevronRightIcon, PartyPopper, Music, Users, Droplets, Gamepad2, Film } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -174,7 +174,7 @@ export default function PartyHousesPage() {
               >
                 <Link href="/properties">
                   Browse Party Houses
-                  <ArrowRight className="ml-2 w-5 h-5" />
+                  <ChevronRightIcon className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
             </div>
@@ -232,7 +232,7 @@ export default function PartyHousesPage() {
                   {feature.title}
                 </h3>
                 <span className="text-[var(--color-accent-sage)] text-sm font-medium inline-flex items-center gap-2">
-                  Explore <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  Explore <ChevronRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </span>
               </Link>
             ))}
@@ -261,3 +261,9 @@ export default function PartyHousesPage() {
     </div>
   );
 }
+
+
+
+
+
+

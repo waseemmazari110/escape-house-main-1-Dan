@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { MapPin, TrendingUp, Instagram, ArrowRight, Sparkles, Clock } from "lucide-react";
+import { MapPin, TrendingUp, Instagram, ChevronRightIcon, Sparkles, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function DestinationsPage() {
@@ -447,7 +447,7 @@ export default function DestinationsPage() {
 
             <Link href="/properties" className="inline-flex items-center gap-2">
               View All Properties
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ChevronRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>
         </div>
@@ -545,7 +545,7 @@ export default function DestinationsPage() {
 
               <Link href="/contact" className="inline-flex items-center gap-2">
                 Get Your Free Quote
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ChevronRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
           </div>
@@ -746,3 +746,7 @@ export default function DestinationsPage() {
     </div>);
 
 }
+
+
+
+

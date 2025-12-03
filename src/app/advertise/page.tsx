@@ -16,7 +16,7 @@ import {
   CreditCard,
   HeartHandshake,
   Sparkles,
-  ArrowRight,
+  ChevronRightIcon,
   MessageSquare,
   BarChart3,
   FileEdit,
@@ -192,7 +192,7 @@ export default function AdvertisePage() {
             >
               <Link href="#pricing">
                 View Membership Options
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ChevronRightIcon className="w-5 h-5 ml-2" />
               </Link>
             </Button>
           </div>
@@ -342,7 +342,7 @@ export default function AdvertisePage() {
                 >
                   <Link href="#apply">
                     Get Started
-                    <ArrowRight className="w-5 h-5 ml-2" />
+                    <ChevronRightIcon className="w-5 h-5 ml-2" />
                   </Link>
                 </Button>
               </div>
@@ -577,7 +577,7 @@ export default function AdvertisePage() {
                 style={{ background: "var(--color-accent-sage)" }}
               >
                 Submit Registration
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ChevronRightIcon className="w-5 h-5 ml-2" />
               </Button>
               
               <p className="text-sm text-center text-[var(--color-neutral-dark)]">
@@ -610,7 +610,7 @@ export default function AdvertisePage() {
                   <h3 className="text-xl font-bold pr-8" style={{ fontFamily: "var(--font-display)" }}>
                     {faq.question}
                   </h3>
-                  <ArrowRight className="w-6 h-6 text-[var(--color-accent-sage)] transform group-open:rotate-90 transition-transform flex-shrink-0" />
+                  <ChevronRightIcon className="w-6 h-6 text-[var(--color-accent-sage)] transform group-open:rotate-90 transition-transform flex-shrink-0" />
                 </summary>
                 <p className="mt-4 text-[var(--color-neutral-dark)] leading-relaxed">
                   {faq.answer}
@@ -640,7 +640,7 @@ export default function AdvertisePage() {
             >
               <Link href="#apply">
                 Register Now
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ChevronRightIcon className="w-5 h-5 ml-2" />
               </Link>
             </Button>
             
@@ -682,3 +682,8 @@ export default function AdvertisePage() {
     </>
   );
 }
+
+
+
+
+

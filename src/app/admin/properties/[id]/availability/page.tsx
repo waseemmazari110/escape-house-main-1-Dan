@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft, Loader2, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronLeftIcon, Loader2, Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -218,7 +218,7 @@ export default function PropertyAvailabilityPage() {
             onClick={() => router.push("/admin/properties")}
             className="mb-4"
           >
-            <ChevronLeft className="w-4 h-4 mr-2" />
+            <ChevronLeftIcon className="w-4 h-4 mr-2" />
             Back to Properties
           </Button>
           <div className="flex items-center justify-between">
@@ -398,3 +398,7 @@ export default function PropertyAvailabilityPage() {
     </div>
   );
 }
+
+
+
+

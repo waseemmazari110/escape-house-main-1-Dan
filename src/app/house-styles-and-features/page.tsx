@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ChevronRightIcon } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -69,7 +69,7 @@ export default function HouseStylesAndFeaturesPage() {
                     <span className="text-lg font-medium text-[var(--color-text-primary)] group-hover:text-[var(--color-accent-sage)] transition-colors">
                       {style.title}
                     </span>
-                    <ArrowRight className="w-5 h-5 text-[var(--color-accent-sage)] group-hover:translate-x-1 transition-transform duration-300" />
+                    <ChevronRightIcon className="w-5 h-5 text-[var(--color-accent-sage)] group-hover:translate-x-1 transition-transform duration-300" />
                   </Link>
                 ))}
               </div>
@@ -90,7 +90,7 @@ export default function HouseStylesAndFeaturesPage() {
                     <span className="text-lg font-medium text-[var(--color-text-primary)] group-hover:text-[var(--color-accent-gold)] transition-colors">
                       {feature.title}
                     </span>
-                    <ArrowRight className="w-5 h-5 text-[var(--color-accent-gold)] group-hover:translate-x-1 transition-transform duration-300" />
+                    <ChevronRightIcon className="w-5 h-5 text-[var(--color-accent-gold)] group-hover:translate-x-1 transition-transform duration-300" />
                   </Link>
                 ))}
               </div>
@@ -125,3 +125,8 @@ export default function HouseStylesAndFeaturesPage() {
     </div>
   );
 }
+
+
+
+
+

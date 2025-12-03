@@ -42,7 +42,7 @@ function BookingConfirmedContent() {
 
     const fetchBookingDetails = async () => {
       try {
-        const response = await GEH_API.get(`/bookings/${bookingId}`);
+        const response: any = await GEH_API.get(`/bookings/${bookingId}`);
         
         if (!response.success || !response.data) {
           throw new Error("Failed to load booking details");
@@ -288,3 +288,8 @@ export default function BookingConfirmedPage() {
     </div>
   );
 }
+
+
+
+
+

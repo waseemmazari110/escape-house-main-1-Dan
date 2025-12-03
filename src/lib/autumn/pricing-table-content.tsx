@@ -65,3 +65,8 @@ export const getPricingTableContent = (product: Product) => {
       };
   }
 };
+
+
+
+
+

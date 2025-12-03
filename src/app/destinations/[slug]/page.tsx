@@ -4,7 +4,7 @@ import Image from "next/image";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
-import { MapPin, Navigation, Coffee, Moon, Sparkles, UtensilsCrossed, ChevronDown, Calendar, Home, Waves, PoundSterling, Users, PartyPopper, Train, Plane, Car, Bus } from "lucide-react";
+import { MapPin, Navigation, Coffee, Moon, Sparkles, UtensilsCrossed, ChevronDownIcon, Calendar, Home, Waves, PoundSterling, Users, PartyPopper, Train, Plane, Car, Bus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
@@ -27,11 +27,11 @@ export default function DestinationDetailPage() {
   // Fetch properties for this destination
   useEffect(() => {
     const fetchProperties = async () => {
-      if (!destination) return;
+      if (!slug) return;
       
       try {
         setIsLoadingProperties(true);
-        const response = await fetch(`/api/properties?isPublished=true&location=${encodeURIComponent(destination.name)}`);
+        const response = await fetch(`/api/properties?isPublished=true&location=${encodeURIComponent(slug)}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch properties');
@@ -63,7 +63,7 @@ export default function DestinationDetailPage() {
     };
 
     fetchProperties();
-  }, [destination]);
+  }, [slug]);
 
   // Destinations data
   const destinationsData: Record<string, any> = {
@@ -2852,7 +2852,7 @@ export default function DestinationDetailPage() {
                   <span className="font-semibold text-[var(--color-text-primary)] pr-4">
                     {faq.question}
                   </span>
-                  <ChevronDown
+                  <ChevronDownIcon
                     className={`w-5 h-5 text-[var(--color-accent-gold)] flex-shrink-0 transition-transform ${
                       openFaq === index ? "rotate-180" : ""
                     }`}
@@ -2928,3 +2928,7 @@ export default function DestinationDetailPage() {
     </div>
   );
 }
+
+
+
+

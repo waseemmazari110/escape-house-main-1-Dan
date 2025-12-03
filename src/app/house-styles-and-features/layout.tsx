@@ -18,3 +18,8 @@ export default function HouseStylesLayout({
 }) {
   return children;
 }
+
+
+
+
+

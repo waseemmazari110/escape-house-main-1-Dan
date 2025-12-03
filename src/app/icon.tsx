@@ -24,6 +24,7 @@ export default async function Icon() {
         >
           <img
             src={logoUrl}
+            alt="Group Escape Houses Icon"
             width={size.width}
             height={size.height}
             style={{ objectFit: 'contain' }}
@@ -61,3 +62,8 @@ export default async function Icon() {
     );
   }
 }
+
+
+
+
+

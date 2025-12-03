@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, ArrowRight, Zap, Leaf, Car, ChevronDown } from "lucide-react";
+import { Check, ChevronRightIcon, Zap, Leaf, Car, ChevronDownIcon } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -137,7 +137,7 @@ export default function EVChargingPage() {
               >
                 <Link href="/properties">
                   Browse Properties
-                  <ArrowRight className="ml-2 w-5 h-5" />
+                  <ChevronRightIcon className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
             </div>
@@ -217,7 +217,7 @@ export default function EVChargingPage() {
                   className="w-full flex items-center justify-between p-6 text-left hover:bg-[var(--color-bg-primary)] transition-colors"
                 >
                   <span className="font-semibold text-lg pr-8">{faq.question}</span>
-                  <ChevronDown
+                  <ChevronDownIcon 
                     className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${
                       openFaqIndex === index ? "rotate-180" : ""
                     }`}
@@ -238,3 +238,9 @@ export default function EVChargingPage() {
     </div>
   );
 }
+
+
+
+
+
+

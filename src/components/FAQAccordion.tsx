@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 
 interface FAQ {
   question: string;
@@ -34,7 +34,7 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
             <span className="font-semibold text-lg text-[var(--color-text-primary)] pr-4">
               {faq.question}
             </span>
-            <ChevronDown
+            <ChevronDownIcon 
               className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${
                 openIndex === index ? "rotate-180" : ""
               }`}
@@ -56,3 +56,8 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
     </div>
   );
 }
+
+
+
+
+

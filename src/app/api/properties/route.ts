@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
 
     // Apply conditions
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      query = query.where(and(...conditions)) as any;
     }
 
     // Apply sorting
@@ -120,9 +120,9 @@ export async function GET(request: NextRequest) {
     }[sortField] ?? properties.createdAt;
 
     if (sortOrder === 'asc') {
-      query = query.orderBy(asc(sortColumn));
+      query = query.orderBy(asc(sortColumn)) as any;
     } else {
-      query = query.orderBy(desc(sortColumn));
+      query = query.orderBy(desc(sortColumn)) as any;
     }
 
     // Apply pagination

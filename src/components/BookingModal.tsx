@@ -7,6 +7,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar, User, Minus, Plus } from "lucide-react";
 import { formatDateUKLong } from "@/lib/date-utils";
+import { format } from "date-fns";
 import { GEH_API } from "@/lib/api-client";
 import { toast } from "sonner";
 
@@ -52,7 +53,7 @@ export default function BookingModal({
         check_in: format(checkInDate, "yyyy-MM-dd"),
         check_out: format(checkOutDate, "yyyy-MM-dd"),
         guests: guests,
-      });
+      }) as any;
 
       if (!quoteResponse.success || !quoteResponse.data?.booking_id) {
         throw new Error("Failed to create booking quote");
@@ -65,7 +66,7 @@ export default function BookingModal({
         booking_id: bookingId,
         success_url: `${window.location.origin}/booking/confirmed?bid=${bookingId}`,
         cancel_url: window.location.href,
-      });
+      }) as any;
 
       if (!checkoutResponse.success || !checkoutResponse.data?.session?.url) {
         throw new Error("Failed to create checkout session");
@@ -274,3 +275,8 @@ export default function BookingModal({
     </Dialog>
   );
 }
+
+
+
+
+

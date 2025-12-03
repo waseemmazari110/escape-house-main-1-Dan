@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, ArrowRight, Baby, Users, Smile } from "lucide-react";
+import { Check, ChevronRightIcon, Baby, Users, Smile } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -85,7 +85,7 @@ export default function FamilyHolidaysPage() {
               >
                 <Link href="/properties">
                   Browse Family Homes
-                  <ArrowRight className="ml-2 w-5 h-5" />
+                  <ChevronRightIcon className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
             </div>
@@ -129,3 +129,9 @@ export default function FamilyHolidaysPage() {
     </div>
   );
 }
+
+
+
+
+
+

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { ArrowRight, Instagram, Home as HomeIcon, Sparkles, CreditCard, PartyPopper, Shield, Users, Award, Clock, Calendar, MapPin, User, Minus, Plus } from "lucide-react";
+import { ChevronRightIcon, Instagram, Home as HomeIcon, Sparkles, CreditCard, PartyPopper, Shield, Users, Award, Clock, Calendar, MapPin, User, Minus, Plus } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
@@ -616,7 +616,7 @@ export default function Home() {
                   }}
                 >
                   Browse Houses
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ChevronRightIcon className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link href="/contact">
@@ -707,7 +707,7 @@ export default function Home() {
                   }}
                 >
                   View All Properties
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ChevronRightIcon className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
@@ -757,7 +757,7 @@ export default function Home() {
                   }}
                 >
                   View All Experiences
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ChevronRightIcon className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
@@ -841,7 +841,7 @@ export default function Home() {
                   }}
                 >
                   View All Destinations
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ChevronRightIcon className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
@@ -922,7 +922,7 @@ export default function Home() {
                   }}
                 >
                   Learn More
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ChevronRightIcon className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
@@ -954,7 +954,7 @@ export default function Home() {
                   }}
                 >
                   Read All Reviews
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ChevronRightIcon className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
@@ -1050,7 +1050,7 @@ export default function Home() {
                   }}
                 >
                   @groupescapehouses
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ChevronRightIcon className="ml-2 h-5 w-5" />
                 </Button>
               </a>
             </div>
@@ -1132,3 +1132,7 @@ export default function Home() {
     </div>
   );
 }
+
+
+
+

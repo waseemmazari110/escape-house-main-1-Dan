@@ -10,7 +10,7 @@ import {
   BarChart3,
   FileEdit,
   Check,
-  ArrowRight,
+  ChevronRightIcon,
   Star,
   Download,
   Users,
@@ -67,7 +67,7 @@ export default function AdvertiseWithUs() {
                     >
                       <Link href="#contact">
                         Register Your Property
-                        <ArrowRight className="w-5 h-5 ml-2" />
+                        <ChevronRightIcon className="w-5 h-5 ml-2" />
                       </Link>
                     </Button>
                     
@@ -689,7 +689,7 @@ export default function AdvertiseWithUs() {
             >
               <Link href="/contact">
                 Register Your Property
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ChevronRightIcon className="w-5 h-5 ml-2" />
               </Link>
             </Button>
           </div>
@@ -700,3 +700,8 @@ export default function AdvertiseWithUs() {
     </div>
   );
 }
+
+
+
+
+

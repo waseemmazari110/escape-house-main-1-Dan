@@ -375,7 +375,7 @@ export default function PropertyDetailPage() {
 
             {/* Right Column - Enquiry Form */}
             <div className="lg:col-span-1">
-              <EnquiryForm propertyTitle={property.title} propertySlug={params.slug} />
+              <EnquiryForm propertyTitle={property.title} propertySlug={Array.isArray(params.slug) ? params.slug[0] : params.slug} />
             </div>
           </div>
 
@@ -421,3 +421,7 @@ export default function PropertyDetailPage() {
     </div>
   );
 }
+
+
+
+

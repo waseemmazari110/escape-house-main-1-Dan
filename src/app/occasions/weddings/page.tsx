@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Church, Camera, Utensils, Sparkles, Check, ChevronDown, Star, Users } from "lucide-react";
+import { Church, Camera, Utensils, Sparkles, Check, ChevronDownIcon, Star, Users } from "lucide-react";
 import { useState } from "react";
 
 export default function WeddingsPage() {
@@ -342,7 +342,7 @@ export default function WeddingsPage() {
                   <span className="font-semibold text-[var(--color-text-primary)] pr-4">
                     {faq.question}
                   </span>
-                  <ChevronDown
+                  <ChevronDownIcon 
                     className={`w-5 h-5 text-[var(--color-accent-gold)] flex-shrink-0 transition-transform ${
                       openFaq === index ? "rotate-180" : ""
                     }`}
@@ -365,3 +365,8 @@ export default function WeddingsPage() {
     </div>
   );
 }
+
+
+
+
+

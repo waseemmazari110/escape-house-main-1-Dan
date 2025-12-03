@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { PartyPopper, Music, Waves, Sparkles, Check, ChevronDown, Star, Clock } from "lucide-react";
+import { PartyPopper, Music, Waves, Sparkles, Check, ChevronDownIcon, Star, Clock } from "lucide-react";
 import { useState } from "react";
 
 export default function NewYearPage() {
@@ -342,7 +342,7 @@ export default function NewYearPage() {
                   <span className="font-semibold text-[var(--color-text-primary)] pr-4">
                     {faq.question}
                   </span>
-                  <ChevronDown
+                  <ChevronDownIcon 
                     className={`w-5 h-5 text-[var(--color-accent-gold)] flex-shrink-0 transition-transform ${
                       openFaq === index ? "rotate-180" : ""
                     }`}
@@ -365,3 +365,8 @@ export default function NewYearPage() {
     </div>
   );
 }
+
+
+
+
+

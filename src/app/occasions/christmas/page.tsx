@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { TreePine, Flame, ChefHat, Sparkles, Check, ChevronDown, Star, Gift } from "lucide-react";
+import { TreePine, Flame, ChefHat, Sparkles, Check, ChevronDownIcon, Star, Gift } from "lucide-react";
 import { useState } from "react";
 
 export default function ChristmasPage() {
@@ -338,7 +338,7 @@ export default function ChristmasPage() {
                   <span className="font-semibold text-[var(--color-text-primary)] pr-4">
                     {faq.question}
                   </span>
-                  <ChevronDown
+                  <ChevronDownIcon 
                     className={`w-5 h-5 text-[var(--color-accent-gold)] flex-shrink-0 transition-transform ${
                       openFaq === index ? "rotate-180" : ""
                     }`}
@@ -361,3 +361,8 @@ export default function ChristmasPage() {
     </div>
   );
 }
+
+
+
+
+

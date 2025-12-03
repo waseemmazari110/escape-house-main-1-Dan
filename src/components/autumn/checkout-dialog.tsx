@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { getCheckoutContent } from "@/lib/autumn/checkout-content";
 import { useCustomer } from "autumn-js/react";
-import { ArrowRight, ChevronDown, Loader2 } from "lucide-react";
+import { ChevronRightIcon, ChevronDownIcon, Loader2 } from "lucide-react";
 import type { CheckoutResult, ProductItem } from "autumn-js";
 import {
   Accordion,
@@ -246,7 +246,7 @@ function CheckoutLines({ checkoutResult }: { checkoutResult: CheckoutResult }) {
             <p className="font-light text-muted-foreground">
               View details
             </p>
-            <ChevronDown
+            <ChevronDownIcon 
               className="text-muted-foreground mt-0.5 rotate-90 transition-transform duration-200 ease-in-out"
               size={14}
             />
@@ -364,7 +364,7 @@ const PrepaidItem = ({
             disabled={disableSelection}
           >
             Qty: {quantity}
-            <ChevronDown size={12} />
+            <ChevronDownIcon size={12} />
           </PopoverTrigger>
           <PopoverContent
             align="start"
@@ -454,7 +454,13 @@ export const PricingDialogButton = ({
       className={cn(className, "shadow-sm shadow-stone-400")}
     >
       {children}
-      <ArrowRight className="!h-3" />
+      <ChevronRightIcon className="!h-3" />
     </Button>
   );
 };
+
+
+
+
+
+

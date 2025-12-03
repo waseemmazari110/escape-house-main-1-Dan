@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 import Link from "next/link";
 
 interface FAQ {
   question: string;
-  answer: string | JSX.Element;
+  answer: string | React.ReactNode;
 }
 
 export default function FAQSection() {
@@ -107,7 +107,7 @@ export default function FAQSection() {
                 >
                   {faq.question}
                 </h3>
-                <ChevronDown
+                <ChevronDownIcon 
                   className={`w-5 h-5 flex-shrink-0 transition-transform duration-300 ${
                     openIndex === index ? "rotate-180" : ""
                   }`}
@@ -143,3 +143,8 @@ export default function FAQSection() {
     </section>
   );
 }
+
+
+
+
+

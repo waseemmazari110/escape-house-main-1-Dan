@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     let query = db.select().from(blogPosts);
 
     // Build WHERE conditions
-    const conditions = [];
+    const conditions: any[] = [];
 
     if (search) {
       conditions.push(
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      query = query.where(and(...conditions)) as any;
     }
 
     // Apply sorting
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
                        sort === 'updatedAt' ? blogPosts.updatedAt :
                        blogPosts.publishedAt;
 
-    query = query.orderBy(order === 'asc' ? asc(sortColumn) : desc(sortColumn));
+    query = query.orderBy(order === 'asc' ? asc(sortColumn) : desc(sortColumn)) as any;
 
     // Apply pagination
     const results = await query.limit(limit).offset(offset);

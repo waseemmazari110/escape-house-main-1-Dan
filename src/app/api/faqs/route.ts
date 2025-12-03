@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      query = query.where(and(...conditions)) as any;
     }
 
     const orderByColumn = sort === 'category' ? faqs.category :
@@ -80,11 +80,11 @@ export async function GET(request: NextRequest) {
       query = query.orderBy(
         order === 'desc' ? desc(faqs.orderIndex) : asc(faqs.orderIndex),
         asc(faqs.category)
-      );
+      ) as any;
     } else {
       query = query.orderBy(
         order === 'desc' ? desc(orderByColumn) : asc(orderByColumn)
-      );
+      ) as any;
     }
 
     const results = await query.limit(limit).offset(offset);

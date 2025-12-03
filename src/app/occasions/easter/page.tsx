@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Egg, Trees, Sun, Sparkles, Check, ChevronDown, Star } from "lucide-react";
+import { Egg, Trees, Sun, Sparkles, Check, ChevronDownIcon, Star } from "lucide-react";
 import { useState } from "react";
 
 export default function EasterPage() {
@@ -279,7 +279,7 @@ export default function EasterPage() {
                   <span className="font-semibold text-[var(--color-text-primary)] pr-4">
                     {faq.question}
                   </span>
-                  <ChevronDown
+                  <ChevronDownIcon 
                     className={`w-5 h-5 text-[var(--color-accent-gold)] flex-shrink-0 transition-transform ${
                       openFaq === index ? "rotate-180" : ""
                     }`}
@@ -302,3 +302,8 @@ export default function EasterPage() {
     </div>
   );
 }
+
+
+
+
+

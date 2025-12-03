@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
 
 interface Review {
@@ -15,9 +15,10 @@ interface Review {
 
 interface ReviewSliderProps {
   reviews: Review[];
+  isLoading?: boolean;
 }
 
-export default function ReviewSlider({ reviews }: ReviewSliderProps) {
+export default function ReviewSlider({ reviews, isLoading = false }: ReviewSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [slidesToShow, setSlidesToShow] = useState(3);
@@ -139,7 +140,7 @@ export default function ReviewSlider({ reviews }: ReviewSliderProps) {
             className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-[var(--color-accent-sage)] hover:text-white transition-all duration-200 hover:scale-110 z-10 border border-gray-200"
             aria-label="Previous reviews"
           >
-            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+            <ChevronLeftIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
           </button>
 
           <button
@@ -147,7 +148,7 @@ export default function ReviewSlider({ reviews }: ReviewSliderProps) {
             className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-[var(--color-accent-sage)] hover:text-white transition-all duration-200 hover:scale-110 z-10 border border-gray-200"
             aria-label="Next reviews"
           >
-            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+            <ChevronRightIcon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
           </button>
         </>
       )}
@@ -175,3 +176,6 @@ export default function ReviewSlider({ reviews }: ReviewSliderProps) {
     </div>
   );
 }
+
+
+
