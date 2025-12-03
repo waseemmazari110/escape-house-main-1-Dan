@@ -328,7 +328,7 @@ function AdminPropertiesPageContent() {
                     </Button>
                   </div>
                 </div>
-              )}}
+              )}
             </>
           )}
         </div>
