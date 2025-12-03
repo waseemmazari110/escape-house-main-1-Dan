@@ -419,6 +419,16 @@ export default function Header() {
                 <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[var(--color-accent-sage)] transition-all duration-200 group-hover:w-full group-hover:left-0"></span>
               </Link>
 
+              {/* Owner Dashboard Link */}
+              <Link
+                href="/owner/dashboard"
+                className="text-[15px] font-medium hover:text-[var(--color-accent-sage)] transition-colors relative group py-8"
+                style={{ fontFamily: "var(--font-body)" }}
+              >
+                Owner Dashboard
+                <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[var(--color-accent-sage)] transition-all duration-200 group-hover:w-full group-hover:left-0"></span>
+              </Link>
+
               {/* Admin Link - Only show if authenticated */}
               {session?.user && (
                 <Link
@@ -726,6 +736,14 @@ export default function Header() {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   How It Works
+                </Link>
+
+                <Link
+                  href="/owner/dashboard"
+                  className="block text-2xl font-medium hover:text-[var(--color-accent-sage)] transition-colors text-[var(--color-text-primary)]"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Owner Dashboard
                 </Link>
 
                 <Link

@@ -21,7 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Edit, Calendar, DollarSign, Search, Filter, LogOut, User } from "lucide-react";
+import { Edit, Calendar, PoundSterling, Search, Filter, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 
@@ -262,7 +262,7 @@ export default function AdminPropertiesPage() {
                       <TableCell>{property.max_guests}</TableCell>
                       <TableCell>£{property.price_from}</TableCell>
                       <TableCell>
-                        {format(new Date(property.updated_at), "dd MMM yyyy")}
+                        {format(new Date(property.updated_at), "dd/MM/yyyy")}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center justify-end gap-2">
@@ -293,7 +293,7 @@ export default function AdminPropertiesPage() {
                             title="Manage Pricing"
                           >
                             <Link href={`/admin/properties/${property.id}/pricing`}>
-                              <DollarSign className="w-4 h-4" />
+                              <PoundSterling className="w-4 h-4" />
                             </Link>
                           </Button>
                         </div>
