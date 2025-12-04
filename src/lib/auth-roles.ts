@@ -36,8 +36,8 @@ export async function getCurrentUserWithRole(): Promise<AuthenticatedUser | null
       name: session.user.name,
       email: session.user.email,
       role: (session.user.role as UserRole) || 'guest',
-      phone: session.user.phone,
-      companyName: session.user.companyName,
+      phone: (session.user as any).phone,
+      companyName: (session.user as any).companyName,
     };
   } catch (error) {
     console.error('Error getting current user:', error);

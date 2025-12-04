@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
     // Owners: Only see their own properties
     // Admins: See all properties
     // Guests/Unauthenticated: Only see published properties
-    if (isOwner(currentUser)) {
+    if (currentUser && isOwner(currentUser)) {
       conditions.push(eq(properties.ownerId, currentUser.id));
     } else if (!isAdmin(currentUser)) {
       // Guests and unauthenticated users only see published properties
