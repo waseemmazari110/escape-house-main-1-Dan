@@ -21,6 +21,9 @@ export const bookings = sqliteTable('bookings', {
   specialRequests: text('special_requests'),
   experiencesSelected: text('experiences_selected', { mode: 'json' }),
   adminNotes: text('admin_notes'),
+  crmId: text('crm_id'), // ID in CRM system
+  crmSyncStatus: text('crm_sync_status').default('pending'),
+  crmLastSyncedAt: integer('crm_last_synced_at', { mode: 'timestamp' }),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
@@ -37,6 +40,10 @@ export const user = sqliteTable("user", {
   role: text("role").notNull().default("guest"), // 'guest', 'owner', 'admin'
   phone: text("phone"),
   companyName: text("company_name"), // For owners
+  crmId: text("crm_id"), // ID in CRM system (TreadSoft)
+  crmSyncStatus: text("crm_sync_status").default("pending"), // 'pending', 'synced', 'failed'
+  crmLastSyncedAt: integer("crm_last_synced_at", { mode: "timestamp" }),
+  membershipStatus: text("membership_status").default("pending"), // 'active', 'pending', 'inactive'
   createdAt: integer("created_at", { mode: "timestamp" })
     .$defaultFn(() => new Date())
     .notNull(),
@@ -121,6 +128,9 @@ export const properties = sqliteTable('properties', {
   ownerContact: text('owner_contact'),
   featured: integer('featured', { mode: 'boolean' }).default(false),
   isPublished: integer('is_published', { mode: 'boolean' }).default(true),
+  crmId: text('crm_id'), // ID in CRM system
+  crmSyncStatus: text('crm_sync_status').default('pending'),
+  crmLastSyncedAt: integer('crm_last_synced_at', { mode: 'timestamp' }),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
@@ -263,6 +273,56 @@ export const partners = sqliteTable('partners', {
   contactEmail: text('contact_email'),
   commissionNotes: text('commission_notes'),
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+// CRM Sync Logs table
+export const crmSyncLogs = sqliteTable('crm_sync_logs', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  entityType: text('entity_type').notNull(), // 'contact', 'property', 'enquiry', 'booking'
+  entityId: text('entity_id').notNull(), // ID in our system
+  crmId: text('crm_id'), // ID in CRM system
+  action: text('action').notNull(), // 'create', 'update', 'delete'
+  status: text('status').notNull(), // 'success', 'failed', 'pending'
+  requestData: text('request_data', { mode: 'json' }),
+  responseData: text('response_data', { mode: 'json' }),
+  errorMessage: text('error_message'),
+  createdAt: text('created_at').notNull(),
+});
+
+// Enquiries table (for CRM sync)
+export const enquiries = sqliteTable('enquiries', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').references(() => user.id, { onDelete: 'cascade' }),
+  propertyId: integer('property_id').references(() => properties.id, { onDelete: 'set null' }),
+  guestName: text('guest_name').notNull(),
+  guestEmail: text('guest_email').notNull(),
+  guestPhone: text('guest_phone'),
+  subject: text('subject').notNull(),
+  message: text('message').notNull(),
+  status: text('status').notNull().default('new'), // 'new', 'contacted', 'qualified', 'converted', 'lost'
+  source: text('source').default('website'), // 'website', 'phone', 'email', 'referral'
+  crmId: text('crm_id'), // ID in CRM system
+  crmSyncStatus: text('crm_sync_status').default('pending'),
+  crmLastSyncedAt: integer('crm_last_synced_at', { mode: 'timestamp' }),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+// Owner Memberships table
+export const ownerMemberships = sqliteTable('owner_memberships', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  membershipTier: text('membership_tier').notNull(), // 'basic', 'premium', 'enterprise'
+  status: text('status').notNull().default('pending'), // 'active', 'pending', 'suspended', 'cancelled'
+  startDate: text('start_date').notNull(),
+  endDate: text('end_date'),
+  autoRenew: integer('auto_renew', { mode: 'boolean' }).default(true),
+  paymentStatus: text('payment_status').default('pending'), // 'paid', 'pending', 'failed'
+  crmId: text('crm_id'),
+  crmSyncStatus: text('crm_sync_status').default('pending'),
+  crmLastSyncedAt: integer('crm_last_synced_at', { mode: 'timestamp' }),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
