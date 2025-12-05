@@ -5,20 +5,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { user } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { authClient } from '@/lib/auth-client';
+import { auth } from '@/lib/auth';
+import { headers } from 'next/headers';
 import { getCRMService } from '@/lib/crm';
 import { CRMSyncLogger } from '@/lib/crm/sync-logger';
 
 export async function PUT(request: NextRequest) {
   try {
     // Get authenticated user
-    const session = await authClient.getSession({
-      fetchOptions: {
-        headers: request.headers,
-      },
-    });
+    const session = await auth.api.getSession({ headers: await headers() });
 
-    if (!session?.user) {
+    if (!session || !session.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -101,13 +98,9 @@ export async function PUT(request: NextRequest) {
 // GET endpoint to fetch profile
 export async function GET(request: NextRequest) {
   try {
-    const session = await authClient.getSession({
-      fetchOptions: {
-        headers: request.headers,
-      },
-    });
+    const session = await auth.api.getSession({ headers: await headers() });
 
-    if (!session?.user) {
+    if (!session || !session.user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
