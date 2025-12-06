@@ -129,6 +129,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "Password reset successfully",
+      debug: {
+        accountsFound: userAccounts.length,
+        providerId: targetAccount.providerId,
+        passwordWasSet: updatedAccount?.password ? true : false,
+        oldHashPrefix: targetAccount.password?.substring(0, 7) || 'none',
+        newHashPrefix: hashedPassword.substring(0, 7),
+      }
     });
   } catch (error) {
     console.error("Reset password error:", error);
