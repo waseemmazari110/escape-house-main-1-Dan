@@ -21,6 +21,9 @@ export const bookings = sqliteTable('bookings', {
   specialRequests: text('special_requests'),
   experiencesSelected: text('experiences_selected', { mode: 'json' }),
   adminNotes: text('admin_notes'),
+  crmId: text('crm_id'), // ID in CRM system
+  crmSyncStatus: text('crm_sync_status').default('pending'),
+  crmLastSyncedAt: integer('crm_last_synced_at', { mode: 'timestamp' }),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
@@ -37,6 +40,10 @@ export const user = sqliteTable("user", {
   role: text("role").notNull().default("guest"), // 'guest', 'owner', 'admin'
   phone: text("phone"),
   companyName: text("company_name"), // For owners
+  crmId: text("crm_id"), // ID in CRM system (TreadSoft)
+  crmSyncStatus: text("crm_sync_status").default("pending"), // 'pending', 'synced', 'failed'
+  crmLastSyncedAt: integer("crm_last_synced_at", { mode: "timestamp" }),
+  membershipStatus: text("membership_status").default("pending"), // 'active', 'pending', 'inactive'
   createdAt: integer("created_at", { mode: "timestamp" })
     .$defaultFn(() => new Date())
     .notNull(),
@@ -121,6 +128,9 @@ export const properties = sqliteTable('properties', {
   ownerContact: text('owner_contact'),
   featured: integer('featured', { mode: 'boolean' }).default(false),
   isPublished: integer('is_published', { mode: 'boolean' }).default(true),
+  crmId: text('crm_id'), // ID in CRM system
+  crmSyncStatus: text('crm_sync_status').default('pending'),
+  crmLastSyncedAt: integer('crm_last_synced_at', { mode: 'timestamp' }),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
@@ -267,104 +277,52 @@ export const partners = sqliteTable('partners', {
   updatedAt: text('updated_at').notNull(),
 });
 
-// ============================================
-// INTERNAL CRM SYSTEM - PHASE 1
-// ============================================
-
-// CRM Owner Profiles - Extended owner information for CRM
-export const crmOwnerProfiles = sqliteTable('crm_owner_profiles', {
+// CRM Sync Logs table
+export const crmSyncLogs = sqliteTable('crm_sync_logs', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  userId: text('user_id').notNull().unique().references(() => user.id, { onDelete: 'cascade' }),
-  businessName: text('business_name'),
-  website: text('website'),
-  address: text('address'),
-  city: text('city'),
-  state: text('state'),
-  postalCode: text('postal_code'),
-  country: text('country').default('UK'),
-  alternatePhone: text('alternate_phone'),
-  alternateEmail: text('alternate_email'),
-  taxId: text('tax_id'),
-  businessType: text('business_type'), // 'individual', 'company', 'partnership'
-  registrationNumber: text('registration_number'),
-  preferredContactMethod: text('preferred_contact_method').default('email'), // 'email', 'phone', 'sms'
-  notes: text('notes'),
-  tags: text('tags', { mode: 'json' }), // Array of tags for categorization
-  source: text('source').default('website'), // 'website', 'referral', 'marketing', 'direct'
-  status: text('status').notNull().default('active'), // 'active', 'inactive', 'suspended'
+  entityType: text('entity_type').notNull(), // 'contact', 'property', 'enquiry', 'booking'
+  entityId: text('entity_id').notNull(), // ID in our system
+  crmId: text('crm_id'), // ID in CRM system
+  action: text('action').notNull(), // 'create', 'update', 'delete'
+  status: text('status').notNull(), // 'success', 'failed', 'pending'
+  requestData: text('request_data', { mode: 'json' }),
+  responseData: text('response_data', { mode: 'json' }),
+  errorMessage: text('error_message'),
   createdAt: text('created_at').notNull(),
-  updatedAt: text('updated_at').notNull(),
 });
 
-// CRM Enquiries - Track all enquiries and link to owners/properties
-export const crmEnquiries = sqliteTable('crm_enquiries', {
+// Enquiries table (for CRM sync)
+export const enquiries = sqliteTable('enquiries', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  ownerId: text('owner_id').references(() => user.id, { onDelete: 'set null' }),
+  userId: text('user_id').references(() => user.id, { onDelete: 'cascade' }),
   propertyId: integer('property_id').references(() => properties.id, { onDelete: 'set null' }),
   guestName: text('guest_name').notNull(),
   guestEmail: text('guest_email').notNull(),
   guestPhone: text('guest_phone'),
   subject: text('subject').notNull(),
   message: text('message').notNull(),
-  enquiryType: text('enquiry_type').notNull().default('general'), // 'booking', 'property_info', 'partnership', 'general'
-  status: text('status').notNull().default('new'), // 'new', 'contacted', 'qualified', 'converted', 'lost', 'spam'
-  priority: text('priority').default('medium'), // 'low', 'medium', 'high', 'urgent'
-  assignedTo: text('assigned_to'), // Staff member handling this enquiry
-  source: text('source').default('website'), // 'website', 'phone', 'email', 'referral', 'social'
-  checkInDate: text('check_in_date'),
-  checkOutDate: text('check_out_date'),
-  numberOfGuests: integer('number_of_guests'),
-  budget: real('budget'),
-  notes: text('notes'),
-  followUpDate: text('follow_up_date'),
-  createdAt: text('created_at').notNull(),
-  updatedAt: text('updated_at').notNull(),
-  closedAt: text('closed_at'),
-});
-
-// CRM Activity Log - Track all interactions and activities
-export const crmActivityLog = sqliteTable('crm_activity_log', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  entityType: text('entity_type').notNull(), // 'owner', 'enquiry', 'property', 'booking'
-  entityId: text('entity_id').notNull(), // ID of the related entity
-  activityType: text('activity_type').notNull(), // 'email', 'phone_call', 'meeting', 'note', 'status_change', 'document_upload'
-  title: text('title').notNull(),
-  description: text('description'),
-  outcome: text('outcome'), // Result of the activity
-  performedBy: text('performed_by'), // User who performed the activity
-  metadata: text('metadata', { mode: 'json' }), // Additional data (email body, call duration, etc)
-  createdAt: text('created_at').notNull(),
-});
-
-// CRM Notes & Reminders
-export const crmNotes = sqliteTable('crm_notes', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  entityType: text('entity_type').notNull(), // 'owner', 'enquiry', 'property'
-  entityId: text('entity_id').notNull(),
-  noteType: text('note_type').default('note'), // 'note', 'reminder', 'todo'
-  title: text('title'),
-  content: text('content').notNull(),
-  priority: text('priority').default('normal'), // 'low', 'normal', 'high'
-  dueDate: text('due_date'), // For reminders and todos
-  isCompleted: integer('is_completed', { mode: 'boolean' }).default(false),
-  completedAt: text('completed_at'),
-  createdBy: text('created_by'),
-  assignedTo: text('assigned_to'),
+  status: text('status').notNull().default('new'), // 'new', 'contacted', 'qualified', 'converted', 'lost'
+  source: text('source').default('website'), // 'website', 'phone', 'email', 'referral'
+  crmId: text('crm_id'), // ID in CRM system
+  crmSyncStatus: text('crm_sync_status').default('pending'),
+  crmLastSyncedAt: integer('crm_last_synced_at', { mode: 'timestamp' }),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
 
-// CRM Property Links - Track which properties are linked to owners in CRM
-export const crmPropertyLinks = sqliteTable('crm_property_links', {
+// Owner Memberships table
+export const ownerMemberships = sqliteTable('owner_memberships', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  ownerId: text('owner_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
-  propertyId: integer('property_id').references(() => properties.id, { onDelete: 'cascade' }),
-  linkStatus: text('link_status').notNull().default('active'), // 'active', 'pending', 'inactive'
-  ownershipType: text('ownership_type').default('full'), // 'full', 'partial', 'managed'
-  commissionRate: real('commission_rate'),
-  contractStartDate: text('contract_start_date'),
-  contractEndDate: text('contract_end_date'),
-  notes: text('notes'),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  membershipTier: text('membership_tier').notNull(), // 'basic', 'premium', 'enterprise'
+  status: text('status').notNull().default('pending'), // 'active', 'pending', 'suspended', 'cancelled'
+  startDate: text('start_date').notNull(),
+  endDate: text('end_date'),
+  autoRenew: integer('auto_renew', { mode: 'boolean' }).default(true),
+  paymentStatus: text('payment_status').default('pending'), // 'paid', 'pending', 'failed'
+  crmId: text('crm_id'),
+  crmSyncStatus: text('crm_sync_status').default('pending'),
+  crmLastSyncedAt: integer('crm_last_synced_at', { mode: 'timestamp' }),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });

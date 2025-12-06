@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 'dummy-key-for-development');
 
 interface EnquiryEmailData {
   name: string;
@@ -233,6 +233,124 @@ export async function sendContactEmail(data: ContactEmailData) {
     }
 
     console.log('✅ Contact email sent successfully:', emailData?.id);
+    return emailData;
+  } catch (error) {
+    console.error('Email sending error:', error);
+    throw error;
+  }
+}
+
+export async function sendPasswordResetEmail(email: string, resetLink: string) {
+  try {
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #89A38F; color: white; padding: 20px; text-align: center; }
+            .content { background: #f9f9f9; padding: 30px; }
+            .button { display: inline-block; padding: 12px 30px; background: #89A38F; color: white; text-decoration: none; border-radius: 8px; margin: 20px 0; }
+            .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Password Reset Request</h1>
+            </div>
+            <div class="content">
+              <p>Hello,</p>
+              <p>We received a request to reset your password for your Group Escape Houses account.</p>
+              <p>Click the button below to reset your password:</p>
+              <a href="${resetLink}" class="button">Reset Password</a>
+              <p>Or copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; color: #666;">${resetLink}</p>
+              <p>This link will expire in 1 hour.</p>
+              <p>If you didn't request this password reset, please ignore this email.</p>
+            </div>
+            <div class="footer">
+              <p>Group Escape Houses<br>11a North Street, Brighton BN41 1DH</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const { data: emailData, error } = await resend.emails.send({
+      from: 'Group Escape Houses <noreply@groupescapehouses.co.uk>',
+      to: [email],
+      subject: 'Reset Your Password - Group Escape Houses',
+      html: htmlContent,
+    });
+
+    if (error) {
+      console.error('❌ Failed to send password reset email:', error);
+      throw error;
+    }
+
+    console.log('✅ Password reset email sent successfully:', emailData?.id);
+    return emailData;
+  } catch (error) {
+    console.error('Email sending error:', error);
+    throw error;
+  }
+}
+
+export async function sendVerificationEmail(email: string, verificationLink: string) {
+  try {
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #89A38F; color: white; padding: 20px; text-align: center; }
+            .content { background: #f9f9f9; padding: 30px; }
+            .button { display: inline-block; padding: 12px 30px; background: #89A38F; color: white; text-decoration: none; border-radius: 8px; margin: 20px 0; }
+            .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Welcome to Group Escape Houses!</h1>
+            </div>
+            <div class="content">
+              <p>Hello,</p>
+              <p>Thank you for creating an account with Group Escape Houses.</p>
+              <p>Please verify your email address by clicking the button below:</p>
+              <a href="${verificationLink}" class="button">Verify Email</a>
+              <p>Or copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; color: #666;">${verificationLink}</p>
+              <p>This link will expire in 24 hours.</p>
+              <p>If you didn't create an account, please ignore this email.</p>
+            </div>
+            <div class="footer">
+              <p>Group Escape Houses<br>11a North Street, Brighton BN41 1DH</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const { data: emailData, error } = await resend.emails.send({
+      from: 'Group Escape Houses <noreply@groupescapehouses.co.uk>',
+      to: [email],
+      subject: 'Verify Your Email - Group Escape Houses',
+      html: htmlContent,
+    });
+
+    if (error) {
+      console.error('❌ Failed to send verification email:', error);
+      throw error;
+    }
+
+    console.log('✅ Verification email sent successfully:', emailData?.id);
     return emailData;
   } catch (error) {
     console.error('Email sending error:', error);

@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { user } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getCRMService } from "@/lib/crm";
-import { CRMSyncLogger } from "@/lib/crm/sync-logger";
+import { crmService } from "@/lib/crm-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -47,23 +46,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // AUTO-SYNC TO CRM (TreadSoft)
-    // This runs in the background and doesn't block the response
-    syncOwnerToCRM(updatedUser.id, updatedUser.name, updatedUser.email, phone, companyName || propertyName)
-      .then((result) => {
-        if (result.success) {
-          console.log(`✅ Owner ${updatedUser.email} synced to CRM: ${result.crmId}`);
-        } else {
-          console.error(`❌ Failed to sync owner ${updatedUser.email} to CRM:`, result.error);
-        }
-      })
-      .catch((error) => {
-        console.error('CRM sync background task failed:', error);
-      });
+    // Auto-create CRM owner profile
+    const crmResult = await crmService.createOwnerProfile({
+      userId: updatedUser.id,
+      businessName: companyName || propertyName || undefined,
+      address: propertyAddress || undefined,
+      alternatePhone: phone || undefined,
+      source: 'website_signup',
+    });
+
+    if (!crmResult.success) {
+      console.error("Failed to create CRM profile:", crmResult.error);
+      // Don't fail the signup, just log the error
+    }
 
     return NextResponse.json({
       success: true,
       message: "Owner profile completed successfully",
+      user: {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        role: updatedUser.role,
+        phone: updatedUser.phone,
+        companyName: updatedUser.companyName,
+      },
     });
   } catch (error) {
     console.error("Complete signup error:", error);
@@ -71,90 +78,6 @@ export async function POST(request: NextRequest) {
       { error: "Failed to complete signup" },
       { status: 500 }
     );
-  }
-}
-
-// Background CRM sync function
-async function syncOwnerToCRM(
-  userId: string,
-  name: string,
-  email: string,
-  phone?: string,
-  companyName?: string
-) {
-  try {
-    const crmService = getCRMService();
-
-    // Prepare contact data
-    const [firstName, ...lastNameParts] = (name || '').split(' ');
-    const lastName = lastNameParts.join(' ') || firstName;
-
-    const contactData = {
-      firstName,
-      lastName,
-      email,
-      phone: phone || undefined,
-      companyName: companyName || undefined,
-      role: 'owner' as const,
-      membershipStatus: 'pending' as const,
-      source: 'website_registration',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    // Log pending sync
-    await CRMSyncLogger.logPending('contact', userId, 'create');
-
-    // Sync to CRM
-    const result = await crmService.createContact(contactData);
-
-    if (result.success && result.crmId) {
-      // Update user with CRM ID
-      await db
-        .update(user)
-        .set({
-          crmId: result.crmId,
-          crmSyncStatus: 'synced',
-          crmLastSyncedAt: new Date(),
-          updatedAt: new Date(),
-        })
-        .where(eq(user.id, userId));
-
-      // Log success
-      await CRMSyncLogger.logSuccess(
-        'contact',
-        userId,
-        result.crmId,
-        'create',
-        contactData,
-        result
-      );
-
-      return { success: true, crmId: result.crmId };
-    } else {
-      // Update sync status to failed
-      await db
-        .update(user)
-        .set({
-          crmSyncStatus: 'failed',
-          updatedAt: new Date(),
-        })
-        .where(eq(user.id, userId));
-
-      // Log failure
-      await CRMSyncLogger.logFailure(
-        'contact',
-        userId,
-        'create',
-        result.error || 'Unknown error',
-        contactData
-      );
-
-      return { success: false, error: result.error || 'Unknown error' };
-    }
-  } catch (error: any) {
-    console.error('CRM sync error:', error);
-    return { success: false, error: error.message };
   }
 }
 

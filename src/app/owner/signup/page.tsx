@@ -96,9 +96,25 @@ function OwnerSignupForm() {
           console.error("Failed to complete owner profile");
           // Still allow login even if profile completion fails
         }
+
+        // Send verification email
+        try {
+          const verificationRes = await fetch('/api/auth/send-verification', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: formData.email }),
+          });
+          
+          if (verificationRes.ok) {
+            console.log('✅ Verification email sent to owner');
+          }
+        } catch (verificationError) {
+          console.error('Failed to send verification email:', verificationError);
+          // Don't block registration if email fails
+        }
       }
 
-      toast.success("Owner account created successfully! You can now log in.");
+      toast.success("Owner account created successfully! Please check your email for verification.");
       
       // Redirect to owner login page
       router.push("/owner/login?registered=true");

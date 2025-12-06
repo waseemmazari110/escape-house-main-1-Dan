@@ -326,6 +326,29 @@ export async function checkForSpam(
   const email = data.email.toLowerCase().trim();
   
   // ==========================================
+  // 0. LOCALHOST WHITELIST (Development Mode)
+  // ==========================================
+  
+  const localhostIPs = ['127.0.0.1', '::1', 'localhost', '::ffff:127.0.0.1'];
+  const isDevelopment = process.env.NODE_ENV === 'development' || localhostIPs.includes(ip);
+  
+  if (isDevelopment) {
+    console.log('🔓 Development mode: Spam checks relaxed for', ip);
+    // In development, skip most spam checks
+    // Only do basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return {
+        isSpam: true,
+        reason: 'Invalid email format',
+        shouldBlacklist: false
+      };
+    }
+    // Allow all localhost requests in development
+    return { isSpam: false };
+  }
+  
+  // ==========================================
   // 1. IP BLACKLIST CHECK
   // ==========================================
   

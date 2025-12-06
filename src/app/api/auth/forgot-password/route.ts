@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { user, verification } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import crypto from "crypto";
+import { sendPasswordResetEmail } from "@/lib/gmail-smtp";
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,16 +41,19 @@ export async function POST(request: NextRequest) {
       identifier: email,
       value: resetToken,
       expiresAt,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
-    // TODO: Send password reset email
-    // You would integrate with your email service here
+    // Send password reset email
     const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
     
-    console.log("Password reset link:", resetLink);
-    // await sendPasswordResetEmail(email, resetLink);
+    try {
+      await sendPasswordResetEmail(email, resetLink);
+      console.log("✅ Password reset email sent to:", email);
+    } catch (emailError) {
+      console.error("❌ Failed to send password reset email:", emailError);
+      console.log("Password reset link (fallback):", resetLink);
+      // Still return success to prevent email enumeration
+    }
 
     return NextResponse.json({
       success: true,

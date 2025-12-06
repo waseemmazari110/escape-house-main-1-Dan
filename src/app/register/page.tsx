@@ -78,7 +78,23 @@ export default function RegisterPage() {
         return;
       }
 
-      toast.success("Account created successfully!");
+      // Send verification email
+      try {
+        const verificationRes = await fetch('/api/auth/send-verification', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        
+        if (verificationRes.ok) {
+          console.log('✅ Verification email sent');
+        }
+      } catch (verificationError) {
+        console.error('Failed to send verification email:', verificationError);
+        // Don't block registration if email fails
+      }
+
+      toast.success("Account created successfully! Please check your email for verification.");
       
       // Redirect to login with success message
       router.push("/login?registered=true");

@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { user, verification } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendVerificationEmail } from '@/lib/gmail-smtp';
+import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,52 +26,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate verification code
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Store verification code
+    // Store verification token
     await db.insert(verification).values({
-      id: `verification_${Date.now()}_${Math.random()}`,
+      id: crypto.randomUUID(),
       identifier: email,
-      value: verificationCode,
+      value: verificationToken,
       expiresAt,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
     // Send verification email
     try {
-      await resend.emails.send({
-        from: 'Escape Houses <noreply@escapehouse.co.uk>',
-        to: email,
-        subject: 'Verify your email address',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>Verify your email address</h2>
-            <p>Thank you for signing up! Your verification code is:</p>
-            <div style="background-color: #f4f4f4; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px;">
-              ${verificationCode}
-            </div>
-            <p>This code will expire in 15 minutes.</p>
-            <p>If you didn't request this code, please ignore this email.</p>
-          </div>
-        `,
+      await sendVerificationEmail(email, verificationToken);
+      
+      console.log(`✅ Verification email sent to ${email}`);
+      
+      return NextResponse.json({
+        message: 'Verification email sent successfully',
+        success: true
       });
     } catch (emailError) {
-      console.error('Email sending error:', emailError);
-      // Continue even if email fails - code is stored in DB
+      console.error('❌ Email sending error:', emailError);
+      return NextResponse.json(
+        { error: 'Failed to send verification email' },
+        { status: 500 }
+      );
     }
-
-    return NextResponse.json({ 
-      success: true,
-      message: 'Verification code sent to your email' 
-    });
 
   } catch (error) {
     console.error('Send verification error:', error);
     return NextResponse.json(
-      { error: 'Failed to send verification code' },
+      { error: 'Failed to send verification email' },
       { status: 500 }
     );
   }
