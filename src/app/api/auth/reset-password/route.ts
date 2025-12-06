@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { user, verification, account } from "@/db/schema";
 import { eq, and, gt } from "drizzle-orm";
-import bcrypt from "bcryptjs";
+import { auth } from "@/lib/auth";
+
+// Import better-auth's password hashing utility
+async function hashPassword(password: string): Promise<string> {
+  // Use the same method better-auth uses internally
+  const bcrypt = await import('bcryptjs');
+  return bcrypt.hash(password, 10);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,8 +63,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash password using bcrypt (same as better-auth)
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash password using the same method as better-auth
+    const hashedPassword = await hashPassword(password);
 
     // Find any account for this user (don't restrict by providerId)
     const userAccounts = await db
@@ -91,6 +98,7 @@ export async function POST(request: NextRequest) {
     const targetAccount = emailAccount || userAccounts[0]; // Fallback to first account
     
     console.log(`Updating account with providerId="${targetAccount.providerId}"`);
+    console.log(`Old password hash: ${targetAccount.password ? targetAccount.password.substring(0, 30) + '...' : 'NULL'}`);
     console.log(`New password hash: ${hashedPassword.substring(0, 30)}...`);
 
     // Update password in account table
