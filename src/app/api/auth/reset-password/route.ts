@@ -59,34 +59,38 @@ export async function POST(request: NextRequest) {
     // Hash new password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Check if account exists
-    const [existingAccount] = await db
+    // Find any account for this user (don't restrict by providerId)
+    const userAccounts = await db
       .select()
       .from(account)
-      .where(
-        and(
-          eq(account.userId, existingUser.id),
-          eq(account.providerId, "email")
-        )
-      )
-      .limit(1);
+      .where(eq(account.userId, existingUser.id))
+      .limit(5);
 
-    if (!existingAccount) {
-      console.error(`❌ No account found for user ${existingUser.id} with providerId 'email'`);
-      
-      // Try to find what accounts exist for this user
-      const allAccounts = await db
-        .select()
-        .from(account)
-        .where(eq(account.userId, existingUser.id));
-      
-      console.log(`Found ${allAccounts.length} accounts for user:`, allAccounts.map(a => a.providerId));
-      
+    console.log(`Found ${userAccounts.length} account(s) for user ${existingUser.id}`);
+    
+    if (userAccounts.length === 0) {
+      console.error(`❌ No accounts found for user ${existingUser.id}`);
       return NextResponse.json(
-        { error: "Account configuration error. Please contact support." },
-        { status: 500 }
+        { error: "Account not found. Please register again." },
+        { status: 404 }
       );
     }
+
+    // Log all provider IDs to help debug
+    userAccounts.forEach((acc, idx) => {
+      console.log(`  Account ${idx + 1}: providerId="${acc.providerId}", accountId="${acc.accountId}"`);
+    });
+
+    // Find the email/password account (try common provider IDs)
+    const emailAccount = userAccounts.find(acc => 
+      acc.providerId === 'email' || 
+      acc.providerId === 'credential' ||
+      acc.providerId === 'emailPassword'
+    );
+
+    const targetAccount = emailAccount || userAccounts[0]; // Fallback to first account
+    
+    console.log(`Updating account with providerId="${targetAccount.providerId}"`);
 
     // Update password in account table
     await db
@@ -95,9 +99,9 @@ export async function POST(request: NextRequest) {
         password: hashedPassword,
         updatedAt: new Date(),
       })
-      .where(eq(account.id, existingAccount.id));
+      .where(eq(account.id, targetAccount.id));
 
-    console.log(`✅ Password updated for user: ${existingUser.email}`);
+    console.log(`✅ Password updated successfully for user: ${existingUser.email}`);
 
     // Delete used verification token
     await db
