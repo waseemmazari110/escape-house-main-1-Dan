@@ -59,8 +59,8 @@ export async function POST(request: NextRequest) {
     // Hash new password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Update password in account table
-    await db
+    // Update password in account table (better-auth uses "email" as providerId)
+    const updateResult = await db
       .update(account)
       .set({
         password: hashedPassword,
@@ -69,9 +69,11 @@ export async function POST(request: NextRequest) {
       .where(
         and(
           eq(account.userId, existingUser.id),
-          eq(account.providerId, "credential")
+          eq(account.providerId, "email")
         )
       );
+
+    console.log(`✅ Password updated for user: ${existingUser.email}`);
 
     // Delete used verification token
     await db
