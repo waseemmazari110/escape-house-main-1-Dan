@@ -59,19 +59,43 @@ export async function POST(request: NextRequest) {
     // Hash new password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Update password in account table (better-auth uses "email" as providerId)
-    const updateResult = await db
-      .update(account)
-      .set({
-        password: hashedPassword,
-        updatedAt: new Date(),
-      })
+    // Check if account exists
+    const [existingAccount] = await db
+      .select()
+      .from(account)
       .where(
         and(
           eq(account.userId, existingUser.id),
           eq(account.providerId, "email")
         )
+      )
+      .limit(1);
+
+    if (!existingAccount) {
+      console.error(`❌ No account found for user ${existingUser.id} with providerId 'email'`);
+      
+      // Try to find what accounts exist for this user
+      const allAccounts = await db
+        .select()
+        .from(account)
+        .where(eq(account.userId, existingUser.id));
+      
+      console.log(`Found ${allAccounts.length} accounts for user:`, allAccounts.map(a => a.providerId));
+      
+      return NextResponse.json(
+        { error: "Account configuration error. Please contact support." },
+        { status: 500 }
       );
+    }
+
+    // Update password in account table
+    await db
+      .update(account)
+      .set({
+        password: hashedPassword,
+        updatedAt: new Date(),
+      })
+      .where(eq(account.id, existingAccount.id));
 
     console.log(`✅ Password updated for user: ${existingUser.email}`);
 
