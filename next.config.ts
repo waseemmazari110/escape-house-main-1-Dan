@@ -57,9 +57,6 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: true,
   poweredByHeader: false,
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
   headers: async () => {
     return [
       {
