@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash new password
+    // Hash password using bcrypt (same as better-auth)
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Find any account for this user (don't restrict by providerId)
@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
     const targetAccount = emailAccount || userAccounts[0]; // Fallback to first account
     
     console.log(`Updating account with providerId="${targetAccount.providerId}"`);
+    console.log(`New password hash: ${hashedPassword.substring(0, 30)}...`);
 
     // Update password in account table
     await db
@@ -102,6 +103,15 @@ export async function POST(request: NextRequest) {
       .where(eq(account.id, targetAccount.id));
 
     console.log(`✅ Password updated successfully for user: ${existingUser.email}`);
+    
+    // Verify the update by reading back
+    const [updatedAccount] = await db
+      .select()
+      .from(account)
+      .where(eq(account.id, targetAccount.id))
+      .limit(1);
+    
+    console.log(`Verified: password field is ${updatedAccount?.password ? 'set' : 'null'}`);
 
     // Delete used verification token
     await db
