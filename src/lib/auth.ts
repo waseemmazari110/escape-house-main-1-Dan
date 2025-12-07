@@ -18,6 +18,9 @@ export const auth = betterAuth({
 		"http://localhost:3000",
 		"http://127.0.0.1:3000",
 		"http://10.102.139.154:3000",
+		"https://escape-house-main-1-dan.vercel.app",
+		"https://groupescapehouses.co.uk",
+		"https://www.groupescapehouses.co.uk",
 	],
 	plugins: [bearer()],
 	// Add user data to session
