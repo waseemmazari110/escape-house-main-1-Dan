@@ -6,11 +6,6 @@ import { useSession } from "@/lib/auth-client";
 
 export default function CustomAutumnProvider({ children }: { children: React.ReactNode }) {
   const { data: session, refetch } = useSession();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Capture ?token=... from URL (after checkout redirect) and persist
   React.useEffect(() => {
@@ -25,11 +20,6 @@ export default function CustomAutumnProvider({ children }: { children: React.Rea
       Promise.resolve(refetch());
     }
   }, [refetch]);
-
-  // Don't render AutumnProvider until mounted to avoid hydration issues
-  if (!mounted) {
-    return <>{children}</>;
-  }
 
   // Only enable Autumn tracking for authenticated users
   const getBearerToken = async () => {
