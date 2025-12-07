@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { user, verification, account } from "@/db/schema";
+import { user, verification, account, session as sessionTable } from "@/db/schema";
 import { eq, and, gt } from "drizzle-orm";
 import { auth } from "@/lib/auth";
-
-// Import better-auth's password hashing utility
-async function hashPassword(password: string): Promise<string> {
-  // Use the same method better-auth uses internally
-  const bcrypt = await import('bcryptjs');
-  return bcrypt.hash(password, 10);
-}
+import { scryptAsync } from "@noble/hashes/scrypt.js";
+import { bytesToHex } from "@noble/hashes/utils.js";
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,7 +25,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find valid verification token
+    // Verify the token exists and is valid
     const [verificationRecord] = await db
       .select()
       .from(verification)
@@ -49,7 +44,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user
+    // Find user by email from verification
     const [existingUser] = await db
       .select()
       .from(user)
@@ -63,63 +58,77 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash password using the same method as better-auth
-    const hashedPassword = await hashPassword(password);
+    console.log(`Resetting password for user: ${existingUser.email}`);
 
-    // Find any account for this user (don't restrict by providerId)
-    const userAccounts = await db
+    // Find the existing credential account
+    const [existingAccount] = await db
       .select()
       .from(account)
-      .where(eq(account.userId, existingUser.id))
-      .limit(5);
+      .where(
+        and(
+          eq(account.userId, existingUser.id),
+          eq(account.providerId, "credential")
+        )
+      )
+      .limit(1);
 
-    console.log(`Found ${userAccounts.length} account(s) for user ${existingUser.id}`);
-    
-    if (userAccounts.length === 0) {
-      console.error(`❌ No accounts found for user ${existingUser.id}`);
+    if (!existingAccount) {
       return NextResponse.json(
-        { error: "Account not found. Please register again." },
+        { error: "No credential account found" },
         { status: 404 }
       );
     }
 
-    // Log all provider IDs to help debug
-    userAccounts.forEach((acc, idx) => {
-      console.log(`  Account ${idx + 1}: providerId="${acc.providerId}", accountId="${acc.accountId}"`);
-    });
+    console.log(`Found existing account: ${existingAccount.accountId}`);
 
-    // Find the email/password account (try common provider IDs)
-    const emailAccount = userAccounts.find(acc => 
-      acc.providerId === 'email' || 
-      acc.providerId === 'credential' ||
-      acc.providerId === 'emailPassword'
-    );
-
-    const targetAccount = emailAccount || userAccounts[0]; // Fallback to first account
+    // Hash password using scrypt EXACTLY as better-auth does internally
+    // Better-auth uses scryptAsync with these exact parameters:
+    const config = {
+      N: 16384, // CPU/memory cost
+      r: 16,    // Block size
+      p: 1,     // Parallelization
+      dkLen: 64 // Derived key length
+    };
     
-    console.log(`Updating account with providerId="${targetAccount.providerId}"`);
-    console.log(`Old password hash: ${targetAccount.password ? targetAccount.password.substring(0, 30) + '...' : 'NULL'}`);
-    console.log(`New password hash: ${hashedPassword.substring(0, 30)}...`);
+    // Generate random salt (16 bytes)
+    const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+    const saltHex = bytesToHex(saltBytes);
+    
+    // Hash password with scrypt
+    const keyBytes = await scryptAsync(
+      password.normalize("NFKC"), 
+      saltHex, 
+      {
+        N: config.N,
+        p: config.p,
+        r: config.r,
+        dkLen: config.dkLen,
+        maxmem: 128 * config.N * config.r * 2
+      }
+    );
+    
+    // Format: salt:key (both hex-encoded, separated by colon)
+    const keyHex = bytesToHex(keyBytes);
+    const hashedPassword = `${saltHex}:${keyHex}`;
+    
+    console.log(`New password hash (scrypt): ${hashedPassword.substring(0, 50)}...`);
 
-    // Update password in account table
+    // Update the existing account with the new password hash
     await db
       .update(account)
       .set({
         password: hashedPassword,
         updatedAt: new Date(),
       })
-      .where(eq(account.id, targetAccount.id));
+      .where(eq(account.id, existingAccount.id));
+    
+    console.log(`✅ Updated account password using better-auth's scrypt format`);
 
-    console.log(`✅ Password updated successfully for user: ${existingUser.email}`);
-    
-    // Verify the update by reading back
-    const [updatedAccount] = await db
-      .select()
-      .from(account)
-      .where(eq(account.id, targetAccount.id))
-      .limit(1);
-    
-    console.log(`Verified: password field is ${updatedAccount?.password ? 'set' : 'null'}`);
+    // Clear all sessions
+    await db
+      .delete(sessionTable)
+      .where(eq(sessionTable.userId, existingUser.id));
+    console.log(`✅ Cleared all sessions`);
 
     // Delete used verification token
     await db
@@ -128,14 +137,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Password reset successfully",
-      debug: {
-        accountsFound: userAccounts.length,
-        providerId: targetAccount.providerId,
-        passwordWasSet: updatedAccount?.password ? true : false,
-        oldHashPrefix: targetAccount.password?.substring(0, 7) || 'none',
-        newHashPrefix: hashedPassword.substring(0, 7),
-      }
+      message: "Password reset successfully. Please try logging in with your new password.",
     });
   } catch (error) {
     console.error("Reset password error:", error);
