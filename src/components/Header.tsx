@@ -11,10 +11,27 @@ import { toast } from "sonner";
 import { useCustomer } from "autumn-js/react";
 import AuthModal from "@/components/AuthModal";
 
+// Safe wrapper for useCustomer that handles SSR
+function useSafeCustomer() {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  try {
+    const customerData = useCustomer();
+    return mounted ? customerData : { customer: null, isLoading: false };
+  } catch (e) {
+    return { customer: null, isLoading: false };
+  }
+}
+
 function Header() {
   const router = useRouter();
   const { data: session, isPending, refetch } = useSession();
-  const { customer, isLoading: isCustomerLoading } = useCustomer();
+  const { customer, isLoading: isCustomerLoading } = useSafeCustomer();
+  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHousesOpen, setIsHousesOpen] = useState(false);
