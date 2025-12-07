@@ -10,7 +10,7 @@
         "vercel-build": "npm install --legacy-peer-deps && next build"
     },
     "engines": {
-        "node": ">=20.0.0"
+        "node": ">=20.0.0 <23"
     },
     "dependencies": {
         "@fullcalendar/core": "^6.1.19",
