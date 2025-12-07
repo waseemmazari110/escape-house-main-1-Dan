@@ -47,15 +47,15 @@ export default function EnquiryForm({ propertyTitle, propertySlug }: EnquiryForm
   }, []);
 
   // Track form load time and user interaction
-  useEffect(() => {
+  useEffect(() {
     setFormLoadTime(Date.now());
 
     const trackClick = () => {
-      setUserInteraction((prev) => ({ ...prev, clicks: prev.clicks + 1 }));
+      setUserInteraction(prev => ({ ...prev, clicks: prev.clicks + 1 }));
     };
 
     const trackKeypress = () => {
-      setUserInteraction((prev) => ({ ...prev, keystrokes: prev.keystrokes + 1 }));
+      setUserInteraction(prev => ({ ...prev, keystrokes: prev.keystrokes + 1 }));
     };
 
     const form = formRef.current;

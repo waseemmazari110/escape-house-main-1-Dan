@@ -15,7 +15,7 @@
    - ✅ Toast: "Account created successfully! Please check your email for verification."
    - ✅ Redirect to `/login?registered=true`
    - ✅ Email received with subject: "Verify Your Email - Group Escape Houses"
-   - ✅ Email sent from: `groupescapehouses.co.uk`
+   - ✅ Email sent from: `mazariwaseem110@gmail.com`
 5. **Check Console**: Should see `✅ Verification email sent to <email>`
 
 ### ✅ Test 2: Owner Account Registration with Email Verification
@@ -70,7 +70,7 @@
 
 #### Verification Email
 - [ ] Subject: "Verify Your Email - Group Escape Houses"
-- [ ] From: "Group Escape Houses" <groupescapehouses.co.uk>
+- [ ] From: "Group Escape Houses" <mazariwaseem110@gmail.com>
 - [ ] Header: Sage green (#89A38F) with white text
 - [ ] Button: "Verify Email Address" (clickable)
 - [ ] Link: Also provided as plain text
@@ -132,11 +132,11 @@ npm install --save-dev @types/nodemailer
 # Press Ctrl+Shift+P → "TypeScript: Restart TS Server"
 ```
 
-### Email Shows "Sent from groupescapehouses.co.uk"
+### Email Shows "Sent from mazariwaseem110@gmail.com"
 
 This is expected! Gmail doesn't allow custom FROM addresses without domain verification. Recipients will see:
 - **Name**: "Group Escape Houses"
-- **Email**: groupescapehouses.co.uk
+- **Email**: mazariwaseem110@gmail.com
 
 To use custom domain (noreply@groupescapehouses.co.uk), you need:
 1. Google Workspace account
