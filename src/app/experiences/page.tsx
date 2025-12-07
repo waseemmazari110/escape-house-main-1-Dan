@@ -23,7 +23,7 @@ export default function ExperiencesPage() {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch('/api/experiences?isPublished=true');
+        const response = await fetch('/api/experiences?isPublished=true', { cache: 'no-store' });
         
         if (!response.ok) {
           throw new Error('Failed to fetch experiences');

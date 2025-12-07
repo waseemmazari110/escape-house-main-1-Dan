@@ -73,7 +73,7 @@ function OwnerBookingsContent() {
         }
 
         // Fetch all bookings
-        const bookingsRes = await fetch('/api/owner/bookings?limit=50');
+        const bookingsRes = await fetch('/api/owner/bookings?limit=50', { cache: 'no-store' });
         if (bookingsRes.ok) {
           const bookingsData = await bookingsRes.json();
           setBookings(bookingsData.bookings || []);

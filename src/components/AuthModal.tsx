@@ -82,7 +82,7 @@ export default function AuthModal({
 
       // Verify user role if owner login
       if (userType === "owner" && data?.user) {
-        const userResponse = await fetch("/api/user/profile");
+        const userResponse = await fetch("/api/user/profile", { cache: 'no-store' });
         if (userResponse.ok) {
           const userData = await userResponse.json();
           if (userData.role !== "owner" && userData.role !== "admin") {

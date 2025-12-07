@@ -94,41 +94,43 @@ function OwnerDashboardContent() {
     async function loadDashboard() {
       try {
         const session = await authClient.getSession();
-        if (session?.data?.user) {
-          const token = localStorage.getItem("bearer_token");
-          const response = await fetch("/api/user/profile", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          
-          if (response.ok) {
-            const profile = await response.json();
-            setUser(profile);
-          }
+        
+        if (!session?.data?.user) {
+          router.push('/owner/login');
+          return;
         }
 
+        // Set user from session data
+        setUser({
+          id: session.data.user.id,
+          name: session.data.user.name || session.data.user.email.split('@')[0],
+          email: session.data.user.email,
+          role: (session.data.user as any).role || 'owner',
+        });
+
         // Fetch stats
-        const statsRes = await fetch('/api/owner/stats');
+        const statsRes = await fetch('/api/owner/stats', { cache: 'no-store' });
         if (statsRes.ok) {
           const statsData = await statsRes.json();
           setStats(statsData);
         }
 
         // Fetch recent bookings
-        const bookingsRes = await fetch('/api/owner/bookings?limit=5');
+        const bookingsRes = await fetch('/api/owner/bookings?limit=5', { cache: 'no-store' });
         if (bookingsRes.ok) {
           const bookingsData = await bookingsRes.json();
           setRecentBookings(bookingsData.bookings || []);
         }
 
         // Fetch upcoming check-ins
-        const checkInsRes = await fetch('/api/owner/upcoming-checkins');
+        const checkInsRes = await fetch('/api/owner/upcoming-checkins', { cache: 'no-store' });
         if (checkInsRes.ok) {
           const checkInsData = await checkInsRes.json();
           setUpcomingCheckIns(checkInsData.checkIns || []);
         }
 
         // Fetch properties
-        const propertiesRes = await fetch('/api/owner/properties');
+        const propertiesRes = await fetch('/api/owner/properties', { cache: 'no-store' });
         if (propertiesRes.ok) {
           const propertiesData = await propertiesRes.json();
           setProperties(propertiesData.properties || []);

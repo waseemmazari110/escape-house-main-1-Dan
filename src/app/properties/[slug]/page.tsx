@@ -48,7 +48,7 @@ export default function PropertyDetailPage() {
         setError(null);
 
         // Fetch the specific property by slug
-        const propertyResponse = await fetch(`/api/properties?slug=${params.slug as string}`);
+        const propertyResponse = await fetch(`/api/properties?slug=${params.slug as string}`, { cache: 'no-store' });
         
         if (!propertyResponse.ok) {
           throw new Error('Failed to fetch property');
@@ -90,7 +90,7 @@ export default function PropertyDetailPage() {
         setProperty(transformedProperty);
 
         // Fetch related properties (same location, exclude current)
-        const relatedResponse = await fetch(`/api/properties?isPublished=true&limit=3`);
+        const relatedResponse = await fetch(`/api/properties?isPublished=true&limit=3`, { cache: 'no-store' });
         
         if (relatedResponse.ok) {
           const relatedData = await relatedResponse.json();

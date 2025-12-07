@@ -6,8 +6,10 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
-import { Calendar, ExternalLink } from "lucide-react";
+import { Calendar, ExternalLink, LogIn } from "lucide-react";
 import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 interface EnquiryFormProps {
   propertyTitle?: string;
@@ -15,8 +17,11 @@ interface EnquiryFormProps {
 }
 
 export default function EnquiryForm({ propertyTitle, propertySlug }: EnquiryFormProps) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   
   // Spam protection state
   const [formLoadTime, setFormLoadTime] = useState<number>(0);
@@ -24,8 +29,25 @@ export default function EnquiryForm({ propertyTitle, propertySlug }: EnquiryForm
   const [userInteraction, setUserInteraction] = useState({ clicks: 0, keystrokes: 0 });
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Track form load time and user interaction
+  // Check authentication status
   useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const session = await authClient.getSession();
+        setIsAuthenticated(!!session?.data?.user);
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setIsAuthenticated(false);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    
+    checkAuth();
+  }, []);
+
+  // Track form load time and user interaction
+  useEffect(() {
     setFormLoadTime(Date.now());
 
     const trackClick = () => {
@@ -124,6 +146,50 @@ export default function EnquiryForm({ propertyTitle, propertySlug }: EnquiryForm
         </h3>
         <p className="text-[var(--color-neutral-dark)]">
           Thank you for your enquiry. Our team will get back to you within 24 hours.
+        </p>
+      </div>
+    );
+  }
+
+  // Show loading state while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="bg-white rounded-2xl p-8 shadow-lg">
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-accent-sage)]"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login prompt if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="bg-white rounded-2xl p-8 shadow-lg text-center">
+        <div className="w-16 h-16 rounded-full bg-[#89A38F]/10 flex items-center justify-center mx-auto mb-4">
+          <LogIn className="w-8 h-8 text-[#89A38F]" />
+        </div>
+        <h3 className="text-2xl font-semibold mb-3" style={{ fontFamily: "var(--font-display)" }}>
+          Login Required
+        </h3>
+        <p className="text-[var(--color-neutral-dark)] mb-6">
+          Please log in to enquire about this property and make bookings.
+        </p>
+        <Button
+          onClick={() => router.push(`/login?redirect=/properties/${propertySlug || ''}`)}
+          className="w-full rounded-2xl py-6 text-base font-medium"
+          style={{
+            background: "var(--color-accent-sage)",
+            color: "white",
+          }}
+        >
+          Log In to Continue
+        </Button>
+        <p className="text-sm text-[var(--color-neutral-dark)] mt-4">
+          Don't have an account?{" "}
+          <Link href="/auth/sign-up" className="text-[var(--color-accent-sage)] font-medium hover:underline">
+            Sign up here
+          </Link>
         </p>
       </div>
     );

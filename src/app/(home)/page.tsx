@@ -116,9 +116,9 @@ export default function Home() {
           setIsLoadingData(true);
 
           const [propertiesRes, experiencesRes, reviewsRes] = await Promise.all([
-            fetch('/api/properties?featured=true&isPublished=true&limit=3'),
-            fetch('/api/experiences?isPublished=true&limit=6'),
-            fetch('/api/reviews?isApproved=true&isPublished=true&limit=6&sort=reviewDate&order=desc')
+            fetch('/api/properties?featured=true&isPublished=true&limit=3', { cache: 'no-store' }),
+            fetch('/api/experiences?isPublished=true&limit=6', { cache: 'no-store' }),
+            fetch('/api/reviews?isApproved=true&isPublished=true&limit=6&sort=reviewDate&order=desc', { cache: 'no-store' })
           ]);
 
           if (!propertiesRes.ok || !experiencesRes.ok || !reviewsRes.ok) {

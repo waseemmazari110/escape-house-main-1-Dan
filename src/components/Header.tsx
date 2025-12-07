@@ -515,10 +515,11 @@ function Header() {
                     </span>
                   </Link>
                   
-                  <div className="flex items-center gap-2 px-4 py-2 bg-[var(--color-bg-secondary)] rounded-xl">
+                  {/* User Name Display - Show for ALL logged in users (guest, owner, admin) */}
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[var(--color-bg-secondary)] rounded-xl border border-[var(--color-accent-sage)]/20">
                     <UserIcon className="w-4 h-4 text-[var(--color-accent-sage)]" />
                     <span className="text-sm font-medium text-[var(--color-text-primary)]">
-                      {session.user.name}
+                      {session.user.name || 'User'}
                     </span>
                   </div>
                   <Button
@@ -849,11 +850,12 @@ function Header() {
                   <span className="text-sm text-[var(--color-accent-sage)]">Manage →</span>
                 </Link>
                 
-                <div className="flex items-center justify-between p-4 bg-white/90 rounded-xl">
+                {/* User Name Display - Mobile - Show for ALL logged in users */}
+                <div className="flex items-center justify-between p-4 bg-white/90 rounded-xl border border-[var(--color-accent-sage)]/20">
                   <div className="flex items-center gap-2">
                     <UserIcon className="w-5 h-5 text-[var(--color-accent-sage)]" />
                     <span className="font-medium text-[var(--color-text-primary)]">
-                      {session.user.name}
+                      {session.user.name || 'User'}
                     </span>
                   </div>
                   <Button

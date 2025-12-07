@@ -52,7 +52,7 @@ function OwnerLoginForm() {
       // Verify user role matches owner
       if (data?.user) {
         // Check if the logged-in user is an owner
-        const userResponse = await fetch("/api/user/profile");
+        const userResponse = await fetch("/api/user/profile", { cache: 'no-store' });
         
         if (userResponse.ok) {
           const userData = await userResponse.json();

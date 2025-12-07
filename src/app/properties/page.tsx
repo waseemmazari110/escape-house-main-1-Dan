@@ -92,7 +92,7 @@ function PropertiesContent() {
         setIsLoadingData(true);
         setDataError(null);
 
-        const response = await fetch('/api/properties?isPublished=true');
+        const response = await fetch('/api/properties?isPublished=true', { cache: 'no-store' });
         
         if (!response.ok) {
           throw new Error('Failed to fetch properties');

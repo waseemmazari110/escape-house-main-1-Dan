@@ -62,7 +62,7 @@ export default function EditPropertyPage() {
         }
 
         // Fetch property data
-        const response = await fetch(`/api/properties?id=${propertyId}`);
+        const response = await fetch(`/api/properties?id=${propertyId}`, { cache: 'no-store' });
         if (response.ok) {
           const data = await response.json();
           setProperty({

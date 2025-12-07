@@ -142,6 +142,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // AUTHENTICATION REQUIRED: Only logged-in users can create bookings
+    const currentUser = await getCurrentUserWithRole();
+    
+    if (!currentUser) {
+      return unauthenticatedResponse('You must be logged in to make a booking');
+    }
+
     const body = await request.json();
 
     // Validate required fields

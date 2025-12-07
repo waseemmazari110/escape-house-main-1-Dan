@@ -101,7 +101,7 @@ export default function AdminBookingsPage() {
   // Fetch stats
   const fetchStats = async () => {
     try {
-      const response = await fetch("/api/bookings/stats");
+      const response = await fetch("/api/bookings/stats", { cache: 'no-store' });
       if (!response.ok) throw new Error("Failed to fetch stats");
       
       const data = await response.json();
@@ -116,7 +116,7 @@ export default function AdminBookingsPage() {
   const fetchProperties = async () => {
     try {
       setLoadingProperties(true);
-      const response = await fetch("/api/properties?isPublished=true&limit=100");
+      const response = await fetch("/api/properties?isPublished=true&limit=100", { cache: 'no-store' });
       if (!response.ok) throw new Error("Failed to fetch properties");
       
       const data = await response.json();

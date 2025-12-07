@@ -1,9 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { checkForSpam, type SpamCheckData } from "@/lib/spam-protection";
 import { sendEnquiryEmail } from "@/lib/email";
+import { getCurrentUserWithRole, unauthenticatedResponse } from "@/lib/auth-roles";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // AUTHENTICATION REQUIRED: Only logged-in users can submit enquiries
+    const currentUser = await getCurrentUserWithRole();
+    
+    if (!currentUser) {
+      return unauthenticatedResponse('You must be logged in to submit an enquiry');
+    }
+
     const body = await request.json();
     const {
       name,

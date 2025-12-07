@@ -9,7 +9,7 @@ Successfully integrated Gmail SMTP with nodemailer for all authentication emails
 ## 📧 Configuration
 
 ### Email Credentials
-- **Gmail Account**: `mazariwaseem110@gmail.com`
+- **Gmail Account**: `groupescapehouses.co.uk`
 - **App Password**: Stored in `.env` as `GMAIL_SMTP_APP_PASSWORD`
 - **Sender Name**: "Group Escape Houses"
 

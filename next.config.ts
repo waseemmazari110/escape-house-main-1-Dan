@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
     'http://10.102.139.154:3001',
   ],
   images: {
+    unoptimized: false,
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: 'https',
@@ -40,6 +44,26 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'encrypted-tbn0.gstatic.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.londonbay.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.propertista.co.uk',
+      },
+      {
+        protocol: 'https',
+        hostname: 'propertista.co.uk',
+      },
+      {
+        protocol: 'http',
+        hostname: 'www.propertista.co.uk',
+      },
+      {
+        protocol: 'http',
+        hostname: 'propertista.co.uk',
       },
     ],
     formats: ['image/avif', 'image/webp'],

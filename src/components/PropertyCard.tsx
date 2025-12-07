@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Heart, UsersRound, MapPinned } from "lucide-react";
 import { useState } from "react";
 import BookingModal from "@/components/BookingModal";
+import { useMemo } from "react";
 
 interface PropertyCardProps {
   id: string;
@@ -31,6 +32,29 @@ export default function PropertyCard({
 }: PropertyCardProps) {
   const [isSaved, setIsSaved] = useState(false);
   const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const isAllowedImageHost = useMemo(() => {
+    try {
+      const url = new URL(image);
+      const allowed = new Set([
+        "slelguoygbfzlpylpxfs.supabase.co",
+        "images.unsplash.com",
+        "v3b.fal.media",
+        "butlersinthebuff.com.au",
+        "butlersinthebuff.co.uk",
+        "encrypted-tbn0.gstatic.com",
+        "www.londonbay.com",
+        "www.propertista.co.uk",
+        "propertista.co.uk",
+        "localhost",
+        "127.0.0.1",
+      ]);
+      return allowed.has(url.hostname);
+    } catch (e) {
+      return false;
+    }
+  }, [image]);
 
   // Extract city name and convert to slug for destination link
   const getDestinationSlug = (location: string) => {
@@ -44,13 +68,28 @@ export default function PropertyCard({
     <>
       <div className="group rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
         <Link href={`/properties/${slug}`}>
-          <div className="relative h-64 overflow-hidden">
-            <Image
-              src={image}
-              alt={title}
-              fill
-              className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
-            />
+          <div className="relative h-64 overflow-hidden bg-gray-200">
+            {!imageError && isAllowedImageHost ? (
+              <Image
+                src={image}
+                alt={title}
+                fill
+                className="object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                onError={() => setImageError(true)}
+              />
+            ) : !imageError ? (
+              <img
+                src={image}
+                alt={title}
+                className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                loading="lazy"
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-300 to-gray-400">
+                <span className="text-white text-sm font-medium">Image unavailable</span>
+              </div>
+            )}
             
             {/* Feature Tags */}
             <div className="absolute top-4 left-4 flex gap-2 flex-wrap">

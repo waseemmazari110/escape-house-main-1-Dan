@@ -179,7 +179,7 @@ function LoginForm() {
                 </label>
               </div>
               <Link
-                href="/auth/forgot-password"
+                href={activeTab === "owner" ? "/owner/forgot-password" : "/forgot-password"}
                 className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
               >
                 Forgot Password?

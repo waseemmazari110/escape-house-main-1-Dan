@@ -31,7 +31,7 @@ export default function DestinationDetailPage() {
       
       try {
         setIsLoadingProperties(true);
-        const response = await fetch(`/api/properties?isPublished=true&location=${encodeURIComponent(slug)}`);
+        const response = await fetch(`/api/properties?isPublished=true&location=${encodeURIComponent(slug)}`, { cache: 'no-store' });
         
         if (!response.ok) {
           throw new Error('Failed to fetch properties');
