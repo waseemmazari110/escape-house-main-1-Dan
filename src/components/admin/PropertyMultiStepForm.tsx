@@ -327,21 +327,21 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
         return (
           <div className="space-y-6">
             <div>
-              <Label htmlFor="title">Property Title *</Label>
+              <Label htmlFor="title" className="text-gray-900">Property Title *</Label>
               <Input
                 id="title"
                 value={formData.title}
                 onChange={(e) => updateField("title", e.target.value)}
                 placeholder="e.g., The Brighton Manor"
-                className={errors.title ? "border-red-500" : ""}
+                className={errors.title ? "border-red-500 text-gray-900" : "text-gray-900"}
               />
               {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
             </div>
 
             <div>
-              <Label htmlFor="property_type">Property Type *</Label>
+              <Label htmlFor="property_type" className="text-gray-900">Property Type *</Label>
               <Select value={formData.property_type} onValueChange={(value) => updateField("property_type", value)}>
-                <SelectTrigger className={errors.property_type ? "border-red-500" : ""}>
+                <SelectTrigger className={errors.property_type ? "border-red-500 text-gray-900" : "text-gray-900"}>
                   <SelectValue placeholder="Select property type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -356,13 +356,14 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
 
 
             <div>
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="text-gray-900">Description</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => updateField("description", e.target.value)}
                 placeholder="Describe your property..."
                 rows={6}
+                className="text-gray-900"
               />
             </div>
           </div>
@@ -372,58 +373,61 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
         return (
           <div className="space-y-6">
             <div>
-              <Label htmlFor="address">Full Address *</Label>
+              <Label htmlFor="address" className="text-gray-900">Full Address *</Label>
               <Input
                 id="address"
                 value={formData.address}
                 onChange={(e) => updateField("address", e.target.value)}
                 placeholder="123 High Street"
-                className={errors.address ? "border-red-500" : ""}
+                className={errors.address ? "border-red-500 text-gray-900" : "text-gray-900"}
               />
               {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="town">Town *</Label>
+                <Label htmlFor="town" className="text-gray-900">Town *</Label>
                 <Input
                   id="town"
                   value={formData.town}
                   onChange={(e) => updateField("town", e.target.value)}
                   placeholder="Brighton"
-                  className={errors.town ? "border-red-500" : ""}
+                  className={errors.town ? "border-red-500 text-gray-900" : "text-gray-900"}
                 />
                 {errors.town && <p className="text-red-500 text-sm mt-1">{errors.town}</p>}
               </div>
 
               <div>
-                <Label htmlFor="county">County</Label>
+                <Label htmlFor="county" className="text-gray-900">County</Label>
                 <Input
                   id="county"
                   value={formData.county}
                   onChange={(e) => updateField("county", e.target.value)}
                   placeholder="East Sussex"
+                  className="text-gray-900"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="postcode">Postcode</Label>
+                <Label htmlFor="postcode" className="text-gray-900">Postcode</Label>
                 <Input
                   id="postcode"
                   value={formData.postcode}
                   onChange={(e) => updateField("postcode", e.target.value)}
                   placeholder="BN1 1AA"
+                  className="text-gray-900"
                 />
               </div>
 
               <div>
-                <Label htmlFor="country">Country</Label>
+                <Label htmlFor="country" className="text-gray-900">Country</Label>
                 <Input
                   id="country"
                   value={formData.country}
                   onChange={(e) => updateField("country", e.target.value)}
+                  className="text-gray-900"
                 />
               </div>
             </div>
@@ -436,39 +440,40 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
         return (
           <div className="space-y-6">
             <div>
-              <Label htmlFor="max_guests">Maximum Guests *</Label>
+              <Label htmlFor="max_guests" className="text-gray-900">Maximum Guests *</Label>
               <Input
                 id="max_guests"
                 type="number"
                 min="1"
                 value={formData.max_guests}
                 onChange={(e) => updateField("max_guests", parseInt(e.target.value) || 0)}
-                className={errors.max_guests ? "border-red-500" : ""}
+                className={errors.max_guests ? "border-red-500 text-gray-900" : "text-gray-900"}
               />
               {errors.max_guests && <p className="text-red-500 text-sm mt-1">{errors.max_guests}</p>}
             </div>
 
             <div>
-              <Label htmlFor="bedrooms">Bedrooms</Label>
+              <Label htmlFor="bedrooms" className="text-gray-900">Bedrooms</Label>
               <Input
                 id="bedrooms"
                 type="number"
                 min="1"
                 value={formData.bedrooms}
                 onChange={(e) => updateField("bedrooms", parseInt(e.target.value) || 0)}
-                className={errors.bedrooms ? "border-red-500" : ""}
+                className={errors.bedrooms ? "border-red-500 text-gray-900" : "text-gray-900"}
               />
               {errors.bedrooms && <p className="text-red-500 text-sm mt-1">{errors.bedrooms}</p>}
             </div>
 
             <div>
-              <Label htmlFor="bathrooms">Bathrooms</Label>
+              <Label htmlFor="bathrooms" className="text-gray-900">Bathrooms</Label>
               <Input
                 id="bathrooms"
                 type="number"
                 min="1"
                 value={formData.bathrooms}
                 onChange={(e) => updateField("bathrooms", parseInt(e.target.value) || 0)}
+                className="text-gray-900"
               />
             </div>
           </div>
@@ -478,7 +483,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
         return (
           <div className="space-y-6">
             <div>
-              <Label>Select Amenities</Label>
+              <Label className="text-gray-900">Select Amenities</Label>
               <div className="grid grid-cols-2 gap-4 mt-3">
                 {AMENITIES_OPTIONS.map(amenity => (
                   <div key={amenity} className="flex items-center space-x-2">
@@ -487,7 +492,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
                       checked={formData.amenities.includes(amenity)}
                       onCheckedChange={() => toggleAmenity(amenity)}
                     />
-                    <label htmlFor={amenity} className="text-sm cursor-pointer">
+                    <label htmlFor={amenity} className="text-sm cursor-pointer text-gray-900">
                       {amenity}
                     </label>
                   </div>
@@ -502,56 +507,61 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="check_in_time">Check-in Time</Label>
+                <Label htmlFor="check_in_time" className="text-gray-900">Check-in Time</Label>
                 <Input
                   id="check_in_time"
                   type="time"
                   value={formData.check_in_time}
                   onChange={(e) => updateField("check_in_time", e.target.value)}
+                  className="text-gray-900"
                 />
               </div>
 
               <div>
-                <Label htmlFor="check_out_time">Check-out Time</Label>
+                <Label htmlFor="check_out_time" className="text-gray-900">Check-out Time</Label>
                 <Input
                   id="check_out_time"
                   type="time"
                   value={formData.check_out_time}
                   onChange={(e) => updateField("check_out_time", e.target.value)}
+                  className="text-gray-900"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="minimum_stay">Minimum Stay (nights)</Label>
+              <Label htmlFor="minimum_stay" className="text-gray-900">Minimum Stay (nights)</Label>
               <Input
                 id="minimum_stay"
                 type="number"
                 min="1"
                 value={formData.minimum_stay}
                 onChange={(e) => updateField("minimum_stay", parseInt(e.target.value) || 1)}
+                className="text-gray-900"
               />
             </div>
 
             <div>
-              <Label htmlFor="cancellation_policy">Cancellation Policy</Label>
+              <Label htmlFor="cancellation_policy" className="text-gray-900">Cancellation Policy</Label>
               <Textarea
                 id="cancellation_policy"
                 value={formData.cancellation_policy}
                 onChange={(e) => updateField("cancellation_policy", e.target.value)}
                 placeholder="Describe your cancellation policy..."
                 rows={4}
+                className="text-gray-900"
               />
             </div>
 
             <div>
-              <Label htmlFor="house_rules">House Rules</Label>
+              <Label htmlFor="house_rules" className="text-gray-900">House Rules</Label>
               <Textarea
                 id="house_rules"
                 value={formData.house_rules}
                 onChange={(e) => updateField("house_rules", e.target.value)}
                 placeholder="List your house rules..."
                 rows={4}
+                className="text-gray-900"
               />
             </div>
           </div>
@@ -561,7 +571,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
         return (
           <div className="space-y-6">
             <div>
-              <Label htmlFor="base_price">Base Price (per night) *</Label>
+              <Label htmlFor="base_price" className="text-gray-900">Base Price (per night) *</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
                 <Input
@@ -572,14 +582,14 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
                   value={formData.base_price || ""}
                   onChange={(e) => updateField("base_price", e.target.value ? parseFloat(e.target.value) : "")}
                   placeholder="Enter base price"
-                  className={`pl-7 ${errors.base_price ? "border-red-500" : ""}`}
+                  className={`pl-7 text-gray-900 ${errors.base_price ? "border-red-500" : ""}`}
                 />
               </div>
               {errors.base_price && <p className="text-red-500 text-sm mt-1">{errors.base_price}</p>}
             </div>
 
             <div>
-              <Label htmlFor="weekend_price">Weekend Price (per night)</Label>
+              <Label htmlFor="weekend_price" className="text-gray-900">Weekend Price (per night)</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
                 <Input
@@ -589,13 +599,13 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
                   step="0.01"
                   value={formData.weekend_price || ""}
                   onChange={(e) => updateField("weekend_price", parseFloat(e.target.value) || undefined)}
-                  className="pl-7"
+                  className="pl-7 text-gray-900"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="cleaning_fee">Cleaning Fee</Label>
+              <Label htmlFor="cleaning_fee" className="text-gray-900">Cleaning Fee</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
                 <Input
@@ -605,13 +615,13 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
                   step="0.01"
                   value={formData.cleaning_fee || ""}
                   onChange={(e) => updateField("cleaning_fee", parseFloat(e.target.value) || undefined)}
-                  className="pl-7"
+                  className="pl-7 text-gray-900"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="security_deposit">Security Deposit</Label>
+              <Label htmlFor="security_deposit" className="text-gray-900">Security Deposit</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
                 <Input
@@ -621,7 +631,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
                   step="0.01"
                   value={formData.security_deposit || ""}
                   onChange={(e) => updateField("security_deposit", parseFloat(e.target.value) || undefined)}
-                  className="pl-7"
+                  className="pl-7 text-gray-900"
                 />
               </div>
             </div>
@@ -632,11 +642,11 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
         return (
           <div className="space-y-6">
             <div>
-              <Label>Property Images</Label>
+              <Label className="text-gray-900">Property Images</Label>
               <div className="space-y-4 mt-3">
                 {formData.images.map((url, index) => (
                   <div key={index} className="flex items-center gap-2">
-                    <Input value={url} readOnly className="flex-1" />
+                    <Input value={url} readOnly className="flex-1 text-gray-900" />
                     <Button
                       type="button"
                       variant="destructive"
@@ -659,12 +669,13 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
             </div>
 
             <div>
-              <Label htmlFor="hero_video">Hero Video URL (Optional)</Label>
+              <Label htmlFor="hero_video" className="text-gray-900">Hero Video URL (Optional)</Label>
               <Input
                 id="hero_video"
                 value={formData.hero_video || ""}
                 onChange={(e) => updateField("hero_video", e.target.value)}
                 placeholder="https://example.com/video.mp4"
+                className="text-gray-900"
               />
             </div>
           </div>
@@ -674,30 +685,32 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
         return (
           <div className="space-y-6">
             <div>
-              <Label htmlFor="slug">URL Slug</Label>
+              <Label htmlFor="slug" className="text-gray-900">URL Slug</Label>
               <Input
                 id="slug"
                 value={formData.slug || ""}
                 onChange={(e) => updateField("slug", e.target.value)}
                 placeholder="brighton-manor"
+                className="text-gray-900"
               />
               <p className="text-sm text-gray-500 mt-1">Leave blank to auto-generate from title</p>
             </div>
 
             <div>
-              <Label htmlFor="meta_title">Meta Title</Label>
+              <Label htmlFor="meta_title" className="text-gray-900">Meta Title</Label>
               <Input
                 id="meta_title"
                 value={formData.meta_title || ""}
                 onChange={(e) => updateField("meta_title", e.target.value)}
                 placeholder="The Brighton Manor - Luxury Party House"
                 maxLength={60}
+                className="text-gray-900"
               />
               <p className="text-sm text-gray-500 mt-1">{formData.meta_title?.length || 0}/60 characters</p>
             </div>
 
             <div>
-              <Label htmlFor="meta_description">Meta Description</Label>
+              <Label htmlFor="meta_description" className="text-gray-900">Meta Description</Label>
               <Textarea
                 id="meta_description"
                 value={formData.meta_description || ""}
@@ -705,6 +718,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
                 placeholder="Luxury 8-bedroom party house in Brighton with hot tub, pool, and games room. Perfect for hen parties and celebrations."
                 rows={3}
                 maxLength={160}
+                className="text-gray-900"
               />
               <p className="text-sm text-gray-500 mt-1">{formData.meta_description?.length || 0}/160 characters</p>
             </div>
@@ -764,7 +778,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
 
       {/* Form Content */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-2xl font-bold mb-6">{STEPS[currentStep - 1].name}</h2>
+        <h2 className="text-2xl font-bold mb-6 text-gray-900">{STEPS[currentStep - 1].name}</h2>
         {renderStepContent()}
       </div>
 
