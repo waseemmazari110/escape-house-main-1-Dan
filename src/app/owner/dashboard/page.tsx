@@ -591,6 +591,7 @@ function OwnerDashboardContent() {
         </div>
       </div>
     </div>
+    </div>
   );
 }
 
