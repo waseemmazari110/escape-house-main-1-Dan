@@ -58,7 +58,7 @@ export default function UpdateAdminNamePage() {
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
           <p className="text-sm text-green-800">
             <strong>Email:</strong> cswaseem110@gmail.com<br />
-            <strong>Current Name:</strong> Khan<br />
+            <strong>Current Name:</strong> Dan Harley<br />
             <strong>New Name:</strong> Dan Harley
           </p>
         </div>
