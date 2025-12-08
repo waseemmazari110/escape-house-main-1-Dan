@@ -177,51 +177,51 @@ function OwnerDashboardContent() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex w-64 bg-white border-r border-gray-200 flex-col">
+      <aside className="hidden md:flex md:w-64 lg:w-72 bg-white border-r border-gray-200 flex-col fixed md:sticky top-0 h-screen">
         {/* Logo */}
-        <div className="p-6 flex items-center gap-2">
-          <div className="w-10 h-10 rounded-lg bg-[#89A38F] flex items-center justify-center">
-            <Home className="w-6 h-6 text-white" />
+        <div className="p-4 md:p-6 flex items-center gap-2 flex-shrink-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-[#89A38F] flex items-center justify-center flex-shrink-0">
+            <Home className="w-5 h-5 md:w-6 md:h-6 text-white" />
           </div>
-          <span className="text-xl font-bold text-gray-900">PropManager</span>
+          <span className="text-lg md:text-xl font-bold text-gray-900 truncate">PropManager</span>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav className="flex-1 px-2 md:px-3 py-4 space-y-1 overflow-y-auto">
           <Link
             href="/owner/dashboard"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#89A38F] text-white font-medium"
+            className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-lg bg-[#89A38F] text-white font-medium text-sm md:text-base transition-all hover:bg-[#7a9280]"
           >
-            <Home className="w-5 h-5" />
-            <span>Overview</span>
+            <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+            <span className="truncate">Overview</span>
           </Link>
           <Link
             href="/owner/bookings"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all text-sm md:text-base"
           >
-            <Calendar className="w-5 h-5" />
-            <span>Bookings</span>
+            <Calendar className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+            <span className="truncate">Bookings</span>
           </Link>
           <button
             onClick={() => router.push('/admin/properties')}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors w-full text-left"
+            className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all w-full text-left text-sm md:text-base"
           >
-            <Building className="w-5 h-5" />
-            <span>Properties</span>
+            <Building className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+            <span className="truncate">Properties</span>
           </button>
           <Link
             href="/owner/payments"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all text-sm md:text-base"
           >
-            <CreditCard className="w-5 h-5" />
-            <span>Payments</span>
+            <CreditCard className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+            <span className="truncate">Payments</span>
           </Link>
           <Link
             href="/owner/settings"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all text-sm md:text-base"
           >
-            <Settings className="w-5 h-5" />
-            <span>Settings</span>
+            <Settings className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+            <span className="truncate">Settings</span>
           </Link>
         </nav>
 
@@ -255,17 +255,18 @@ function OwnerDashboardContent() {
       </aside>
 
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#89A38F] flex items-center justify-center">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm safe-top">
+        <div className="flex items-center justify-between p-3 min-h-[56px]">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="w-8 h-8 rounded-lg bg-[#89A38F] flex items-center justify-center flex-shrink-0">
               <Home className="w-5 h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-gray-900">PropManager</span>
+            <span className="text-base font-bold text-gray-900 truncate">PropManager</span>
           </div>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-gray-50"
+            className="p-2 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors flex-shrink-0 touch-manipulation"
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
           >
             {isMobileMenuOpen ? (
               <X className="w-6 h-6 text-gray-600" />
@@ -275,58 +276,82 @@ function OwnerDashboardContent() {
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu Drawer */}
         {isMobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg">
-            <nav className="px-4 py-4 space-y-1">
-              <Link
-                href="/owner/dashboard"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#89A38F] text-white font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Home className="w-5 h-5" />
-                <span>Overview</span>
-              </Link>
-              <Link
-                href="/owner/bookings"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Calendar className="w-5 h-5" />
-                <span>Bookings</span>
-              </Link>
-              <Link
-                href="/admin/properties"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Building className="w-5 h-5" />
-                <span>Properties</span>
-              </Link>
-              <Link
-                href="/owner/payments"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <CreditCard className="w-5 h-5" />
-                <span>Payments</span>
-              </Link>
-              <Link
-                href="/owner/settings"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                <Settings className="w-5 h-5" />
-                <span>Settings</span>
-              </Link>
-            </nav>
-          </div>
+          <>
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black/20 z-40"
+              onClick={() => setIsMobileMenuOpen(false)}
+              aria-hidden="true"
+            />
+            {/* Drawer */}
+            <div className="fixed top-[57px] left-0 right-0 bottom-0 bg-white z-50 overflow-y-auto">
+              <nav className="px-3 py-4 space-y-1 pb-safe">
+                <Link
+                  href="/owner/dashboard"
+                  className="flex items-center gap-3 px-4 py-3.5 rounded-lg bg-[#89A38F] text-white font-medium touch-manipulation active:scale-[0.98] transition-transform"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Home className="w-5 h-5 flex-shrink-0" />
+                  <span>Overview</span>
+                </Link>
+                <Link
+                  href="/owner/bookings"
+                  className="flex items-center gap-3 px-4 py-3.5 rounded-lg text-gray-700 hover:bg-gray-50 active:bg-gray-100 touch-manipulation active:scale-[0.98] transition-all"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Calendar className="w-5 h-5 flex-shrink-0" />
+                  <span>Bookings</span>
+                </Link>
+                <Link
+                  href="/admin/properties"
+                  className="flex items-center gap-3 px-4 py-3.5 rounded-lg text-gray-700 hover:bg-gray-50 active:bg-gray-100 touch-manipulation active:scale-[0.98] transition-all"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Building className="w-5 h-5 flex-shrink-0" />
+                  <span>Properties</span>
+                </Link>
+                <Link
+                  href="/owner/payments"
+                  className="flex items-center gap-3 px-4 py-3.5 rounded-lg text-gray-700 hover:bg-gray-50 active:bg-gray-100 touch-manipulation active:scale-[0.98] transition-all"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <CreditCard className="w-5 h-5 flex-shrink-0" />
+                  <span>Payments</span>
+                </Link>
+                <Link
+                  href="/owner/settings"
+                  className="flex items-center gap-3 px-4 py-3.5 rounded-lg text-gray-700 hover:bg-gray-50 active:bg-gray-100 touch-manipulation active:scale-[0.98] transition-all"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Settings className="w-5 h-5 flex-shrink-0" />
+                  <span>Settings</span>
+                </Link>
+                
+                {/* Sign Out in Mobile Menu */}
+                <div className="pt-4 mt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => {
+                      handleSignOut();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-lg text-red-600 hover:bg-red-50 active:bg-red-100 w-full touch-manipulation active:scale-[0.98] transition-all"
+                  >
+                    <LogOut className="w-5 h-5 flex-shrink-0" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </nav>
+            </div>
+          </>
         )}
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto md:pt-0 pt-16">
-        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="flex-1 w-full md:ml-64 lg:ml-72">
+        <div className="min-h-screen pt-16 md:pt-0">
+          <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           {/* Header */}
           <div className="mb-6 sm:mb-8">
             <div className="flex items-center justify-between mb-2">

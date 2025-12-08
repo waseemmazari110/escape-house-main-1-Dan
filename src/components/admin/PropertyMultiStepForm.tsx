@@ -778,88 +778,154 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-2 sm:px-4">
       {/* Progress Steps */}
-      <div className="mb-8">
-        <div className="flex justify-between items-center">
-          {STEPS.map((step, index) => {
-            const Icon = step.icon;
-            const isActive = currentStep === step.id;
-            const isCompleted = currentStep > step.id;
-            const isAccessible = isStepAccessible(step.id);
-            
-            return (
-              <div key={step.id} className="flex-1">
-                <div className="flex items-center">
-                  <button
-                    type="button"
-                    onClick={() => handleStepClick(step.id)}
-                    disabled={!isAccessible}
-                    className={`relative flex flex-col items-center group ${
-                      isActive ? "text-[var(--color-accent-sage)]" : isCompleted ? "text-green-600" : "text-gray-400"
-                    } ${!isAccessible ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                  >
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
-                        isActive
-                          ? "border-[var(--color-accent-sage)] bg-[var(--color-accent-sage)] text-white"
-                          : isCompleted
-                          ? "border-green-600 bg-green-600 text-white"
-                          : isAccessible
-                          ? "border-gray-300 bg-white hover:border-gray-400"
-                          : "border-gray-200 bg-gray-100"
-                      }`}
+      <div className="mb-6 md:mb-8">
+        {/* Mobile: Horizontal Scroll */}
+        <div className="md:hidden">
+          <div className="overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
+            <div className="flex items-center gap-2 min-w-max">
+              {STEPS.map((step, index) => {
+                const Icon = step.icon;
+                const isActive = currentStep === step.id;
+                const isCompleted = currentStep > step.id;
+                const isAccessible = isStepAccessible(step.id);
+                
+                return (
+                  <div key={step.id} className="flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => handleStepClick(step.id)}
+                      disabled={!isAccessible}
+                      className={`relative flex flex-col items-center gap-1 touch-manipulation ${
+                        isActive ? "text-[var(--color-accent-sage)]" : isCompleted ? "text-green-600" : "text-gray-400"
+                      } ${!isAccessible ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-95"}`}
                     >
-                      {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
-                    </div>
-                    <span className="text-xs mt-2 font-medium hidden lg:block">{step.name}</span>
-                  </button>
-                  {index < STEPS.length - 1 && (
-                    <div
-                      className={`flex-1 h-0.5 mx-2 ${
-                        currentStep > step.id ? "bg-green-600" : "bg-gray-300"
-                      }`}
-                    />
-                  )}
+                      <div
+                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border-2 transition-all flex-shrink-0 ${
+                          isActive
+                            ? "border-[var(--color-accent-sage)] bg-[var(--color-accent-sage)] text-white shadow-md"
+                            : isCompleted
+                            ? "border-green-600 bg-green-600 text-white"
+                            : isAccessible
+                            ? "border-gray-300 bg-white"
+                            : "border-gray-200 bg-gray-100"
+                        }`}
+                      >
+                        {isCompleted ? <Check className="w-4 h-4 sm:w-5 sm:h-5" /> : <Icon className="w-4 h-4 sm:w-5 sm:h-5" />}
+                      </div>
+                      <span className="text-[10px] sm:text-xs font-medium whitespace-nowrap">{step.name}</span>
+                    </button>
+                    {index < STEPS.length - 1 && (
+                      <div
+                        className={`w-8 sm:w-12 h-0.5 mx-1 flex-shrink-0 ${
+                          currentStep > step.id ? "bg-green-600" : "bg-gray-300"
+                        }`}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          {/* Step Counter for Mobile */}
+          <div className="text-center mt-2">
+            <span className="text-xs text-gray-500 font-medium">
+              Step {currentStep} of {STEPS.length}
+            </span>
+          </div>
+        </div>
+
+        {/* Desktop: Full Width with Connectors */}
+        <div className="hidden md:block">
+          <div className="flex justify-between items-center">
+            {STEPS.map((step, index) => {
+              const Icon = step.icon;
+              const isActive = currentStep === step.id;
+              const isCompleted = currentStep > step.id;
+              const isAccessible = isStepAccessible(step.id);
+              
+              return (
+                <div key={step.id} className="flex-1">
+                  <div className="flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => handleStepClick(step.id)}
+                      disabled={!isAccessible}
+                      className={`relative flex flex-col items-center group w-full ${
+                        isActive ? "text-[var(--color-accent-sage)]" : isCompleted ? "text-green-600" : "text-gray-400"
+                      } ${!isAccessible ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                    >
+                      <div
+                        className={`w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center border-2 transition-all ${
+                          isActive
+                            ? "border-[var(--color-accent-sage)] bg-[var(--color-accent-sage)] text-white shadow-lg"
+                            : isCompleted
+                            ? "border-green-600 bg-green-600 text-white"
+                            : isAccessible
+                            ? "border-gray-300 bg-white hover:border-gray-400 hover:shadow-md"
+                            : "border-gray-200 bg-gray-100"
+                        }`}
+                      >
+                        {isCompleted ? <Check className="w-5 h-5 lg:w-6 lg:h-6" /> : <Icon className="w-5 h-5 lg:w-6 lg:h-6" />}
+                      </div>
+                      <span className="text-xs lg:text-sm mt-2 font-medium text-center px-1">{step.name}</span>
+                    </button>
+                    {index < STEPS.length - 1 && (
+                      <div
+                        className={`flex-1 h-0.5 mx-2 lg:mx-3 ${
+                          currentStep > step.id ? "bg-green-600" : "bg-gray-300"
+                        }`}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
       {/* Form Content */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-900">{STEPS[currentStep - 1].name}</h2>
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-gray-900">{STEPS[currentStep - 1].name}</h2>
         {renderStepContent()}
       </div>
 
       {/* Navigation Buttons */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pb-safe">
         <Button
           type="button"
           variant="outline"
           onClick={handlePrevious}
           disabled={currentStep === 1}
+          className="w-full sm:w-auto order-2 sm:order-1 touch-manipulation"
         >
           <ChevronLeft className="w-4 h-4 mr-2" />
-          Previous
+          <span className="hidden sm:inline">Previous</span>
+          <span className="sm:hidden">Back</span>
         </Button>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 order-1 sm:order-2">
           <Button
             type="button"
             variant="outline"
             onClick={handleSaveDraft}
             disabled={isLoading}
+            className="w-full sm:w-auto touch-manipulation"
           >
             <Save className="w-4 h-4 mr-2" />
             Save Draft
           </Button>
 
           {currentStep < STEPS.length ? (
-            <Button type="button" onClick={handleNext}>
-              Next
+            <Button 
+              type="button" 
+              onClick={handleNext}
+              className="w-full sm:w-auto touch-manipulation"
+            >
+              <span className="hidden sm:inline">Next</span>
+              <span className="sm:hidden">Continue</span>
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           ) : (
@@ -868,9 +934,10 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
               onClick={handlePublish}
               disabled={isLoading}
               style={{ background: "var(--color-accent-sage)", color: "white" }}
+              className="w-full sm:w-auto touch-manipulation"
             >
               <Check className="w-4 h-4 mr-2" />
-              {propertyId ? "Update Property" : "Publish Property"}
+              {propertyId ? "Update" : "Publish"}
             </Button>
           )}
         </div>
