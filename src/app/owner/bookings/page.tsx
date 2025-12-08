@@ -79,7 +79,9 @@ function OwnerBookingsContent() {
         const bookingsRes = await fetch('/api/owner/bookings?limit=50', { cache: 'no-store' });
         if (bookingsRes.ok) {
           const bookingsData = await bookingsRes.json();
-          setBookings(bookingsData.bookings || []);
+          setBookings(Array.isArray(bookingsData) ? bookingsData : (bookingsData.bookings || []));
+        } else {
+          console.error('Failed to fetch owner bookings:', bookingsRes.status);
         }
       } catch (error) {
         console.error('Error loading bookings:', error);

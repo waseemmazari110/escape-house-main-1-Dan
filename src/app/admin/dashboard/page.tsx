@@ -120,7 +120,9 @@ function AdminDashboardContent() {
         const bookingsRes = await fetch('/api/bookings?limit=50', { cache: 'no-store' });
         if (bookingsRes.ok) {
           const bookingsData = await bookingsRes.json();
-          setBookings(bookingsData.bookings || []);
+          setBookings(Array.isArray(bookingsData) ? bookingsData : (bookingsData.bookings || []));
+        } else {
+          console.error('Failed to fetch bookings:', bookingsRes.status);
         }
 
         // Fetch all users
