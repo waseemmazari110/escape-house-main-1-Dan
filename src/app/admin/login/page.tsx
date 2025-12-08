@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
@@ -16,6 +16,31 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  // Check if user is already authenticated
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const session = await authClient.getSession();
+        if (session?.data?.user) {
+          const userResponse = await fetch("/api/user/profile", { cache: 'no-store' });
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+            if (userData.role === "admin") {
+              router.replace("/admin/dashboard");
+              return;
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Auth check error:", error);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    }
+    checkAuth();
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +79,7 @@ export default function AdminLoginPage() {
           }
           
           toast.success("Welcome back, Admin!");
-          router.push("/admin/dashboard");
+          router.replace("/admin/dashboard");
         } else {
           toast.error("Authentication failed. Please try again.");
           await authClient.signOut();
@@ -67,6 +92,14 @@ export default function AdminLoginPage() {
       setIsLoading(false);
     }
   };
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

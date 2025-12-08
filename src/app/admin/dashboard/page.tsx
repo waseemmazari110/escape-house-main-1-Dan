@@ -98,7 +98,7 @@ function AdminDashboardContent() {
         const session = await authClient.getSession();
         
         if (!session?.data?.user) {
-          router.push('/admin/login');
+          router.replace('/admin/login');
           return;
         }
 
@@ -150,7 +150,7 @@ function AdminDashboardContent() {
 
   const handleSignOut = async () => {
     await authClient.signOut();
-    router.push('/admin/login');
+    router.replace('/admin/login');
   };
 
   const getStatusColor = (status: string) => {
@@ -238,13 +238,6 @@ function AdminDashboardContent() {
             <Users className="w-5 h-5" />
             <span>Users</span>
           </button>
-          <Link
-            href="/admin/properties"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 transition-colors font-medium"
-          >
-            <Building className="w-5 h-5" />
-            <span>Properties</span>
-          </Link>
         </nav>
 
         {/* Sign Out */}
@@ -278,12 +271,15 @@ function AdminDashboardContent() {
 
       {/* Mobile Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-gray-900 to-gray-800 shadow-lg">
-        <div className="flex items-center justify-between p-4">
+        <div className="flex items-center justify-between px-3 py-3 sm:px-4 sm:py-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-white" />
+              <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <span className="text-lg font-bold text-white">Admin</span>
+            <div className="flex flex-col">
+              <span className="text-base sm:text-lg font-bold text-white">Admin Panel</span>
+              {user?.name && <span className="text-xs text-gray-400">{user.name}</span>}
+            </div>
           </div>
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -328,22 +324,29 @@ function AdminDashboardContent() {
                 <Users className="w-5 h-5" />
                 <span>Users</span>
               </button>
+              <button
+                onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-400"
+              >
+                <LogOut className="w-5 h-5" />
+                <span>Sign Out</span>
+              </button>
             </nav>
           </div>
         )}
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto md:pt-0 pt-16">
-        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="flex-1 overflow-auto pt-[60px] md:pt-0">
+        <div className="max-w-7xl mx-auto p-3 sm:p-4 md:p-6 lg:p-8">
           {/* Header */}
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+          <div className="mb-4 sm:mb-6 md:mb-8">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">
               {activeView === "overview" && "Dashboard Overview"}
               {activeView === "bookings" && "All Bookings"}
               {activeView === "users" && "User Management"}
             </h1>
-            <p className="text-sm sm:text-base text-gray-600">
+            <p className="text-xs sm:text-sm md:text-base text-gray-600">
               {activeView === "overview" && "Monitor your platform's performance and activity"}
               {activeView === "bookings" && "View and manage all booking records"}
               {activeView === "users" && "Manage guests and property owners"}
@@ -354,66 +357,66 @@ function AdminDashboardContent() {
           {activeView === "overview" && (
             <>
               {/* Stats Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 sm:p-6 text-white shadow-lg">
-                  <div className="flex items-start justify-between mb-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 md:mb-8">
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-white shadow-lg">
+                  <div className="flex items-start justify-between mb-2 sm:mb-3">
                     <div>
-                      <p className="text-sm opacity-90 mb-1">Total Bookings</p>
-                      <p className="text-3xl font-bold">
+                      <p className="text-xs sm:text-sm opacity-90 mb-1">Total Bookings</p>
+                      <p className="text-2xl sm:text-3xl font-bold">
                         {stats?.totalBookings?.toLocaleString() || '0'}
                       </p>
                     </div>
-                    <Calendar className="w-8 h-8 opacity-80" />
+                    <Calendar className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
                   </div>
-                  <p className="text-sm opacity-90">All time bookings</p>
+                  <p className="text-xs sm:text-sm opacity-90">All time bookings</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 sm:p-6 text-white shadow-lg">
-                  <div className="flex items-start justify-between mb-3">
+                <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-white shadow-lg">
+                  <div className="flex items-start justify-between mb-2 sm:mb-3">
                     <div>
-                      <p className="text-sm opacity-90 mb-1">Total Users</p>
-                      <p className="text-3xl font-bold">
+                      <p className="text-xs sm:text-sm opacity-90 mb-1">Total Users</p>
+                      <p className="text-2xl sm:text-3xl font-bold">
                         {stats?.totalUsers || '0'}
                       </p>
                     </div>
-                    <Users className="w-8 h-8 opacity-80" />
+                    <Users className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
                   </div>
-                  <p className="text-sm opacity-90">Registered users</p>
+                  <p className="text-xs sm:text-sm opacity-90">Registered users</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-4 sm:p-6 text-white shadow-lg">
-                  <div className="flex items-start justify-between mb-3">
+                <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-white shadow-lg">
+                  <div className="flex items-start justify-between mb-2 sm:mb-3">
                     <div>
-                      <p className="text-sm opacity-90 mb-1">Property Owners</p>
-                      <p className="text-3xl font-bold">
+                      <p className="text-xs sm:text-sm opacity-90 mb-1">Property Owners</p>
+                      <p className="text-2xl sm:text-3xl font-bold">
                         {stats?.totalOwners || '0'}
                       </p>
                     </div>
-                    <UserCog className="w-8 h-8 opacity-80" />
+                    <UserCog className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
                   </div>
-                  <p className="text-sm opacity-90">Active owners</p>
+                  <p className="text-xs sm:text-sm opacity-90">Active owners</p>
                 </div>
 
-                <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 sm:p-6 text-white shadow-lg">
-                  <div className="flex items-start justify-between mb-3">
+                <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 text-white shadow-lg">
+                  <div className="flex items-start justify-between mb-2 sm:mb-3">
                     <div>
-                      <p className="text-sm opacity-90 mb-1">Guests</p>
-                      <p className="text-3xl font-bold">
+                      <p className="text-xs sm:text-sm opacity-90 mb-1">Guests</p>
+                      <p className="text-2xl sm:text-3xl font-bold">
                         {stats?.totalGuests || '0'}
                       </p>
                     </div>
-                    <UserCheck className="w-8 h-8 opacity-80" />
+                    <UserCheck className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
                   </div>
-                  <p className="text-sm opacity-90">Guest accounts</p>
+                  <p className="text-xs sm:text-sm opacity-90">Guest accounts</p>
                 </div>
               </div>
 
               {/* Recent Activity */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                 {/* Recent Bookings */}
-                <div className="bg-white rounded-xl p-4 sm:p-6 shadow-md">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-bold text-gray-900">Recent Bookings</h2>
+                <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-6 shadow-md">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
+                    <h2 className="text-base sm:text-lg font-bold text-gray-900">Recent Bookings</h2>
                     <Button
                       variant="ghost"
                       size="sm"
