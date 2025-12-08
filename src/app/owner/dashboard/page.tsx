@@ -177,7 +177,7 @@ function OwnerDashboardContent() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex w-64 bg-white border-r border-gray-200 flex-col">
+      <aside className="hidden md:flex w-64 bg-white border-r border-gray-200 flex-col">
         {/* Logo */}
         <div className="p-6 flex items-center gap-2">
           <div className="w-10 h-10 rounded-lg bg-[#89A38F] flex items-center justify-center">
@@ -255,7 +255,7 @@ function OwnerDashboardContent() {
       </aside>
 
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-[#89A38F] flex items-center justify-center">
@@ -325,28 +325,27 @@ function OwnerDashboardContent() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto lg:pt-0 pt-20">
-        <div className="max-w-7xl mx-auto p-6 lg:p-8">
+      <div className="flex-1 overflow-auto md:pt-0 pt-16">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">Overview</h1>
-              <p className="text-gray-600">Welcome back! Here's what's happening with your properties.</p>
-            </div>
-            <div className="flex items-center gap-2 text-gray-600">
-              <div className="w-10 h-10 rounded-full bg-[#89A38F] flex items-center justify-center">
-                <span className="text-sm font-semibold text-white">
-                  {user?.name?.charAt(0)?.toUpperCase() || 'Y'}
-                </span>
+          <div className="mb-6 sm:mb-8">
+            <div className="flex items-center justify-between mb-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Overview</h1>
+              <div className="md:hidden flex items-center gap-2 text-gray-600">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#89A38F] flex items-center justify-center">
+                  <span className="text-xs sm:text-sm font-semibold text-white">
+                    {user?.name?.charAt(0)?.toUpperCase() || 'Y'}
+                  </span>
+                </div>
               </div>
-              <span className="font-medium hidden sm:block">{user?.name || 'Yasir Ali'}</span>
             </div>
+            <p className="text-sm sm:text-base text-gray-600">Welcome back! Here's what's happening with your properties.</p>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
             {/* Total Bookings */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Total Bookings</p>
@@ -364,7 +363,7 @@ function OwnerDashboardContent() {
             </div>
 
             {/* Active Properties */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Active Properties</p>
@@ -382,7 +381,7 @@ function OwnerDashboardContent() {
             </div>
 
             {/* Revenue */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Revenue</p>
@@ -400,7 +399,7 @@ function OwnerDashboardContent() {
             </div>
 
             {/* Upcoming Check-ins */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200 hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Upcoming Check-ins</p>
@@ -412,9 +411,9 @@ function OwnerDashboardContent() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             {/* Recent Bookings */}
-            <div className="lg:col-span-2 bg-white rounded-xl p-6 border border-gray-200">
+            <div className="lg:col-span-2 bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-gray-900">Recent Bookings</h2>
                 <Link
@@ -471,7 +470,7 @@ function OwnerDashboardContent() {
             </div>
 
             {/* Upcoming Check-ins */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
+            <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
               <h2 className="text-lg font-bold text-gray-900 mb-6">Upcoming Check-ins</h2>
               
               {upcomingCheckIns.length === 0 ? (
@@ -508,7 +507,7 @@ function OwnerDashboardContent() {
 
           {/* Your Properties */}
           {properties.length > 0 && (
-            <div className="bg-white rounded-xl p-6 border border-gray-200">
+            <div className="bg-white rounded-xl p-4 sm:p-6 border border-gray-200">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-gray-900">Your Properties</h2>
                 <Link
@@ -519,7 +518,7 @@ function OwnerDashboardContent() {
                 </Link>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {properties.slice(0, 6).map((property) => (
                   <Link
                     key={property.id}

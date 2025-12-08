@@ -353,19 +353,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
               {errors.property_type && <p className="text-red-500 text-sm mt-1">{errors.property_type}</p>}
             </div>
 
-            <div>
-              <Label htmlFor="status">Status</Label>
-              <Select value={formData.status} onValueChange={(value) => updateField("status", value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
 
             <div>
               <Label htmlFor="description">Description</Label>
@@ -440,31 +428,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="latitude">Latitude (Optional)</Label>
-                <Input
-                  id="latitude"
-                  type="number"
-                  step="0.000001"
-                  value={formData.latitude || ""}
-                  onChange={(e) => updateField("latitude", parseFloat(e.target.value) || undefined)}
-                  placeholder="50.8225"
-                />
-              </div>
 
-              <div>
-                <Label htmlFor="longitude">Longitude (Optional)</Label>
-                <Input
-                  id="longitude"
-                  type="number"
-                  step="0.000001"
-                  value={formData.longitude || ""}
-                  onChange={(e) => updateField("longitude", parseFloat(e.target.value) || undefined)}
-                  placeholder="-0.1372"
-                />
-              </div>
-            </div>
           </div>
         );
 
