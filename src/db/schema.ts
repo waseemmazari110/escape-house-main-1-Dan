@@ -368,3 +368,6 @@ export const crmPropertyLinks = sqliteTable('crm_property_links', {
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
+
+// Export alias for user table (for convenience in queries)
+export const users = user;
