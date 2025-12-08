@@ -162,6 +162,32 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
     }));
   };
 
+  // Check if a step is accessible based on required fields
+  const isStepAccessible = (step: number): boolean => {
+    // Step 1 is always accessible
+    if (step === 1) return true;
+    
+    // For subsequent steps, check if essential fields are filled
+    switch (step) {
+      case 2: // Location - requires Essentials
+        return formData.title.trim() !== "" && formData.property_type !== "";
+      case 3: // Rooms - requires Essentials
+        return formData.title.trim() !== "" && formData.property_type !== "";
+      case 4: // Amenities - requires Essentials
+        return formData.title.trim() !== "" && formData.property_type !== "";
+      case 5: // Policies - requires Essentials
+        return formData.title.trim() !== "" && formData.property_type !== "";
+      case 6: // Pricing - requires Essentials
+        return formData.title.trim() !== "" && formData.property_type !== "";
+      case 7: // Media - requires Essentials
+        return formData.title.trim() !== "" && formData.property_type !== "";
+      case 8: // SEO - requires Essentials
+        return formData.title.trim() !== "" && formData.property_type !== "";
+      default:
+        return true;
+    }
+  };
+
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -188,6 +214,27 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleStepClick = (targetStep: number) => {
+    // Check if the target step is accessible
+    if (!isStepAccessible(targetStep)) {
+      toast.error("Please complete required fields in the Essentials section first");
+      return;
+    }
+    
+    // If going to a previous step or the current step, allow it
+    if (targetStep <= currentStep) {
+      setCurrentStep(targetStep);
+      return;
+    }
+    
+    // If going forward, validate the current step first
+    if (validateStep(currentStep)) {
+      setCurrentStep(targetStep);
+    } else {
+      toast.error("Please complete all required fields before proceeding");
+    }
   };
 
   const handleNext = () => {
@@ -739,15 +786,18 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
             const Icon = step.icon;
             const isActive = currentStep === step.id;
             const isCompleted = currentStep > step.id;
+            const isAccessible = isStepAccessible(step.id);
             
             return (
               <div key={step.id} className="flex-1">
                 <div className="flex items-center">
                   <button
-                    onClick={() => setCurrentStep(step.id)}
+                    type="button"
+                    onClick={() => handleStepClick(step.id)}
+                    disabled={!isAccessible}
                     className={`relative flex flex-col items-center group ${
                       isActive ? "text-[var(--color-accent-sage)]" : isCompleted ? "text-green-600" : "text-gray-400"
-                    }`}
+                    } ${!isAccessible ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                   >
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
@@ -755,7 +805,9 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
                           ? "border-[var(--color-accent-sage)] bg-[var(--color-accent-sage)] text-white"
                           : isCompleted
                           ? "border-green-600 bg-green-600 text-white"
-                          : "border-gray-300 bg-white"
+                          : isAccessible
+                          ? "border-gray-300 bg-white hover:border-gray-400"
+                          : "border-gray-200 bg-gray-100"
                       }`}
                     >
                       {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}

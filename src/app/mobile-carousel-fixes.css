@@ -1,0 +1,175 @@
+/* Mobile Image Carousel Styles */
+
+/* Prevent zoom and improve touch handling */
+.carousel-container {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: pan-y;
+}
+
+/* Smooth image transitions */
+.carousel-slide {
+  transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+}
+
+/* Dot indicators */
+.carousel-dot {
+  transition: all 200ms ease-in-out;
+}
+
+.carousel-dot:hover {
+  transform: scale(1.2);
+}
+
+/* Arrow buttons */
+.carousel-arrow {
+  transition: all 200ms ease-in-out;
+  backdrop-filter: blur(8px);
+}
+
+.carousel-arrow:hover {
+  transform: scale(1.1);
+}
+
+.carousel-arrow:active {
+  transform: scale(0.95);
+}
+
+/* Image counter */
+.carousel-counter {
+  backdrop-filter: blur(8px);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Form Step Navigation Styles */
+
+/* Disabled step styling */
+.step-icon-disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: auto;
+}
+
+.step-icon-disabled:hover {
+  transform: none !important;
+}
+
+/* Active step pulse animation */
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.step-icon-active {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Step connector line */
+.step-connector {
+  transition: background-color 300ms ease-in-out;
+}
+
+/* Tooltip for disabled steps */
+.step-tooltip {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease-in-out;
+}
+
+.step-icon-disabled:hover .step-tooltip {
+  opacity: 1;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .carousel-arrow {
+    display: none;
+  }
+  
+  .carousel-counter {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  
+  .carousel-dot {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .carousel-dot.active {
+    width: 16px;
+  }
+}
+
+/* Desktop hover effects */
+@media (min-width: 769px) {
+  .carousel-image {
+    cursor: grab;
+  }
+  
+  .carousel-image:active {
+    cursor: grabbing;
+  }
+}
+
+/* Accessibility improvements */
+.carousel-button:focus-visible,
+.step-icon:focus-visible {
+  outline: 2px solid #17a2b8;
+  outline-offset: 2px;
+}
+
+/* Loading state for images */
+.carousel-image-loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
+}
+
+/* Error state */
+.form-error-shake {
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+/* Success state */
+.form-success-pulse {
+  animation: success-pulse 0.6s;
+}
+
+@keyframes success-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}

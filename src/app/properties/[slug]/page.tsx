@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
 import EnquiryForm from "@/components/EnquiryForm";
 import FAQAccordion from "@/components/FAQAccordion";
+import MobileImageCarousel from "@/components/MobileImageCarousel";
 import { Button } from "@/components/ui/button";
 import {
   Users,
@@ -183,8 +184,14 @@ export default function PropertyDetailPage() {
       <div className="pt-24">
         {/* Image Gallery */}
         <div className="max-w-[1400px] mx-auto px-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-2xl overflow-hidden">
-            <div className="relative h-[400px] md:h-[600px]">
+          {/* Mobile: Swipeable Carousel */}
+          <div className="md:hidden relative h-[400px] rounded-2xl overflow-hidden">
+            <MobileImageCarousel images={property.images} alt={property.title} />
+          </div>
+
+          {/* Desktop: Grid Layout */}
+          <div className="hidden md:grid grid-cols-2 gap-4 rounded-2xl overflow-hidden">
+            <div className="relative h-[600px]">
               <Image
                 src={property.images[currentImageIndex]}
                 alt={property.title}
@@ -193,8 +200,8 @@ export default function PropertyDetailPage() {
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              {property.images.slice(1, 4).map((image: string, index: number) => (
-                <div key={index} className="relative h-[190px] md:h-[290px] cursor-pointer">
+              {property.images.slice(1, 5).map((image: string, index: number) => (
+                <div key={index} className="relative h-[290px] cursor-pointer">
                   <Image
                     src={image}
                     alt={`${property.title} ${index + 2}`}
@@ -204,10 +211,10 @@ export default function PropertyDetailPage() {
                   />
                 </div>
               ))}
-              {property.images.length < 4 && (
+              {property.images.length < 5 && (
                 <>
-                  {[...Array(4 - property.images.length)].map((_, index) => (
-                    <div key={`placeholder-${index}`} className="relative h-[190px] md:h-[290px] bg-gray-200"></div>
+                  {[...Array(5 - property.images.length)].map((_, index) => (
+                    <div key={`placeholder-${index}`} className="relative h-[290px] bg-gray-200"></div>
                   ))}
                 </>
               )}
