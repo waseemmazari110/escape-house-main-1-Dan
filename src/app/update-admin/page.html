@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Role to Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        button {
+            background: linear-gradient(to right, #2563eb, #7c3aed);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .info {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #6366f1;
+        }
+        .links {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 8px;
+        }
+        .links a {
+            display: block;
+            color: #2563eb;
+            text-decoration: none;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Update User Role to Admin</h1>
+        
+        <div class="info">
+            <strong>Email:</strong> cswaseem110@gmail.com<br>
+            <strong>Action:</strong> Change role from "owner" to "admin"
+        </div>
+        
+        <button onclick="updateRole()">Update to Admin Role</button>
+        
+        <div id="result" class="result"></div>
+        
+        <div class="links" id="adminLinks" style="display: none;">
+            <strong>✅ Success! Access your admin dashboard:</strong>
+            <a href="http://localhost:3000/admin/login" target="_blank">🔐 Admin Login</a>
+            <a href="http://localhost:3000/admin/dashboard" target="_blank">📊 Admin Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        async function updateRole() {
+            const resultDiv = document.getElementById('result');
+            const adminLinks = document.getElementById('adminLinks');
+            const button = document.querySelector('button');
+            
+            button.disabled = true;
+            button.textContent = 'Updating...';
+            resultDiv.style.display = 'none';
+            adminLinks.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/update-role', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'cswaseem110@gmail.com',
+                        secret: 'update-admin-role-2025'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ Success!</strong><br>
+                        ${data.message}<br><br>
+                        You can now login as admin with your existing password.
+                    `;
+                    adminLinks.style.display = 'block';
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `<strong>❌ Error:</strong> ${data.error}`;
+                }
+                
+                resultDiv.style.display = 'block';
+                
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Error:</strong> ${error.message}`;
+                resultDiv.style.display = 'block';
+            }
+            
+            button.disabled = false;
+            button.textContent = 'Update to Admin Role';
+        }
+    </script>
+</body>
+</html>

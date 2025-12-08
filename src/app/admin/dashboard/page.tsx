@@ -197,7 +197,10 @@ function AdminDashboardContent() {
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
             <ShieldCheck className="w-6 h-6 text-white" />
           </div>
-          <span className="text-xl font-bold text-white">Admin Panel</span>
+          <div className="flex flex-col">
+            <span className="text-xl font-bold text-white">Admin Panel</span>
+            {user?.name && <span className="text-xs text-gray-400">{user.name}</span>}
+          </div>
         </div>
 
         {/* Navigation */}
@@ -486,7 +489,7 @@ function AdminDashboardContent() {
                       placeholder="Search bookings..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full"
+                      className="w-full text-gray-900"
                     />
                   </div>
                   <Button variant="outline" className="gap-2">
@@ -546,13 +549,13 @@ function AdminDashboardContent() {
                       placeholder="Search users..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full"
+                      className="w-full text-gray-900"
                     />
                   </div>
                   <select
                     value={filterRole}
                     onChange={(e) => setFilterRole(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm"
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900"
                   >
                     <option value="all">All Roles</option>
                     <option value="admin">Admin</option>
