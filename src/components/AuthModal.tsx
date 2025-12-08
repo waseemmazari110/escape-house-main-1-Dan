@@ -284,12 +284,13 @@ export default function AuthModal({
                 />
               </div>
 
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <Checkbox
                     id="remember"
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                    className="size-3.5 sm:size-4"
                   />
                   <label htmlFor="remember" className="text-gray-700 cursor-pointer">
                     Remember me

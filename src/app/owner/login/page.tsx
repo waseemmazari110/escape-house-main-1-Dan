@@ -169,24 +169,24 @@ function OwnerLoginForm() {
             </div>
 
             {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between text-xs sm:text-sm">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <Checkbox
                   id="remember"
                   checked={rememberMe}
                   onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                  className="border-2 border-gray-900"
+                  className="size-3.5 sm:size-4 border-2 border-gray-900"
                 />
                 <label
                   htmlFor="remember"
-                  className="text-sm text-gray-900 cursor-pointer"
+                  className="text-gray-900 cursor-pointer"
                 >
                   Remember me
                 </label>
               </div>
               <Link
                 href="/forgot-password"
-                className="text-sm text-gray-600 hover:text-gray-900 underline"
+                className="text-gray-600 hover:text-gray-900 underline"
               >
                 Forgot Password?
               </Link>

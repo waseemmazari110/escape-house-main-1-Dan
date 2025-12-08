@@ -164,23 +164,24 @@ function LoginForm() {
             </div>
 
             {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between text-xs sm:text-sm">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 <Checkbox
                   id="remember"
                   checked={rememberMe}
                   onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                  className="size-3.5 sm:size-4"
                 />
                 <label
                   htmlFor="remember"
-                  className="text-sm text-gray-700 cursor-pointer"
+                  className="text-gray-700 cursor-pointer"
                 >
                   Remember me
                 </label>
               </div>
               <Link
                 href={activeTab === "owner" ? "/owner/forgot-password" : "/forgot-password"}
-                className="text-sm text-gray-600 hover:text-gray-900 underline transition-colors"
+                className="text-gray-600 hover:text-gray-900 underline transition-colors"
               >
                 Forgot Password?
               </Link>
