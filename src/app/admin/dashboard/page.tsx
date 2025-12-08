@@ -207,7 +207,7 @@ function AdminDashboardContent() {
         <nav className="flex-1 px-3 py-6 space-y-2">
           <button
             onClick={() => setActiveView("overview")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-normal transition-colors ${
               activeView === "overview"
                 ? "bg-blue-600 text-white"
                 : "text-gray-300 hover:bg-gray-700"
@@ -218,7 +218,7 @@ function AdminDashboardContent() {
           </button>
           <button
             onClick={() => setActiveView("bookings")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-normal transition-colors ${
               activeView === "bookings"
                 ? "bg-blue-600 text-white"
                 : "text-gray-300 hover:bg-gray-700"
@@ -229,7 +229,7 @@ function AdminDashboardContent() {
           </button>
           <button
             onClick={() => setActiveView("users")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-normal transition-colors ${
               activeView === "users"
                 ? "bg-blue-600 text-white"
                 : "text-gray-300 hover:bg-gray-700"
@@ -244,7 +244,7 @@ function AdminDashboardContent() {
         <div className="p-3 border-t border-gray-700">
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-gray-700 transition-colors font-medium"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-400 hover:bg-gray-700 transition-colors font-normal"
           >
             <LogOut className="w-5 h-5" />
             <span>Sign Out</span>
@@ -299,7 +299,7 @@ function AdminDashboardContent() {
             <nav className="px-4 py-4 space-y-2">
               <button
                 onClick={() => { setActiveView("overview"); setIsMobileMenuOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-normal ${
                   activeView === "overview" ? "bg-blue-600 text-white" : "text-gray-300"
                 }`}
               >
@@ -308,7 +308,7 @@ function AdminDashboardContent() {
               </button>
               <button
                 onClick={() => { setActiveView("bookings"); setIsMobileMenuOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-normal ${
                   activeView === "bookings" ? "bg-blue-600 text-white" : "text-gray-300"
                 }`}
               >
@@ -317,7 +317,7 @@ function AdminDashboardContent() {
               </button>
               <button
                 onClick={() => { setActiveView("users"); setIsMobileMenuOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-normal ${
                   activeView === "users" ? "bg-blue-600 text-white" : "text-gray-300"
                 }`}
               >
@@ -326,7 +326,7 @@ function AdminDashboardContent() {
               </button>
               <button
                 onClick={() => { handleSignOut(); setIsMobileMenuOpen(false); }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-400"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-normal text-red-400"
               >
                 <LogOut className="w-5 h-5" />
                 <span>Sign Out</span>
@@ -457,7 +457,7 @@ function AdminDashboardContent() {
                     </Button>
                   </div>
                   <div className="space-y-3">
-                    {users.slice(0, 5).map((user) => (
+                    {users.filter(u => u.role !== 'admin').slice(0, 5).map((user) => (
                       <div key={user.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
                           <span className="text-sm font-semibold text-white">
@@ -471,6 +471,11 @@ function AdminDashboardContent() {
                             <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${getRoleBadge(user.role)}`}>
                               {user.role}
                             </span>
+                            {user.emailVerified ? (
+                              <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-700">Verified</span>
+                            ) : (
+                              <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-amber-100 text-amber-700">Unverified</span>
+                            )}
                             <span className="text-xs text-gray-400">{formatUKDate(user.createdAt)}</span>
                           </div>
                         </div>
