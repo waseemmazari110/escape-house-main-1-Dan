@@ -126,7 +126,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
     house_rules: initialData?.house_rules || "",
     
     // Pricing
-    base_price: initialData?.base_price || 0,
+    base_price: initialData?.base_price as any || undefined,
     weekend_price: initialData?.weekend_price,
     cleaning_fee: initialData?.cleaning_fee,
     security_deposit: initialData?.security_deposit,
@@ -569,8 +569,9 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
                   type="number"
                   min="0"
                   step="0.01"
-                  value={formData.base_price}
-                  onChange={(e) => updateField("base_price", parseFloat(e.target.value) || 0)}
+                  value={formData.base_price || ""}
+                  onChange={(e) => updateField("base_price", e.target.value ? parseFloat(e.target.value) : "")}
+                  placeholder="Enter base price"
                   className={`pl-7 ${errors.base_price ? "border-red-500" : ""}`}
                 />
               </div>

@@ -272,28 +272,28 @@ function OwnerBookingsContent() {
             {/* Bookings Table */}
             <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full min-w-[640px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Guest
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden md:table-cell">
                         Property
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden lg:table-cell">
                         Check-in
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden xl:table-cell">
                         Check-out
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">
                         Guests
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden lg:table-cell">
                         Total
                       </th>
                     </tr>
@@ -309,20 +309,21 @@ function OwnerBookingsContent() {
                     ) : (
                       filteredBookings.map((booking) => (
                         <tr key={booking.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4">
-                            <div className="text-sm font-medium text-gray-900">{booking.guestName}</div>
-                            <div className="text-xs text-gray-500">{booking.guestEmail}</div>
+                          <td className="px-3 sm:px-6 py-4">
+                            <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-none">{booking.guestName}</div>
+                            <div className="text-xs text-gray-500 truncate max-w-[120px] sm:max-w-none">{booking.guestEmail}</div>
+                            <div className="text-xs text-gray-500 md:hidden truncate max-w-[120px]">{booking.propertyName}</div>
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-900">{booking.propertyName}</td>
-                          <td className="px-6 py-4 text-sm text-gray-600">{formatFullUKDate(booking.checkInDate)}</td>
-                          <td className="px-6 py-4 text-sm text-gray-600">{formatFullUKDate(booking.checkOutDate)}</td>
-                          <td className="px-6 py-4 text-sm text-gray-600">{booking.numberOfGuests}</td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(booking.bookingStatus)}`}>
+                          <td className="px-3 sm:px-6 py-4 text-sm text-gray-900 hidden md:table-cell">{booking.propertyName}</td>
+                          <td className="px-3 sm:px-6 py-4 text-sm text-gray-600 hidden lg:table-cell">{formatFullUKDate(booking.checkInDate)}</td>
+                          <td className="px-3 sm:px-6 py-4 text-sm text-gray-600 hidden xl:table-cell">{formatFullUKDate(booking.checkOutDate)}</td>
+                          <td className="px-3 sm:px-6 py-4 text-sm text-gray-600 hidden sm:table-cell">{booking.numberOfGuests}</td>
+                          <td className="px-3 sm:px-6 py-4">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(booking.bookingStatus)}`}>
                               {booking.bookingStatus}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                          <td className="px-3 sm:px-6 py-4 text-sm font-medium text-gray-900 hidden lg:table-cell">
                             £{booking.totalPrice?.toLocaleString() || '0'}
                           </td>
                         </tr>

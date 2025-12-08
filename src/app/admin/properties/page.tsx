@@ -82,9 +82,10 @@ function AdminPropertiesPageContent() {
         params.append("search", searchQuery.trim());
       }
 
-      const data = await GEH_API.get<PropertiesResponse>(
-        `/properties?${params.toString()}`
-      );
+      const response = await fetch(`/api/properties?${params.toString()}`, { 
+        cache: 'no-store' 
+      });
+      const data = await response.json();
 
       setProperties(data.properties);
       setTotal(data.total);

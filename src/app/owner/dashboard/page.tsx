@@ -202,13 +202,13 @@ function OwnerDashboardContent() {
             <Calendar className="w-5 h-5" />
             <span>Bookings</span>
           </Link>
-          <Link
-            href="/admin/properties"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+          <button
+            onClick={() => router.push('/admin/properties')}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors w-full text-left"
           >
             <Building className="w-5 h-5" />
             <span>Properties</span>
-          </Link>
+          </button>
           <Link
             href="/owner/payments"
             className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
