@@ -126,8 +126,8 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
     house_rules: initialData?.house_rules || "",
     
     // Pricing
-    base_price: initialData?.base_price as any || undefined,
-    weekend_price: initialData?.weekend_price,
+    base_price: initialData?.base_price ?? 0,
+    weekend_price: initialData?.weekend_price ?? 0,
     cleaning_fee: initialData?.cleaning_fee,
     security_deposit: initialData?.security_deposit,
     
@@ -250,27 +250,37 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
   const handleSaveDraft = async () => {
     setIsLoading(true);
     try {
+      // Validate and convert prices
+      const basePriceNum = parseFloat(String(formData.base_price)) || 0;
+      const weekendPriceNum = parseFloat(String(formData.weekend_price || formData.base_price)) || 0;
+      
+      const maxGuestsNum = parseInt(String(formData.max_guests)) || 1;
+      const bedroomsNum = parseInt(String(formData.bedrooms)) || 1;
+      const bathroomsNum = parseInt(String(formData.bathrooms)) || 1;
+
       // Transform form data to API schema
       const apiData = {
-        title: formData.title,
+        title: formData.title.trim(),
         slug: formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
-        location: formData.town || formData.address,
-        region: formData.county || formData.country || 'United Kingdom',
+        location: (formData.town || formData.address).trim(),
+        region: (formData.county || formData.country || 'United Kingdom').trim(),
         sleepsMin: 1,
-        sleepsMax: formData.max_guests,
-        bedrooms: formData.bedrooms,
-        bathrooms: formData.bathrooms,
-        priceFromMidweek: formData.base_price,
-        priceFromWeekend: formData.weekend_price || formData.base_price,
-        description: formData.description || 'Property listing',
-        houseRules: formData.house_rules,
+        sleepsMax: maxGuestsNum,
+        bedrooms: bedroomsNum,
+        bathrooms: bathroomsNum,
+        priceFromMidweek: basePriceNum,
+        priceFromWeekend: weekendPriceNum,
+        description: formData.description?.trim() || 'No description provided',
+        houseRules: formData.house_rules?.trim() || null,
         checkInOut: `Check-in: ${formData.check_in_time}, Check-out: ${formData.check_out_time}`,
         heroImage: formData.images[0] || '/placeholder-property.jpg',
-        heroVideo: formData.hero_video,
-        mapLat: formData.latitude,
-        mapLng: formData.longitude,
+        heroVideo: formData.hero_video?.trim() || null,
+        mapLat: formData.latitude !== undefined && !isNaN(parseFloat(String(formData.latitude))) ? parseFloat(String(formData.latitude)) : null,
+        mapLng: formData.longitude !== undefined && !isNaN(parseFloat(String(formData.longitude))) ? parseFloat(String(formData.longitude)) : null,
         isPublished: false,
       };
+
+      console.log('Saving draft with data:', apiData);
 
       if (propertyId) {
         // Update existing property
@@ -283,7 +293,10 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
         router.push(`/admin/properties/${response.id}/edit`);
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to save draft");
+      console.error('Save draft error:', error);
+      console.error('Error response:', error.response?.data);
+      const errorMessage = error.message || error.response?.data?.error || "Failed to save draft";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -294,44 +307,86 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
     const requiredFieldsErrors: Record<string, string> = {};
     
     if (!formData.title.trim()) requiredFieldsErrors.title = "Title is required";
+    if (!formData.property_type) requiredFieldsErrors.property_type = "Property type is required";
+    if (!formData.description.trim()) requiredFieldsErrors.description = "Description is required";
     if (!formData.address.trim()) requiredFieldsErrors.address = "Address is required";
+    if (!formData.town.trim()) requiredFieldsErrors.town = "Town is required";
     if (formData.max_guests < 1) requiredFieldsErrors.max_guests = "Max guests is required";
-    if (formData.base_price <= 0) requiredFieldsErrors.base_price = "Base price is required";
+    if (formData.bedrooms < 1) requiredFieldsErrors.bedrooms = "Bedrooms must be at least 1";
+    if (formData.bathrooms < 1) requiredFieldsErrors.bathrooms = "Bathrooms must be at least 1";
+    if (formData.base_price <= 0) requiredFieldsErrors.base_price = "Base price must be greater than 0";
+    if (!formData.images || formData.images.length === 0) requiredFieldsErrors.images = "At least one image is required";
 
     if (Object.keys(requiredFieldsErrors).length > 0) {
       setErrors(requiredFieldsErrors);
       toast.error("Please fill in all required fields");
       // Jump to first step with error
-      if (requiredFieldsErrors.title || requiredFieldsErrors.property_type) setCurrentStep(1);
-      else if (requiredFieldsErrors.address) setCurrentStep(2);
-      else if (requiredFieldsErrors.max_guests) setCurrentStep(3);
+      if (requiredFieldsErrors.title || requiredFieldsErrors.property_type || requiredFieldsErrors.description) setCurrentStep(1);
+      else if (requiredFieldsErrors.address || requiredFieldsErrors.town) setCurrentStep(2);
+      else if (requiredFieldsErrors.max_guests || requiredFieldsErrors.bedrooms || requiredFieldsErrors.bathrooms) setCurrentStep(3);
       else if (requiredFieldsErrors.base_price) setCurrentStep(6);
+      else if (requiredFieldsErrors.images) setCurrentStep(7);
       return;
     }
 
     setIsLoading(true);
     try {
+      // Validate prices are valid numbers
+      const basePriceNum = parseFloat(String(formData.base_price));
+      const weekendPriceNum = parseFloat(String(formData.weekend_price || formData.base_price));
+      
+      if (isNaN(basePriceNum) || basePriceNum <= 0) {
+        setErrors({ base_price: "Base price must be a valid number greater than 0" });
+        toast.error("Base price must be a valid number greater than 0");
+        setCurrentStep(6);
+        setIsLoading(false);
+        return;
+      }
+      
+      if (isNaN(weekendPriceNum) || weekendPriceNum <= 0) {
+        setErrors({ weekend_price: "Weekend price must be a valid number greater than 0" });
+        toast.error("Weekend price must be a valid number greater than 0");
+        setCurrentStep(6);
+        setIsLoading(false);
+        return;
+      }
+
+      // Validate integer fields
+      const maxGuestsNum = parseInt(String(formData.max_guests)) || 1;
+      const bedroomsNum = parseInt(String(formData.bedrooms)) || 1;
+      const bathroomsNum = parseInt(String(formData.bathrooms)) || 1;
+
+      if (maxGuestsNum < 1) {
+        setErrors({ max_guests: "Max guests must be at least 1" });
+        toast.error("Max guests must be at least 1");
+        setCurrentStep(3);
+        setIsLoading(false);
+        return;
+      }
+
       // Transform form data to API schema
       const apiData = {
-        title: formData.title,
+        title: formData.title.trim(),
         slug: formData.slug || formData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''),
-        location: formData.town || formData.address,
-        region: formData.county || formData.country || 'United Kingdom',
+        location: (formData.town || formData.address).trim(),
+        region: (formData.county || formData.country || 'United Kingdom').trim(),
         sleepsMin: 1,
-        sleepsMax: formData.max_guests,
-        bedrooms: formData.bedrooms,
-        bathrooms: formData.bathrooms,
-        priceFromMidweek: formData.base_price,
-        priceFromWeekend: formData.weekend_price || formData.base_price,
-        description: formData.description || 'Property listing',
-        houseRules: formData.house_rules,
+        sleepsMax: maxGuestsNum,
+        bedrooms: bedroomsNum,
+        bathrooms: bathroomsNum,
+        priceFromMidweek: basePriceNum,
+        priceFromWeekend: weekendPriceNum,
+        description: formData.description.trim(),
+        houseRules: formData.house_rules?.trim() || null,
         checkInOut: `Check-in: ${formData.check_in_time}, Check-out: ${formData.check_out_time}`,
         heroImage: formData.images[0] || '/placeholder-property.jpg',
-        heroVideo: formData.hero_video,
-        mapLat: formData.latitude,
-        mapLng: formData.longitude,
+        heroVideo: formData.hero_video?.trim() || null,
+        mapLat: formData.latitude !== undefined && !isNaN(parseFloat(String(formData.latitude))) ? parseFloat(String(formData.latitude)) : null,
+        mapLng: formData.longitude !== undefined && !isNaN(parseFloat(String(formData.longitude))) ? parseFloat(String(formData.longitude)) : null,
         isPublished: true,
       };
+
+      console.log('Publishing with data:', apiData);
 
       if (propertyId) {
         // Update existing property
@@ -340,12 +395,15 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
         router.push("/admin/properties");
       } else {
         // Create new property
-        await GEH_API.post("/properties", apiData);
+        const response = await GEH_API.post("/properties", apiData) as any;
         toast.success("Property published successfully");
         router.push("/admin/properties");
       }
     } catch (error: any) {
-      toast.error(error.message || "Failed to publish property");
+      console.error('Publish error:', error);
+      console.error('Error response:', error.response?.data);
+      const errorMessage = error.message || error.response?.data?.error || "Failed to publish property";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

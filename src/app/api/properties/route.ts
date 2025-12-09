@@ -205,6 +205,8 @@ export async function POST(request: NextRequest) {
     
     const body = await request.json();
 
+    console.log('POST /properties - Received body:', JSON.stringify(body, null, 2));
+
     // Validate required fields
     const requiredFields = [
       'title',
@@ -222,6 +224,7 @@ export async function POST(request: NextRequest) {
 
     for (const field of requiredFields) {
       if (!body[field] && body[field] !== 0) {
+        console.error(`Missing required field: ${field}`);
         return NextResponse.json(
           {
             error: `Required field '${field}' is missing`,
@@ -300,8 +303,8 @@ export async function POST(request: NextRequest) {
       heroImage: body.heroImage.trim(),
       heroVideo: body.heroVideo?.trim() || null,
       floorplanURL: body.floorplanURL?.trim() || null,
-      mapLat: body.mapLat !== undefined ? parseFloat(body.mapLat) : null,
-      mapLng: body.mapLng !== undefined ? parseFloat(body.mapLng) : null,
+      mapLat: body.mapLat !== undefined && body.mapLat !== null && body.mapLat !== '' ? parseFloat(body.mapLat) : null,
+      mapLng: body.mapLng !== undefined && body.mapLng !== null && body.mapLng !== '' ? parseFloat(body.mapLng) : null,
       ownerId: currentUser.id, // Set from authenticated user
       ownerContact: body.ownerContact?.trim() || null,
       featured: body.featured ?? false,
@@ -310,6 +313,14 @@ export async function POST(request: NextRequest) {
       updatedAt: now,
     };
 
+    // Final validation: ensure no NaN values in numeric fields
+    if (propertyData.mapLat !== null && isNaN(propertyData.mapLat)) {
+      propertyData.mapLat = null;
+    }
+    if (propertyData.mapLng !== null && isNaN(propertyData.mapLng)) {
+      propertyData.mapLng = null;
+    }
+
     const newProperty = await db
       .insert(properties)
       .values(propertyData)
@@ -317,15 +328,22 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(newProperty[0], { status: 201 });
   } catch (error: any) {
-    console.error('POST error:', error);
+    console.error('POST /properties error:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error message:', error.message);
+    
     if (error.message === 'Authentication required') {
       return unauthenticatedResponse();
     }
     if (error.message?.includes('Unauthorized')) {
       return unauthorizedResponse(error.message);
     }
+    
     return NextResponse.json(
-      { error: 'Internal server error: ' + (error as Error).message },
+      { 
+        error: 'Internal server error: ' + (error as Error).message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     );
   }

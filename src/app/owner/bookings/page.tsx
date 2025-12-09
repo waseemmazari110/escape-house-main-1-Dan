@@ -219,7 +219,7 @@ function OwnerBookingsContent() {
                   <span>Bookings</span>
                 </Link>
                 <Link
-                  href="/admin/properties"
+                  href="/owner/properties"
                   className="flex items-center gap-3 px-4 py-3.5 rounded-lg text-gray-700 hover:bg-gray-50 active:bg-gray-100 touch-manipulation active:scale-[0.98] transition-all"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -281,7 +281,7 @@ function OwnerBookingsContent() {
               <span className="truncate">Bookings</span>
             </Link>
             <Link
-              href="/admin/properties"
+              href="/owner/properties"
               className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition-all text-sm md:text-base"
             >
               <Home className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />

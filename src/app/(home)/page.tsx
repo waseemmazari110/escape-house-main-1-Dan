@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -16,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import type { DateRange } from "react-day-picker";
+import { authClient } from "@/lib/auth-client";
 
 // Lazy load non-critical components with no SSR
 const ReviewSlider = dynamic(() => import("@/components/ReviewSlider"), { 

@@ -1,4 +1,7 @@
 import { Metadata } from "next";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Large Group Accommodation UK | Luxury Houses for 10-40 Guests | Group Escape Houses",
@@ -42,11 +45,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomeLayout({
+export default async function HomeLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const user = session?.user as any;
+  const role = user?.role;
+
+  // Redirect owners to their dashboard—they should not see the public landing
+  if (user && role === "owner") {
+    redirect("/owner/dashboard");
+  }
+
   return <>{children}</>;
 }
 

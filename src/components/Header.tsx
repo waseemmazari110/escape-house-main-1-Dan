@@ -531,14 +531,25 @@ function Header() {
                       {planName}
                     </span>
                   </Link>
-                  
-                  {/* User Name Display - Show for ALL logged in users (guest, owner, admin) */}
-                  <div className="flex items-center gap-2 px-4 py-2 bg-[var(--color-bg-secondary)] rounded-xl border border-[var(--color-accent-sage)]/20">
-                    <UserIcon className="w-4 h-4 text-[var(--color-accent-sage)]" />
-                    <span className="text-sm font-medium text-[var(--color-text-primary)]">
-                      {session.user.name || 'User'}
-                    </span>
-                  </div>
+
+                  {/* Owner view: show dashboard CTA instead of name pill */}
+                  {isOwner ? (
+                    <Link
+                      href="/owner/dashboard"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--color-accent-sage)] text-white font-medium border border-[var(--color-accent-sage)]/30 hover:bg-[var(--color-accent-sage)]/90 transition-colors"
+                    >
+                      <Home className="w-4 h-4" />
+                      <span>Owner Dashboard</span>
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-2 px-4 py-2 bg-[var(--color-bg-secondary)] rounded-xl border border-[var(--color-accent-sage)]/20">
+                      <UserIcon className="w-4 h-4 text-[var(--color-accent-sage)]" />
+                      <span className="text-sm font-medium text-[var(--color-text-primary)]">
+                        {session.user.name || 'User'}
+                      </span>
+                    </div>
+                  )}
+
                   <Button
                     onClick={handleSignOut}
                     variant="outline"
@@ -867,23 +878,44 @@ function Header() {
                   <span className="text-sm text-[var(--color-accent-sage)]">Manage →</span>
                 </Link>
                 
-                {/* User Name Display - Mobile - Show for ALL logged in users */}
-                <div className="flex items-center justify-between p-4 bg-white/90 rounded-xl border border-[var(--color-accent-sage)]/20">
-                  <div className="flex items-center gap-2">
-                    <UserIcon className="w-5 h-5 text-[var(--color-accent-sage)]" />
-                    <span className="font-medium text-[var(--color-text-primary)]">
-                      {session.user.name || 'User'}
-                    </span>
+                {/* Owner view: dashboard CTA instead of name pill; others keep name */}
+                {isOwner ? (
+                  <div className="flex items-center justify-between p-4 bg-white/90 rounded-xl border border-[var(--color-accent-sage)]/20">
+                    <Link
+                      href="/owner/dashboard"
+                      className="inline-flex items-center gap-2 text-[var(--color-accent-sage)] font-medium"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Home className="w-5 h-5" />
+                      <span>Owner Dashboard</span>
+                    </Link>
+                    <Button
+                      onClick={handleSignOut}
+                      size="sm"
+                      variant="outline"
+                      className="rounded-lg border-red-500 text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <Button
-                    onClick={handleSignOut}
-                    size="sm"
-                    variant="outline"
-                    className="rounded-lg border-red-500 text-red-600 hover:bg-red-50"
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </Button>
-                </div>
+                ) : (
+                  <div className="flex items-center justify-between p-4 bg-white/90 rounded-xl border border-[var(--color-accent-sage)]/20">
+                    <div className="flex items-center gap-2">
+                      <UserIcon className="w-5 h-5 text-[var(--color-accent-sage)]" />
+                      <span className="font-medium text-[var(--color-text-primary)]">
+                        {session.user.name || 'User'}
+                      </span>
+                    </div>
+                    <Button
+                      onClick={handleSignOut}
+                      size="sm"
+                      variant="outline"
+                      className="rounded-lg border-red-500 text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
                 <Button
                   asChild
                   size="lg"
