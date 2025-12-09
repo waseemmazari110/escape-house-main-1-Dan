@@ -3,7 +3,7 @@
 import { useState, useEffect, memo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, ChevronDownIcon, LogOut, User as UserIcon, CreditCard, Phone } from "lucide-react";
+import { Menu, X, ChevronDownIcon, LogOut, User as UserIcon, CreditCard, Phone, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { authClient, useSession } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
