@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { properties } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
+import { nowUKFormatted } from '@/lib/date-utils';
+import { logPropertyAction, captureRequestDetails } from '@/lib/audit-logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,8 +28,27 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status'); // active, draft, archived
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const offset = parseInt(searchParams.get('offset') || '0');
+
     // Fetch properties owned by this user
-    const ownerProperties = await db
+    let query = db
+      .select()
+      .from(properties)
+      .where(eq(properties.ownerId, session.user.id))
+      .orderBy(desc(properties.createdAt));
+
+    // Apply status filter if provided
+    if (status) {
+      query = query.where(eq(properties.isPublished, status === 'active')) as any;
+    }
+
+    const ownerProperties = await query.limit(limit).offset(offset);
+
+    // Get total count
+    const totalCount = await db
       .select()
       .from(properties)
       .where(eq(properties.ownerId, session.user.id));
@@ -35,6 +56,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       properties: ownerProperties,
+      pagination: {
+        total: totalCount.length,
+        limit,
+        offset,
+        hasMore: offset + limit < totalCount.length,
+      },
+      timestamp: nowUKFormatted(),
     });
   } catch (error) {
     console.error('Error fetching owner properties:', error);
@@ -81,7 +109,9 @@ export async function POST(request: NextRequest) {
       heroImage,
     } = body;
 
-    // Create new property
+    const timestamp = nowUKFormatted();
+
+    // Create new property with UK timestamps
     const newProperty = await db.insert(properties).values({
       title,
       slug: title.toLowerCase().replace(/\s+/g, '-'),
@@ -97,14 +127,33 @@ export async function POST(request: NextRequest) {
       heroImage,
       ownerId: session.user.id,
       isPublished: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: timestamp,
+      updatedAt: timestamp,
     }).returning();
+
+    // Log audit event with UK timestamp
+    const requestDetails = captureRequestDetails(request);
+    await logPropertyAction(
+      session.user.id,
+      'property.create',
+      newProperty[0].id,
+      title,
+      { 
+        bedrooms,
+        bathrooms,
+        sleepsMin,
+        sleepsMax,
+        priceFromMidweek,
+        priceFromWeekend,
+        ...requestDetails
+      }
+    );
 
     return NextResponse.json({
       success: true,
       property: newProperty[0],
-    });
+      timestamp,
+    }, { status: 201 });
   } catch (error) {
     console.error('Error creating property:', error);
     return NextResponse.json(
