@@ -1,0 +1,67 @@
+# ============================================
+# STRIPE BILLING - MILESTONE 3
+# ============================================
+# Add these to your .env file
+
+# Stripe Test Mode Keys
+STRIPE_TEST_KEY=sk_test_51xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+STRIPE_PUBLISHABLE_KEY=pk_test_51xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# For Production (replace when ready to go live)
+# STRIPE_SECRET_KEY=sk_live_51xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# STRIPE_PUBLISHABLE_KEY=pk_live_51xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# ============================================
+# HOW TO GET THESE VALUES
+# ============================================
+
+# 1. STRIPE_TEST_KEY (Secret Key):
+#    - Go to: https://dashboard.stripe.com/test/apikeys
+#    - Copy the "Secret key" (starts with sk_test_)
+#    - NEVER commit this to GitHub!
+
+# 2. STRIPE_PUBLISHABLE_KEY:
+#    - Same page as above
+#    - Copy the "Publishable key" (starts with pk_test_)
+#    - This is safe to use in client-side code
+
+# 3. STRIPE_WEBHOOK_SECRET:
+#    a) For Local Development:
+#       - Install Stripe CLI: https://stripe.com/docs/stripe-cli
+#       - Run: stripe listen --forward-to http://localhost:3000/api/webhooks/billing
+#       - Copy the webhook signing secret (starts with whsec_)
+#    
+#    b) For Production:
+#       - Go to: https://dashboard.stripe.com/test/webhooks
+#       - Click "Add endpoint"
+#       - URL: https://yourdomain.com/api/webhooks/billing
+#       - Select events to listen for
+#       - Copy the "Signing secret"
+
+# ============================================
+# STRIPE PRODUCTS & PRICES
+# ============================================
+# Create products in Stripe Dashboard or CLI:
+
+# Using Stripe CLI:
+# stripe products create --name="Premium Plan" --description="Full access to all features"
+# stripe prices create --product=prod_xxx --unit-amount=2999 --currency=gbp --recurring[interval]=month
+
+# Then use the price ID (price_xxx) in your code:
+# STRIPE_PRICE_MONTHLY=price_xxxxxxxxxxxxxxxxxxxxx
+# STRIPE_PRICE_YEARLY=price_xxxxxxxxxxxxxxxxxxxxx
+
+# ============================================
+# TESTING
+# ============================================
+# Test card numbers (use any future date and any CVC):
+# - Success: 4242 4242 4242 4242
+# - Decline: 4000 0000 0000 0002
+# - 3D Secure: 4000 0027 6000 3184
+
+# Test webhook events:
+# stripe trigger customer.subscription.created
+# stripe trigger invoice.paid
+# stripe trigger payment_intent.succeeded
