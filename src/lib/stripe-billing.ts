@@ -603,6 +603,7 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
 
 async function handleSubscriptionDeleted(event: Stripe.Event) {
   const subscription = event.data.object as Stripe.Subscription;
+  const userId = subscription.metadata.userId;
 
   await db
     .update(subscriptions)
@@ -614,6 +615,20 @@ async function handleSubscriptionDeleted(event: Stripe.Event) {
     .where(eq(subscriptions.stripeSubscriptionId, subscription.id));
 
   logBillingAction('Subscription deleted', { subscriptionId: subscription.id });
+  
+  // Downgrade user after cancellation
+  if (userId) {
+    try {
+      const { downgradeAfterCancellation } = await import('@/lib/crm-sync');
+      await downgradeAfterCancellation(userId);
+      logBillingAction('User downgraded after cancellation', { userId });
+    } catch (error) {
+      logBillingAction('Failed to downgrade user', { 
+        userId, 
+        error: (error as Error).message 
+      });
+    }
+  }
 }
 
 async function handleTrialWillEnd(event: Stripe.Event) {
@@ -677,6 +692,28 @@ async function handleInvoicePaid(event: Stripe.Event) {
     .where(eq(invoices.stripeInvoiceId, invoice.id));
 
   logBillingAction('Invoice marked as paid', { invoiceId: invoice.id });
+  
+  // Sync membership status after successful payment
+  const userId = invoice.subscription 
+    ? (await db
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.stripeSubscriptionId, invoice.subscription as string))
+        .limit(1))[0]?.userId
+    : null;
+
+  if (userId) {
+    try {
+      const { updateMembershipAfterPayment } = await import('@/lib/crm-sync');
+      await updateMembershipAfterPayment(userId, true);
+      logBillingAction('Membership status synced after payment', { userId });
+    } catch (error) {
+      logBillingAction('Failed to sync membership after payment', { 
+        userId, 
+        error: (error as Error).message 
+      });
+    }
+  }
 }
 
 async function handleInvoicePaymentFailed(event: Stripe.Event) {
