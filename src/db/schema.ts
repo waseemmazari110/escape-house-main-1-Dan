@@ -369,5 +369,140 @@ export const crmPropertyLinks = sqliteTable('crm_property_links', {
   updatedAt: text('updated_at').notNull(),
 });
 
+// ============================================
+// MILESTONE 2 - SUBSCRIPTIONS & BILLING
+// ============================================
+
+// Subscriptions table - Track user subscriptions (Stripe/Autumn)
+export const subscriptions = sqliteTable('subscriptions', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  stripeSubscriptionId: text('stripe_subscription_id').unique(),
+  stripePriceId: text('stripe_price_id'),
+  stripeCustomerId: text('stripe_customer_id'),
+  planName: text('plan_name').notNull(), // 'free', 'basic', 'premium', 'enterprise'
+  planType: text('plan_type').notNull(), // 'monthly', 'yearly'
+  status: text('status').notNull().default('active'), // 'active', 'cancelled', 'expired', 'past_due', 'trialing'
+  currentPeriodStart: text('current_period_start').notNull(), // DD/MM/YYYY
+  currentPeriodEnd: text('current_period_end').notNull(), // DD/MM/YYYY
+  cancelAtPeriodEnd: integer('cancel_at_period_end', { mode: 'boolean' }).default(false),
+  cancelledAt: text('cancelled_at'), // DD/MM/YYYY HH:mm:ss
+  trialStart: text('trial_start'), // DD/MM/YYYY
+  trialEnd: text('trial_end'), // DD/MM/YYYY
+  amount: real('amount').notNull(), // Subscription amount
+  currency: text('currency').notNull().default('GBP'),
+  interval: text('interval').notNull(), // 'month', 'year'
+  intervalCount: integer('interval_count').default(1),
+  metadata: text('metadata', { mode: 'json' }), // Additional subscription data
+  createdAt: text('created_at').notNull(), // DD/MM/YYYY HH:mm:ss
+  updatedAt: text('updated_at').notNull(), // DD/MM/YYYY HH:mm:ss
+});
+
+// Invoices table - Track all invoices and payments
+export const invoices = sqliteTable('invoices', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  subscriptionId: integer('subscription_id').references(() => subscriptions.id, { onDelete: 'set null' }),
+  stripeInvoiceId: text('stripe_invoice_id').unique(),
+  stripePaymentIntentId: text('stripe_payment_intent_id'),
+  invoiceNumber: text('invoice_number').notNull().unique(),
+  status: text('status').notNull().default('draft'), // 'draft', 'open', 'paid', 'void', 'uncollectible'
+  description: text('description'),
+  amountDue: real('amount_due').notNull(),
+  amountPaid: real('amount_paid').default(0),
+  amountRemaining: real('amount_remaining').notNull(),
+  currency: text('currency').notNull().default('GBP'),
+  taxAmount: real('tax_amount').default(0),
+  subtotal: real('subtotal').notNull(),
+  total: real('total').notNull(),
+  dueDate: text('due_date'), // DD/MM/YYYY
+  paidAt: text('paid_at'), // DD/MM/YYYY HH:mm:ss
+  invoiceDate: text('invoice_date').notNull(), // DD/MM/YYYY
+  periodStart: text('period_start'), // DD/MM/YYYY
+  periodEnd: text('period_end'), // DD/MM/YYYY
+  billingReason: text('billing_reason'), // 'subscription_create', 'subscription_cycle', 'manual'
+  customerEmail: text('customer_email').notNull(),
+  customerName: text('customer_name').notNull(),
+  invoicePdf: text('invoice_pdf'), // URL to invoice PDF
+  hostedInvoiceUrl: text('hosted_invoice_url'), // Stripe hosted invoice URL
+  metadata: text('metadata', { mode: 'json' }),
+  createdAt: text('created_at').notNull(), // DD/MM/YYYY HH:mm:ss
+  updatedAt: text('updated_at').notNull(), // DD/MM/YYYY HH:mm:ss
+});
+
+// ============================================
+// MILESTONE 2 - MEDIA MANAGEMENT
+// ============================================
+
+// Media table - Centralized media library for all uploads
+export const media = sqliteTable('media', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  fileName: text('file_name').notNull(),
+  fileUrl: text('file_url').notNull().unique(),
+  fileType: text('file_type').notNull(), // 'image', 'video', 'document', 'audio'
+  mimeType: text('mime_type').notNull(), // 'image/jpeg', 'video/mp4', etc.
+  fileSize: integer('file_size').notNull(), // Size in bytes
+  width: integer('width'), // For images/videos
+  height: integer('height'), // For images/videos
+  duration: integer('duration'), // For videos/audio in seconds
+  altText: text('alt_text'),
+  caption: text('caption'),
+  description: text('description'),
+  title: text('title'),
+  entityType: text('entity_type'), // 'property', 'experience', 'destination', 'blog', 'user', 'general'
+  entityId: text('entity_id'), // ID of the related entity
+  uploadedBy: text('uploaded_by').references(() => user.id, { onDelete: 'set null' }),
+  folder: text('folder').default('general'), // Organize media into folders
+  tags: text('tags', { mode: 'json' }), // Array of tags for searching
+  isPublic: integer('is_public', { mode: 'boolean' }).default(true),
+  thumbnailUrl: text('thumbnail_url'), // For videos/documents
+  metadata: text('metadata', { mode: 'json' }), // EXIF data, video metadata, etc.
+  storageProvider: text('storage_provider').default('supabase'), // 'supabase', 's3', 'cloudinary'
+  storageKey: text('storage_key'), // Key/path in storage provider
+  createdAt: text('created_at').notNull(), // DD/MM/YYYY HH:mm:ss
+  updatedAt: text('updated_at').notNull(), // DD/MM/YYYY HH:mm:ss
+});
+
+// ============================================
+// MILESTONE 2 - ENQUIRIES SYSTEM
+// ============================================
+
+// Enquiries table - General enquiries from website forms
+export const enquiries = sqliteTable('enquiries', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  firstName: text('first_name').notNull(),
+  lastName: text('last_name').notNull(),
+  email: text('email').notNull(),
+  phone: text('phone'),
+  subject: text('subject').notNull(),
+  message: text('message').notNull(),
+  enquiryType: text('enquiry_type').notNull().default('general'), // 'general', 'booking', 'property', 'partnership', 'support'
+  source: text('source').default('website'), // 'website', 'email', 'phone', 'social'
+  status: text('status').notNull().default('new'), // 'new', 'in_progress', 'resolved', 'closed', 'spam'
+  priority: text('priority').default('medium'), // 'low', 'medium', 'high', 'urgent'
+  assignedTo: text('assigned_to'), // Staff member assigned to this enquiry
+  propertyId: integer('property_id').references(() => properties.id, { onDelete: 'set null' }),
+  checkInDate: text('check_in_date'), // DD/MM/YYYY - for booking enquiries
+  checkOutDate: text('check_out_date'), // DD/MM/YYYY - for booking enquiries
+  numberOfGuests: integer('number_of_guests'),
+  occasion: text('occasion'),
+  budget: real('budget'),
+  preferredLocations: text('preferred_locations', { mode: 'json' }), // Array of locations
+  specialRequests: text('special_requests'),
+  referralSource: text('referral_source'), // How they heard about us
+  marketingConsent: integer('marketing_consent', { mode: 'boolean' }).default(false),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  adminNotes: text('admin_notes'),
+  internalNotes: text('internal_notes'),
+  responseTemplate: text('response_template'), // Template used for response
+  respondedAt: text('responded_at'), // DD/MM/YYYY HH:mm:ss
+  respondedBy: text('responded_by'),
+  resolvedAt: text('resolved_at'), // DD/MM/YYYY HH:mm:ss
+  metadata: text('metadata', { mode: 'json' }),
+  createdAt: text('created_at').notNull(), // DD/MM/YYYY HH:mm:ss
+  updatedAt: text('updated_at').notNull(), // DD/MM/YYYY HH:mm:ss
+});
+
 // Export alias for user table (for convenience in queries)
 export const users = user;
