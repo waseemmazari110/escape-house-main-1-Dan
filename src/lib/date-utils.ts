@@ -1,28 +1,70 @@
 /**
- * UK Date Formatting Utilities
- * All dates across the site use dd/mm/yy format
+ * UK Date & Time Formatting Utilities
+ * Global Rules:
+ * - Dates: DD/MM/YYYY
+ * - DateTime: DD/MM/YYYY HH:mm:ss (24-hour format)
+ * - Timezone: Europe/London
  */
 
+// UK Timezone constant
+export const UK_TIMEZONE = 'Europe/London';
+
 /**
- * Format date to UK short format: dd/mm/yy
+ * Get current date/time in UK timezone
+ */
+export function nowUK(): Date {
+  return new Date(new Date().toLocaleString('en-GB', { timeZone: UK_TIMEZONE }));
+}
+
+/**
+ * Format date to UK short format: DD/MM/YYYY
  */
 export function formatDateUK(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date;
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = String(d.getFullYear()).slice(-2);
+  const year = d.getFullYear();
   return `${day}/${month}/${year}`;
 }
 
 /**
- * Format date to UK long format: dd/mm/yyyy
+ * Format date to UK long format: DD/MM/YYYY (alias for consistency)
  */
 export function formatDateUKLong(date: Date | string): string {
+  return formatDateUK(date);
+}
+
+/**
+ * Format date and time to UK format: DD/MM/YYYY HH:mm:ss (24-hour)
+ */
+export function formatDateTimeUK(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date;
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
+  const datePart = formatDateUK(d);
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const seconds = String(d.getSeconds()).padStart(2, '0');
+  return `${datePart} ${hours}:${minutes}:${seconds}`;
+}
+
+/**
+ * Format time only to UK format: HH:mm:ss (24-hour)
+ */
+export function formatTimeUK(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const seconds = String(d.getSeconds()).padStart(2, '0');
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+/**
+ * Format time without seconds: HH:mm (24-hour)
+ */
+export function formatTimeShortUK(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
 }
 
 /**
