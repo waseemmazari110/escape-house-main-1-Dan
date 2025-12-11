@@ -123,3 +123,90 @@ export function formatMonthYear(date: Date | string): string {
     year: 'numeric' 
   });
 }
+
+/**
+ * Add days to a date and return UK formatted string
+ * @param date Base date
+ * @param days Number of days to add
+ * @returns DD/MM/YYYY formatted date
+ */
+export function addDaysUK(date: Date | string, days: number): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const result = new Date(d);
+  result.setDate(result.getDate() + days);
+  return formatDateUK(result);
+}
+
+/**
+ * Add months to a date and return UK formatted string
+ * @param date Base date
+ * @param months Number of months to add
+ * @returns DD/MM/YYYY formatted date
+ */
+export function addMonthsUK(date: Date | string, months: number): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const result = new Date(d);
+  result.setMonth(result.getMonth() + months);
+  return formatDateUK(result);
+}
+
+/**
+ * Add years to a date and return UK formatted string
+ * @param date Base date
+ * @param years Number of years to add
+ * @returns DD/MM/YYYY formatted date
+ */
+export function addYearsUK(date: Date | string, years: number): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const result = new Date(d);
+  result.setFullYear(result.getFullYear() + years);
+  return formatDateUK(result);
+}
+
+/**
+ * Calculate next billing date based on interval
+ * @param currentDate Current billing date
+ * @param interval 'month' or 'year'
+ * @param intervalCount Number of intervals
+ * @returns DD/MM/YYYY formatted next billing date
+ */
+export function calculateNextBillingDate(
+  currentDate: Date | string,
+  interval: 'month' | 'year',
+  intervalCount: number = 1
+): string {
+  if (interval === 'month') {
+    return addMonthsUK(currentDate, intervalCount);
+  } else {
+    return addYearsUK(currentDate, intervalCount);
+  }
+}
+
+/**
+ * Get days between two dates
+ */
+export function getDaysBetween(date1: Date | string, date2: Date | string): number {
+  const d1 = typeof date1 === 'string' ? new Date(date1) : date1;
+  const d2 = typeof date2 === 'string' ? new Date(date2) : date2;
+  const diffTime = Math.abs(d2.getTime() - d1.getTime());
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * Check if date is in the past
+ */
+export function isDateInPast(date: Date | string): boolean {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d < new Date();
+}
+
+/**
+ * Check if date is today
+ */
+export function isToday(date: Date | string): boolean {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const today = new Date();
+  return d.getDate() === today.getDate() &&
+    d.getMonth() === today.getMonth() &&
+    d.getFullYear() === today.getFullYear();
+}
