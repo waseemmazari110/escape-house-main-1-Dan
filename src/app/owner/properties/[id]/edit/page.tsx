@@ -62,7 +62,7 @@ export default function EditPropertyPage() {
         }
 
         // Fetch property data
-        const response = await fetch(`/api/properties?id=${propertyId}`, { cache: 'no-store' });
+        const response = await fetch(`/api/owner/properties/${propertyId}`, { cache: 'no-store' });
         if (response.ok) {
           const data = await response.json();
           setProperty({
@@ -100,7 +100,7 @@ export default function EditPropertyPage() {
     setSaving(true);
 
     try {
-      const response = await fetch(`/api/properties?id=${propertyId}`, {
+      const response = await fetch(`/api/owner/properties/${propertyId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -359,7 +359,7 @@ export default function EditPropertyPage() {
               <Button
                 type="submit"
                 disabled={saving}
-                className="px-8 py-3 bg-[#17a2b8] text-white rounded-lg hover:bg-[#138496] disabled:opacity-50"
+                className="px-8 py-3 bg-[#17a2b8] text-white rounded-lg hover:bg-[#138496] disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {saving ? (
                   <>

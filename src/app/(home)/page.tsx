@@ -110,43 +110,48 @@ export default function Home() {
   const newsletterFormRef = useRef<HTMLFormElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Fetch data with proper error handling - DEFER to reduce initial load
+  // Fetch data with proper error handling - OPTIMIZED with caching
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const fetchData = async () => {
-        try {
-          setIsLoadingData(true);
+    const fetchData = async () => {
+      try {
+        setIsLoadingData(true);
 
-          const [propertiesRes, experiencesRes, reviewsRes] = await Promise.all([
-            fetch('/api/properties?featured=true&isPublished=true&limit=3', { cache: 'no-store' }),
-            fetch('/api/experiences?isPublished=true&limit=6', { cache: 'no-store' }),
-            fetch('/api/reviews?isApproved=true&isPublished=true&limit=6&sort=reviewDate&order=desc', { cache: 'no-store' })
-          ]);
+        const [propertiesRes, experiencesRes, reviewsRes] = await Promise.all([
+          fetch('/api/properties?featured=true&isPublished=true&limit=3', { 
+            next: { revalidate: 60 } // Cache for 60 seconds
+          }),
+          fetch('/api/experiences?isPublished=true&limit=6', { 
+            next: { revalidate: 60 }
+          }),
+          fetch('/api/reviews?isApproved=true&isPublished=true&limit=6&sort=reviewDate&order=desc', { 
+            next: { revalidate: 60 }
+          })
+        ]);
 
-          if (!propertiesRes.ok || !experiencesRes.ok || !reviewsRes.ok) {
-            throw new Error('Failed to fetch data');
-          }
+        if (!propertiesRes.ok || !experiencesRes.ok || !reviewsRes.ok) {
+          throw new Error('Failed to fetch data');
+        }
 
-          const [propertiesData, experiencesData, reviewsData] = await Promise.all([
-            propertiesRes.json(),
-            experiencesRes.json(),
-            reviewsRes.json()
-          ]);
+        const [propertiesData, experiencesData, reviewsData] = await Promise.all([
+          propertiesRes.json(),
+          experiencesRes.json(),
+          reviewsRes.json()
+        ]);
 
-          // Handle both array and object response formats for properties
-          const propertiesArray = Array.isArray(propertiesData) ? propertiesData : (propertiesData.properties || []);
+        // Handle both array and object response formats for properties
+        const propertiesArray = Array.isArray(propertiesData) ? propertiesData : (propertiesData.properties || []);
 
-          setFeaturedProperties(propertiesArray.map((prop: any) => ({
-            id: prop.id.toString(),
-            title: prop.title,
-            location: prop.location,
-            sleeps: prop.sleepsMax,
-            bedrooms: prop.bedrooms,
-            priceFrom: prop.priceFromWeekend || prop.priceFromMidweek,
-            image: prop.heroImage,
-            features: [],
-            slug: prop.slug,
-          })));
+        setFeaturedProperties(propertiesArray.map((prop: any) => ({
+          id: prop.id.toString(),
+          title: prop.title,
+          location: prop.location,
+          sleeps: prop.sleepsMax,
+          bedrooms: prop.bedrooms,
+          priceFrom: prop.priceFromWeekend || prop.priceFromMidweek,
+          image: prop.heroImage,
+          features: [],
+          slug: prop.slug,
+        })));
 
           // Handle both array and object response formats for experiences
           const experiencesArray = Array.isArray(experiencesData) ? experiencesData : (experiencesData.experiences || []);
@@ -182,9 +187,6 @@ export default function Home() {
       };
 
       fetchData();
-    }, 100);
-
-    return () => clearTimeout(timer);
   }, []);
 
   // Lazy load video after initial page load

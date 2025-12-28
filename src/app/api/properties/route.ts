@@ -48,15 +48,21 @@ export async function GET(request: NextRequest) {
       const prop = property[0];
       
       // Role-based access control for property details
-      // Owners can only view their own properties
-      // Admins can view all properties
-      // Guests can view published properties only
-      if (isOwner(currentUser) && !isPropertyOwner(currentUser, prop.ownerId)) {
+      // Admins can view all properties regardless of status
+      // Owners can only view their own properties (all statuses)
+      // Guests can only view approved AND published properties
+      if (isOwner(currentUser) && !isAdmin(currentUser) && !isPropertyOwner(currentUser, prop.ownerId)) {
         return unauthorizedResponse('You can only view your own properties');
       }
       
-      if (!currentUser && !prop.isPublished) {
-        return unauthorizedResponse('Property not found');
+      if (!currentUser || (!isAdmin(currentUser) && !isPropertyOwner(currentUser, prop.ownerId))) {
+        // Guests and unauthenticated users can only see approved and published properties
+        if (!prop.isPublished || prop.status !== 'approved') {
+          return NextResponse.json(
+            { error: 'Property not found', code: 'NOT_FOUND' },
+            { status: 404 }
+          );
+        }
       }
 
       // Map property to include legacy field names
@@ -91,14 +97,15 @@ export async function GET(request: NextRequest) {
     const conditions = [];
 
     // Role-based filtering
-    // Owners: Only see their own properties
-    // Admins: See all properties
-    // Guests/Unauthenticated: Only see published properties
-    if (currentUser && isOwner(currentUser)) {
+    // Owners: Only see their own properties (all statuses)
+    // Admins: See all properties (all statuses)
+    // Guests/Unauthenticated: Only see approved AND published properties
+    if (currentUser && isOwner(currentUser) && !isAdmin(currentUser)) {
       conditions.push(eq(properties.ownerId, currentUser.id));
     } else if (!isAdmin(currentUser)) {
-      // Guests and unauthenticated users only see published properties
+      // Guests and unauthenticated users only see approved AND published properties
       conditions.push(eq(properties.isPublished, true));
+      conditions.push(eq(properties.status, 'approved'));
     }
 
     // Search condition
@@ -308,6 +315,9 @@ export async function POST(request: NextRequest) {
       ownerId: currentUser.id, // Set from authenticated user
       ownerContact: body.ownerContact?.trim() || null,
       featured: body.featured ?? false,
+      // Property approval workflow: All new properties default to 'pending' status
+      // unless explicitly set by admin
+      status: isAdmin(currentUser) ? (body.status || 'pending') : 'pending',
       isPublished: body.isPublished ?? true,
       createdAt: now,
       updatedAt: now,

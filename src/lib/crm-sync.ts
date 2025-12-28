@@ -592,3 +592,349 @@ export async function getMembershipSummary() {
     return null;
   }
 }
+
+// ============================================
+// STEP 5: CRM SYNC FOR PAYMENT EVENTS
+// ============================================
+
+/**
+ * Sync subscription status to CRM on payment events
+ * Triggered by: payment success, payment failure, subscription cancellation
+ */
+export async function syncSubscriptionStatusToCRM(
+  userId: string,
+  eventType: 'payment_success' | 'payment_failure' | 'subscription_cancelled' | 'subscription_renewed',
+  metadata?: {
+    amount?: number;
+    currency?: string;
+    subscriptionId?: number;
+    planName?: string;
+    failureReason?: string;
+  }
+): Promise<{ success: boolean; syncedData: any }> {
+  const timestamp = nowUKFormatted();
+  
+  try {
+    logCRMSync(`Syncing ${eventType} to CRM`, { userId, metadata });
+
+    // 1. Get user's current subscription and membership data
+    const membership = await getMembershipData(userId);
+    if (!membership) {
+      throw new Error(`No membership data found for user ${userId}`);
+    }
+
+    // 2. Update CRM owner profile based on event
+    const { crmOwnerProfiles, crmActivityLog, crmNotes, user: userTable } = await import('@/db/schema');
+    
+    // Check if CRM profile exists, create if not
+    const existingProfile = await db
+      .select()
+      .from(crmOwnerProfiles)
+      .where(eq(crmOwnerProfiles.userId, userId))
+      .limit(1);
+
+    if (!existingProfile || existingProfile.length === 0) {
+      // Create CRM profile
+      const userData = await db
+        .select()
+        .from(userTable)
+        .where(eq(userTable.id, userId))
+        .limit(1);
+
+      if (userData && userData.length > 0) {
+        await db.insert(crmOwnerProfiles).values({
+          userId,
+          businessName: userData[0].companyName || null,
+          address: null,
+          city: null,
+          state: null,
+          postalCode: null,
+          country: 'UK',
+          alternatePhone: userData[0].phone || null,
+          alternateEmail: null,
+          preferredContactMethod: 'email',
+          notes: `CRM profile auto-created on ${timestamp}`,
+          tags: JSON.stringify(['owner', 'auto-created']),
+          source: 'website',
+          status: 'active',
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        });
+
+        logCRMSync('Created CRM profile', { userId });
+      }
+    }
+
+    // 3. Update CRM profile status based on event
+    const profileStatus = 
+      eventType === 'payment_success' || eventType === 'subscription_renewed' ? 'active' :
+      eventType === 'payment_failure' ? 'suspended' :
+      eventType === 'subscription_cancelled' ? 'inactive' : 'active';
+
+    await db
+      .update(crmOwnerProfiles)
+      .set({
+        status: profileStatus,
+        updatedAt: timestamp,
+      })
+      .where(eq(crmOwnerProfiles.userId, userId));
+
+    logCRMSync('Updated CRM profile status', { userId, profileStatus });
+
+    // 4. Log activity in CRM
+    const activityTitle = 
+      eventType === 'payment_success' ? `Payment received: ${metadata?.currency} ${metadata?.amount}` :
+      eventType === 'payment_failure' ? `Payment failed: ${metadata?.currency} ${metadata?.amount}` :
+      eventType === 'subscription_cancelled' ? `Subscription cancelled: ${metadata?.planName}` :
+      eventType === 'subscription_renewed' ? `Subscription renewed: ${metadata?.planName}` :
+      'Subscription event';
+
+    await db.insert(crmActivityLog).values({
+      entityType: 'owner',
+      entityId: userId,
+      activityType: eventType === 'payment_success' || eventType === 'subscription_renewed' ? 'payment' : 'status_change',
+      title: activityTitle,
+      description: `${eventType.replace(/_/g, ' ')} event. Status: ${membership.status}, Tier: ${membership.tier}`,
+      outcome: eventType === 'payment_success' || eventType === 'subscription_renewed' ? 'success' : eventType,
+      performedBy: 'system',
+      metadata: JSON.stringify({
+        ...metadata,
+        membershipStatus: membership.status,
+        membershipTier: membership.tier,
+        subscriptionEnd: membership.subscriptionEnd,
+      }),
+      createdAt: timestamp,
+    });
+
+    logCRMSync('Logged CRM activity', { userId, eventType });
+
+    // 5. Create high-priority note for failures or cancellations
+    if (eventType === 'payment_failure' || eventType === 'subscription_cancelled') {
+      const noteTitle = eventType === 'payment_failure' 
+        ? 'URGENT: Subscription payment failed'
+        : 'Subscription cancelled';
+      
+      const noteContent = eventType === 'payment_failure'
+        ? `Subscription payment of ${metadata?.currency} ${metadata?.amount} failed. Reason: ${metadata?.failureReason || 'Unknown'}. Immediate follow-up required.`
+        : `Subscription cancelled on ${timestamp}. Plan: ${metadata?.planName}. Follow up to understand reason and potential retention.`;
+
+      await db.insert(crmNotes).values({
+        entityType: 'owner',
+        entityId: userId,
+        noteType: 'reminder',
+        title: noteTitle,
+        content: noteContent,
+        priority: eventType === 'payment_failure' ? 'high' : 'normal',
+        dueDate: timestamp,
+        isCompleted: false,
+        createdBy: 'system',
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
+
+      logCRMSync('Created CRM note', { userId, eventType, priority: eventType === 'payment_failure' ? 'high' : 'normal' });
+    }
+
+    return {
+      success: true,
+      syncedData: {
+        userId,
+        eventType,
+        membershipStatus: membership.status,
+        crmStatus: profileStatus,
+        timestamp,
+      },
+    };
+
+  } catch (error) {
+    logCRMSync('Failed to sync to CRM', {
+      userId,
+      eventType,
+      error: (error as Error).message,
+    });
+    
+    return {
+      success: false,
+      syncedData: {
+        userId,
+        eventType,
+        error: (error as Error).message,
+        timestamp,
+      },
+    };
+  }
+}
+
+/**
+ * Sync multiple properties to CRM
+ * Triggered when subscription status changes or properties are updated
+ */
+export async function syncPropertiesToCRM(
+  ownerId: string
+): Promise<{ success: boolean; propertySyncCount: number }> {
+  const timestamp = nowUKFormatted();
+  
+  try {
+    logCRMSync('Syncing properties to CRM', { ownerId });
+
+    // Get all properties owned by this user
+    const { properties, crmPropertyLinks } = await import('@/db/schema');
+    
+    const ownerProperties = await db
+      .select()
+      .from(properties)
+      .where(eq(properties.ownerId, ownerId));
+
+    if (ownerProperties.length === 0) {
+      logCRMSync('No properties to sync', { ownerId });
+      return { success: true, propertySyncCount: 0 };
+    }
+
+    let syncedCount = 0;
+
+    // Sync each property
+    for (const property of ownerProperties) {
+      try {
+        // Check if property link exists
+        const existingLink = await db
+          .select()
+          .from(crmPropertyLinks)
+          .where(
+            and(
+              eq(crmPropertyLinks.ownerId, ownerId),
+              eq(crmPropertyLinks.propertyId, property.id)
+            )
+          )
+          .limit(1);
+
+        const linkStatus = property.status === 'approved' ? 'active' : 'pending';
+
+        if (existingLink && existingLink.length > 0) {
+          // Update existing link
+          await db
+            .update(crmPropertyLinks)
+            .set({
+              linkStatus,
+              updatedAt: timestamp,
+            })
+            .where(
+              and(
+                eq(crmPropertyLinks.ownerId, ownerId),
+                eq(crmPropertyLinks.propertyId, property.id)
+              )
+            );
+        } else {
+          // Create new link
+          await db.insert(crmPropertyLinks).values({
+            ownerId,
+            propertyId: property.id,
+            linkStatus,
+            ownershipType: 'full',
+            commissionRate: null,
+            contractStartDate: timestamp,
+            contractEndDate: null,
+            notes: `Property: ${property.title}. Status: ${property.status}`,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          });
+        }
+
+        syncedCount++;
+      } catch (propError) {
+        logCRMSync('Error syncing property', {
+          propertyId: property.id,
+          error: (propError as Error).message,
+        });
+      }
+    }
+
+    logCRMSync('Properties synced to CRM', { ownerId, syncedCount });
+
+    return {
+      success: true,
+      propertySyncCount: syncedCount,
+    };
+
+  } catch (error) {
+    logCRMSync('Failed to sync properties to CRM', {
+      ownerId,
+      error: (error as Error).message,
+    });
+    
+    return {
+      success: false,
+      propertySyncCount: 0,
+    };
+  }
+}
+
+/**
+ * Full owner sync to CRM
+ * Syncs subscription status, membership state, and all properties
+ */
+export async function fullOwnerSyncToCRM(
+  userId: string,
+  eventType: 'payment_success' | 'payment_failure' | 'subscription_cancelled' | 'subscription_renewed' = 'subscription_renewed',
+  metadata?: any
+): Promise<{ success: boolean; syncDetails: any }> {
+  const timestamp = nowUKFormatted();
+  
+  try {
+    logCRMSync('Starting full owner sync to CRM', { userId });
+
+    // 1. Sync subscription status
+    const subscriptionSync = await syncSubscriptionStatusToCRM(userId, eventType, metadata);
+
+    // 2. Sync all properties
+    const propertySync = await syncPropertiesToCRM(userId);
+
+    // 3. Log full sync activity
+    const { crmActivityLog } = await import('@/db/schema');
+    await db.insert(crmActivityLog).values({
+      entityType: 'owner',
+      entityId: userId,
+      activityType: 'note',
+      title: 'Full CRM sync completed',
+      description: `Complete owner data synced to CRM. Event: ${eventType}. Properties synced: ${propertySync.propertySyncCount}`,
+      outcome: subscriptionSync.success && propertySync.success ? 'success' : 'partial',
+      performedBy: 'system',
+      metadata: JSON.stringify({
+        subscriptionSync: subscriptionSync.syncedData,
+        propertySyncCount: propertySync.propertySyncCount,
+      }),
+      createdAt: timestamp,
+    });
+
+    logCRMSync('Full owner sync completed', {
+      userId,
+      subscriptionSyncSuccess: subscriptionSync.success,
+      propertySyncCount: propertySync.propertySyncCount,
+    });
+
+    return {
+      success: subscriptionSync.success && propertySync.success,
+      syncDetails: {
+        subscriptionSync: subscriptionSync.syncedData,
+        propertySync: {
+          success: propertySync.success,
+          propertySyncCount: propertySync.propertySyncCount,
+        },
+        timestamp,
+      },
+    };
+
+  } catch (error) {
+    logCRMSync('Failed full owner sync', {
+      userId,
+      error: (error as Error).message,
+    });
+    
+    return {
+      success: false,
+      syncDetails: {
+        error: (error as Error).message,
+        timestamp,
+      },
+    };
+  }
+}

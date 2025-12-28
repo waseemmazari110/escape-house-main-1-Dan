@@ -3,9 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Heart, UsersRound, MapPinned } from "lucide-react";
-import { useState } from "react";
+import { useState, memo, useMemo } from "react";
 import BookingModal from "@/components/BookingModal";
-import { useMemo } from "react";
 
 interface PropertyCardProps {
   id: string;
@@ -19,7 +18,7 @@ interface PropertyCardProps {
   slug: string;
 }
 
-export default function PropertyCard({
+const PropertyCard = memo(function PropertyCard({
   id,
   title,
   location,
@@ -195,7 +194,9 @@ export default function PropertyCard({
       />
     </>
   );
-}
+});
+
+export default PropertyCard;
 
 
 

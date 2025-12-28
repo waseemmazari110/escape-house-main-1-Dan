@@ -51,24 +51,30 @@ function OwnerLoginForm() {
 
       // Verify user role matches owner
       if (data?.user) {
-        // Check if the logged-in user is an owner
+        // Check if the logged-in user is an owner or admin
         const userResponse = await fetch("/api/user/profile", { cache: 'no-store' });
         
         if (userResponse.ok) {
           const userData = await userResponse.json();
+          const userRole = userData.role;
           
-          if (userData.role !== "owner" && userData.role !== "admin") {
+          // Redirect based on role
+          if (userRole === "admin") {
+            toast.success("Welcome back, Admin!");
+            router.push("/admin/dashboard");
+            return;
+          } else if (userRole === "owner") {
+            toast.success("Welcome back!");
+            const redirectUrl = searchParams.get("redirect") || "/owner/dashboard";
+            router.push(redirectUrl);
+            return;
+          } else {
+            // Guest or other role
             toast.error("This login is for property owners only. Please use the guest login.");
             await authClient.signOut();
             setIsLoading(false);
             return;
           }
-          
-          toast.success("Welcome back!");
-          
-          // Redirect based on role
-          const redirectUrl = searchParams.get("redirect") || "/owner/dashboard";
-          router.push(redirectUrl);
         } else {
           toast.error("Could not verify account. Please try again.");
           await authClient.signOut();

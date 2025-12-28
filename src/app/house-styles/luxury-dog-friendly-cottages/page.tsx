@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, ChevronRightIcon, Dog, Home, TreePine } from "lucide-react";
+import { Check, ChevronRight, Dog, Home, TreePine } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -85,7 +85,7 @@ export default function LuxuryDogFriendlyCottagesPage() {
               >
                 <Link href="/properties">
                   Browse Dog Friendly Cottages
-                  <ChevronRightIcon className="ml-2 w-5 h-5" />
+                  <ChevronRight className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
             </div>
@@ -180,9 +180,6 @@ export default function LuxuryDogFriendlyCottagesPage() {
     </div>
   );
 }
-
-
-
 
 
 

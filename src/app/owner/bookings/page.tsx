@@ -504,7 +504,7 @@ function OwnerBookingsContent() {
 
 export default function OwnerBookings() {
   return (
-    <ProtectedRoute allowedRoles={['owner', 'admin']}>
+    <ProtectedRoute allowedRoles={['owner']}>
       <OwnerBookingsContent />
     </ProtectedRoute>
   );

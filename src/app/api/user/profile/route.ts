@@ -7,11 +7,16 @@ import { eq } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
     const session = await auth.api.getSession({ headers: await headers() });
+    clearTimeout(timeoutId);
 
     if (!session?.user) {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { error: "Unauthorized", authenticated: false },
         { status: 401 }
       );
     }
@@ -24,8 +29,9 @@ export async function GET(request: NextRequest) {
       .limit(1);
 
     if (!userProfile) {
+      // User in session but not in database - session is stale
       return NextResponse.json(
-        { error: "User not found" },
+        { error: "User not found", authenticated: false },
         { status: 404 }
       );
     }
@@ -43,9 +49,17 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Profile fetch error:", error);
+    
+    // Return 401 for auth-related errors, 500 for others
+    const isAuthError = error instanceof Error && 
+      (error.message.includes('session') || error.message.includes('unauthorized'));
+    
     return NextResponse.json(
-      { error: "Failed to fetch profile" },
-      { status: 500 }
+      { 
+        error: "Failed to fetch profile",
+        authenticated: !isAuthError 
+      },
+      { status: isAuthError ? 401 : 500 }
     );
   }
 }

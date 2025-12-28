@@ -11,7 +11,7 @@ import { nowUKFormatted } from '@/lib/date-utils';
 // ============================================
 
 export type PlanInterval = 'monthly' | 'yearly';
-export type PlanTier = 'basic' | 'premium' | 'enterprise';
+export type PlanTier = 'free' | 'basic' | 'premium' | 'enterprise';
 
 export interface SubscriptionPlan {
   id: string;
@@ -37,6 +37,32 @@ export interface SubscriptionPlan {
 // ============================================
 
 export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
+  // FREE/GUEST PLAN
+  free: {
+    id: 'free',
+    name: 'Free Plan',
+    tier: 'free',
+    interval: 'monthly',
+    price: 0,
+    currency: 'GBP',
+    stripePriceId: 'free',
+    features: [
+      'Up to 2 property listings',
+      'Basic photo gallery (10 photos per property)',
+      'Basic listing visibility',
+      'Email support',
+      'Mobile responsive design',
+    ],
+    maxProperties: 2,
+    maxPhotos: 10,
+    featuredListings: false,
+    prioritySupport: false,
+    analytics: false,
+    customDomain: false,
+    apiAccess: false,
+    description: 'Perfect for getting started with property listings',
+  },
+  
   // BASIC PLANS
   basic_monthly: {
     id: 'basic_monthly',
@@ -68,7 +94,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Basic Yearly',
     tier: 'basic',
     interval: 'yearly',
-    price: 199.99, // Save £39.89 (16.6% discount)
+    price: 79.99, // Save £159.89 (66.7% discount)
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_BASIC_YEARLY || 'price_basic_yearly',
     features: [
@@ -77,7 +103,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
       'Basic analytics',
       'Email support',
       'Mobile responsive design',
-      '💰 Save £39.89 per year',
+      '💰 Save £159.89 per year',
     ],
     maxProperties: 5,
     maxPhotos: 20,
@@ -95,7 +121,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Premium Monthly',
     tier: 'premium',
     interval: 'monthly',
-    price: 49.99,
+    price: 29.99,
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_PREMIUM_MONTHLY || 'price_premium_monthly',
     features: [
@@ -122,7 +148,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Premium Yearly',
     tier: 'premium',
     interval: 'yearly',
-    price: 499.99, // Save £99.89 (16.6% discount)
+    price: 99.99, // Save £259.89 (72.2% discount)
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_PREMIUM_YEARLY || 'price_premium_yearly',
     features: [
@@ -133,7 +159,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
       'Priority email & chat support',
       'Social media integration',
       'Booking calendar',
-      '💰 Save £99.89 per year',
+      '💰 Save £259.89 per year',
     ],
     maxProperties: 25,
     maxPhotos: 50,
@@ -151,7 +177,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Enterprise Monthly',
     tier: 'enterprise',
     interval: 'monthly',
-    price: 99.99,
+    price: 39.99,
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY || 'price_enterprise_monthly',
     features: [
@@ -180,7 +206,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Enterprise Yearly',
     tier: 'enterprise',
     interval: 'yearly',
-    price: 999.99, // Save £199.89 (16.6% discount)
+    price: 119.99, // Save £359.89 (75% discount)
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_ENTERPRISE_YEARLY || 'price_enterprise_yearly',
     features: [
@@ -193,7 +219,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
       'API access',
       'White-label options',
       'Dedicated account manager',
-      '💰 Save £199.89 per year',
+      '💰 Save £359.89 per year',
     ],
     maxProperties: -1, // unlimited
     maxPhotos: -1, // unlimited
@@ -204,6 +230,55 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     apiAccess: true,
     description: 'For established property management companies - Save 16.6% annually',
   },
+
+  // TEST PRODUCTS (for development/testing)
+  test_basic: {
+    id: 'test_basic',
+    name: 'Test Basic - £1',
+    tier: 'basic',
+    interval: 'monthly',
+    price: 1.00,
+    currency: 'GBP',
+    stripePriceId: process.env.STRIPE_BASIC || 'price_test_basic',
+    features: [
+      '🧪 Test Product - £1',
+      'Up to 5 property listings',
+      'Standard photo gallery',
+      'Email support',
+    ],
+    maxProperties: 5,
+    maxPhotos: 20,
+    featuredListings: false,
+    prioritySupport: false,
+    analytics: true,
+    customDomain: false,
+    apiAccess: false,
+    description: 'Test product for £1 - verify payment tracking',
+  },
+
+  test_basic2: {
+    id: 'test_basic2',
+    name: 'Test Basic 2 - £2',
+    tier: 'basic',
+    interval: 'monthly',
+    price: 2.00,
+    currency: 'GBP',
+    stripePriceId: process.env.STRIPE_BASIC2 || 'price_test_basic2',
+    features: [
+      '🧪 Test Product - £2',
+      'Up to 5 property listings',
+      'Standard photo gallery',
+      'Email support',
+    ],
+    maxProperties: 5,
+    maxPhotos: 20,
+    featuredListings: false,
+    prioritySupport: false,
+    analytics: true,
+    customDomain: false,
+    apiAccess: false,
+    description: 'Test product for £2 - verify payment tracking',
+  },
 };
 
 // ============================================
@@ -211,6 +286,10 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
 // ============================================
 
 export const TRIAL_CONFIG = {
+  free: {
+    days: 0,
+    description: 'No trial needed - Always free',
+  },
   basic: {
     days: 7,
     description: '7-day free trial',
@@ -319,6 +398,12 @@ export function getPlanComparison() {
   const timestamp = nowUKFormatted();
   
   const comparison = {
+    free: {
+      monthly: SUBSCRIPTION_PLANS.free,
+      yearly: null,
+      savings: 0,
+      discount: 0,
+    },
     basic: {
       monthly: SUBSCRIPTION_PLANS.basic_monthly,
       yearly: SUBSCRIPTION_PLANS.basic_yearly,

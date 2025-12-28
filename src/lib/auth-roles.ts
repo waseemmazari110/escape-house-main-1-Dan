@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from './auth';
 import { headers } from 'next/headers';
+import { db } from '@/db';
+import { user } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export type UserRole = 'guest' | 'owner' | 'admin';
 
@@ -21,7 +24,7 @@ export interface AuthenticatedUser {
 }
 
 /**
- * Get the current authenticated user with role information
+ * Get the current authenticated user with role information from database
  */
 export async function getCurrentUserWithRole(): Promise<AuthenticatedUser | null> {
   try {
@@ -31,13 +34,31 @@ export async function getCurrentUserWithRole(): Promise<AuthenticatedUser | null
       return null;
     }
 
+    // Fetch user from database to get actual role
+    const [userProfile] = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        companyName: user.companyName,
+      })
+      .from(user)
+      .where(eq(user.id, session.user.id))
+      .limit(1);
+
+    if (!userProfile) {
+      return null;
+    }
+
     return {
-      id: session.user.id,
-      name: session.user.name,
-      email: session.user.email,
-      role: (session.user.role as UserRole) || 'guest',
-      phone: (session.user as any).phone,
-      companyName: (session.user as any).companyName,
+      id: userProfile.id,
+      name: userProfile.name,
+      email: userProfile.email,
+      role: (userProfile.role as UserRole) || 'guest',
+      phone: userProfile.phone || undefined,
+      companyName: userProfile.companyName || undefined,
     };
   } catch (error) {
     console.error('Error getting current user:', error);

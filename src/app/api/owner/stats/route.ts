@@ -44,9 +44,21 @@ export async function GET(request: NextRequest) {
 
     const propertyIds = ownerProperties.map(p => p.id);
     
-    // Get all bookings for owner's properties
+    // Get all bookings for owner's properties (select specific fields to avoid JSON parsing issues)
     const ownerBookings = await db
-      .select()
+      .select({
+        id: bookings.id,
+        propertyId: bookings.propertyId,
+        propertyName: bookings.propertyName,
+        guestName: bookings.guestName,
+        guestEmail: bookings.guestEmail,
+        checkInDate: bookings.checkInDate,
+        checkOutDate: bookings.checkOutDate,
+        numberOfGuests: bookings.numberOfGuests,
+        totalPrice: bookings.totalPrice,
+        bookingStatus: bookings.bookingStatus,
+        createdAt: bookings.createdAt,
+      })
       .from(bookings)
       .where(
         sql`${bookings.propertyId} IN ${sql.raw(`(${propertyIds.join(',')})`)} OR ${bookings.propertyName} IN ${sql.raw(`(${ownerProperties.map(p => `'${p.title.replace(/'/g, "''")}'`).join(',')})`)}`

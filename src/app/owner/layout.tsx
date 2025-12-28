@@ -14,9 +14,19 @@ export default async function OwnerLayout({
   const user = session?.user as any;
   const role = user?.role;
 
-  // Redirect if not authenticated or not an owner
-  if (!user || (role !== "owner" && role !== "admin")) {
+  // Redirect if not authenticated
+  if (!user) {
     redirect("/owner/login");
+  }
+
+  // STRICT: Only owners can access owner routes (not even admins)
+  if (role !== "owner") {
+    // Redirect non-owners to their appropriate dashboard
+    if (role === "admin") {
+      redirect("/admin/dashboard");
+    } else {
+      redirect("/");
+    }
   }
 
   return <>{children}</>;

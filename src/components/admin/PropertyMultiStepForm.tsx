@@ -11,6 +11,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronLeft, ChevronRight, Save, Check, Home, MapPin, Bed, Sparkles, FileText, PoundSterling, Image, Search } from "lucide-react";
 import { GEH_API } from "@/lib/api-client";
 import { toast } from "sonner";
+import { PropertyImageUpload } from "@/components/property/PropertyImageUpload";
+import { AmenitiesSelector } from "@/components/property/AmenitiesSelector";
+import { PricingFieldsManager } from "@/components/property/PricingFieldsManager";
 
 type PropertyFormData = {
   // Essentials
@@ -69,12 +72,6 @@ const STEPS = [
   { id: 6, name: "Pricing", icon: PoundSterling },
   { id: 7, name: "Media", icon: Image },
   { id: 8, name: "SEO", icon: Search },
-];
-
-const AMENITIES_OPTIONS = [
-  "Hot Tub", "Swimming Pool", "Games Room", "Cinema Room", "BBQ", 
-  "Garden", "Parking", "WiFi", "Pet Friendly", "Accessible",
-  "EV Charging", "Tennis Court", "Beach Access", "Fishing Lake"
 ];
 
 const PROPERTY_TYPES = [
@@ -151,15 +148,6 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
         return newErrors;
       });
     }
-  };
-
-  const toggleAmenity = (amenity: string) => {
-    setFormData(prev => ({
-      ...prev,
-      amenities: prev.amenities.includes(amenity)
-        ? prev.amenities.filter(a => a !== amenity)
-        : [...prev.amenities, amenity]
-    }));
   };
 
   // Check if a step is accessible based on required fields
@@ -409,23 +397,6 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
     }
   };
 
-  const addImageUrl = () => {
-    const url = prompt("Enter image URL:");
-    if (url) {
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, url]
-      }));
-    }
-  };
-
-  const removeImage = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index)
-    }));
-  };
-
   const renderStepContent = () => {
     switch (currentStep) {
       case 1: // Essentials
@@ -587,23 +558,10 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
       case 4: // Amenities
         return (
           <div className="space-y-6">
-            <div>
-              <Label className="text-gray-900">Select Amenities</Label>
-              <div className="grid grid-cols-2 gap-4 mt-3">
-                {AMENITIES_OPTIONS.map(amenity => (
-                  <div key={amenity} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={amenity}
-                      checked={formData.amenities.includes(amenity)}
-                      onCheckedChange={() => toggleAmenity(amenity)}
-                    />
-                    <label htmlFor={amenity} className="text-sm cursor-pointer text-gray-900">
-                      {amenity}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <AmenitiesSelector
+              selectedAmenities={formData.amenities}
+              onAmenitiesChange={(amenities) => updateField("amenities", amenities)}
+            />
           </div>
         );
 
@@ -674,73 +632,17 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
 
       case 6: // Pricing
         return (
-          <div className="space-y-6">
-            <div>
-              <Label htmlFor="base_price" className="text-gray-900">Base Price (per night) *</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
-                <Input
-                  id="base_price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.base_price || ""}
-                  onChange={(e) => updateField("base_price", e.target.value ? parseFloat(e.target.value) : "")}
-                  placeholder="Enter base price"
-                  className={`pl-7 text-gray-900 ${errors.base_price ? "border-red-500" : ""}`}
-                />
-              </div>
-              {errors.base_price && <p className="text-red-500 text-sm mt-1">{errors.base_price}</p>}
-            </div>
-
-            <div>
-              <Label htmlFor="weekend_price" className="text-gray-900">Weekend Price (per night)</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
-                <Input
-                  id="weekend_price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.weekend_price || ""}
-                  onChange={(e) => updateField("weekend_price", parseFloat(e.target.value) || undefined)}
-                  className="pl-7 text-gray-900"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="cleaning_fee" className="text-gray-900">Cleaning Fee</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
-                <Input
-                  id="cleaning_fee"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.cleaning_fee || ""}
-                  onChange={(e) => updateField("cleaning_fee", parseFloat(e.target.value) || undefined)}
-                  className="pl-7 text-gray-900"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="security_deposit" className="text-gray-900">Security Deposit</Label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">£</span>
-                <Input
-                  id="security_deposit"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={formData.security_deposit || ""}
-                  onChange={(e) => updateField("security_deposit", parseFloat(e.target.value) || undefined)}
-                  className="pl-7 text-gray-900"
-                />
-              </div>
-            </div>
-          </div>
+          <PricingFieldsManager
+            basePrice={formData.base_price || 0}
+            weekendPrice={formData.weekend_price}
+            cleaningFee={formData.cleaning_fee}
+            securityDeposit={formData.security_deposit}
+            onBasePriceChange={(price) => updateField("base_price", price)}
+            onWeekendPriceChange={(price) => updateField("weekend_price", price)}
+            onCleaningFeeChange={(fee) => updateField("cleaning_fee", fee)}
+            onSecurityDepositChange={(deposit) => updateField("security_deposit", deposit)}
+            showSeasonalPricing={false}
+          />
         );
 
       case 7: // Media
@@ -748,29 +650,15 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
           <div className="space-y-6">
             <div>
               <Label className="text-gray-900">Property Images</Label>
-              <div className="space-y-4 mt-3">
-                {formData.images.map((url, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Input value={url} readOnly className="flex-1 text-gray-900" />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => removeImage(index)}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addImageUrl}
-                  className="w-full"
-                >
-                  Add Image URL
-                </Button>
-              </div>
+              <p className="text-sm text-gray-500 mb-4">
+                Upload images of your property. The first image will be the hero image.
+              </p>
+              <PropertyImageUpload
+                images={formData.images}
+                onImagesChange={(imgs) => updateField("images", imgs)}
+                maxImages={20}
+                maxSizeMB={5}
+              />
             </div>
 
             <div>
@@ -857,7 +745,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
                       disabled={!isAccessible}
                       className={`relative flex flex-col items-center gap-1 touch-manipulation ${
                         isActive ? "text-[var(--color-accent-sage)]" : isCompleted ? "text-green-600" : "text-gray-400"
-                      } ${!isAccessible ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-95"}`}
+                      } ${!isAccessible ? "bg-gray-200 cursor-not-allowed" : "cursor-pointer active:scale-95"}`}
                     >
                       <div
                         className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center border-2 transition-all flex-shrink-0 ${
@@ -912,7 +800,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
                       disabled={!isAccessible}
                       className={`relative flex flex-col items-center group w-full ${
                         isActive ? "text-[var(--color-accent-sage)]" : isCompleted ? "text-green-600" : "text-gray-400"
-                      } ${!isAccessible ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                      } ${!isAccessible ? "bg-gray-200 cursor-not-allowed" : "cursor-pointer"}`}
                     >
                       <div
                         className={`w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center border-2 transition-all ${

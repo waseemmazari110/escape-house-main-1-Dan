@@ -60,7 +60,18 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      return NextResponse.json(booking[0], { status: 200 });
+      // Sanitize paymentMetadata if needed
+      const sanitizedBooking = { ...booking[0] };
+      if (sanitizedBooking.paymentMetadata && typeof sanitizedBooking.paymentMetadata === 'string') {
+        try {
+          sanitizedBooking.paymentMetadata = JSON.parse(sanitizedBooking.paymentMetadata);
+        } catch {
+          console.warn(`Invalid JSON in paymentMetadata for booking ${sanitizedBooking.id}, setting to null`);
+          sanitizedBooking.paymentMetadata = null;
+        }
+      }
+
+      return NextResponse.json(sanitizedBooking, { status: 200 });
     }
 
     // List bookings - Only admins can list all bookings
@@ -130,7 +141,23 @@ export async function GET(request: NextRequest) {
     // Apply pagination
     const results = await query.limit(limit).offset(offset);
 
-    return NextResponse.json(results, { status: 200 });
+    // Sanitize results to handle invalid JSON in paymentMetadata field
+    const sanitizedResults = results.map((booking: any) => {
+      // If paymentMetadata is invalid JSON (string instead of object), set to null
+      if (booking.paymentMetadata && typeof booking.paymentMetadata === 'string') {
+        try {
+          // Try to parse if it's a JSON string
+          booking.paymentMetadata = JSON.parse(booking.paymentMetadata);
+        } catch {
+          // If parsing fails, set to null
+          console.warn(`Invalid JSON in paymentMetadata for booking ${booking.id}, setting to null`);
+          booking.paymentMetadata = null;
+        }
+      }
+      return booking;
+    });
+
+    return NextResponse.json(sanitizedResults, { status: 200 });
   } catch (error) {
     console.error('GET error:', error);
     return NextResponse.json(

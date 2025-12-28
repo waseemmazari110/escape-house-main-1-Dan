@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Check, ChevronRightIcon, Home, Users, Sparkles, Droplets, Waves, Film } from "lucide-react";
+import { Check, ChevronRight, Home, Users, Sparkles, Droplets, Waves, Film } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -175,7 +175,7 @@ export default function ManorHousesPage() {
               >
                 <Link href="/properties">
                   Browse Manor Houses
-                  <ChevronRightIcon className="ml-2 w-5 h-5" />
+                  <ChevronRight className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
             </div>
@@ -234,7 +234,7 @@ export default function ManorHousesPage() {
                   {feature.title}
                 </h3>
                 <span className="text-[var(--color-accent-sage)] text-sm font-medium inline-flex items-center gap-2">
-                  Explore <ChevronRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  Explore <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </span>
               </Link>
             ))}
@@ -263,9 +263,6 @@ export default function ManorHousesPage() {
     </div>
   );
 }
-
-
-
 
 
 
