@@ -26,6 +26,13 @@ export function todayUKFormatted(): string {
 }
 
 /**
+ * Get current date/time in UK timezone
+ */
+export function nowUK(): Date {
+  return new Date(new Date().toLocaleString('en-GB', { timeZone: UK_TIMEZONE }));
+}
+
+/**
  * Format date to UK short format: DD/MM/YYYY
  */
 export function formatDateUK(date: Date | string): string {
