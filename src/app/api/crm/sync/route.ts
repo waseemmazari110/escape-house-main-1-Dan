@@ -5,8 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import {
   syncMembershipStatus,
   syncAllMemberships,
@@ -23,7 +22,7 @@ export async function GET(request: NextRequest) {
   console.log(`[${timestamp}] GET /api/crm/sync`);
 
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -89,7 +88,7 @@ export async function POST(request: NextRequest) {
   console.log(`[${timestamp}] POST /api/crm/sync`);
 
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },

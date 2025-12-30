@@ -217,3 +217,40 @@ export function isToday(date: Date | string): boolean {
     d.getMonth() === today.getMonth() &&
     d.getFullYear() === today.getFullYear();
 }
+
+/**
+ * Parse UK format date string (DD/MM/YYYY) to Date object
+ * @param dateStr Date string in DD/MM/YYYY format
+ * @returns Date object
+ */
+export function parseUKDate(dateStr: string): Date {
+  if (!dateStr) throw new Error('Date string is required');
+  
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) {
+    throw new Error(`Invalid UK date format: ${dateStr}. Expected DD/MM/YYYY`);
+  }
+  
+  const [day, month, year] = parts.map(p => parseInt(p, 10));
+  
+  if (isNaN(day) || isNaN(month) || isNaN(year)) {
+    throw new Error(`Invalid UK date format: ${dateStr}. Contains non-numeric values`);
+  }
+  
+  // Month is 0-indexed in JavaScript Date
+  return new Date(year, month - 1, day);
+}
+
+/**
+ * Validate UK date format string
+ * @param dateStr Date string to validate
+ * @returns true if valid DD/MM/YYYY format
+ */
+export function isValidUKDate(dateStr: string): boolean {
+  try {
+    parseUKDate(dateStr);
+    return true;
+  } catch {
+    return false;
+  }
+}
