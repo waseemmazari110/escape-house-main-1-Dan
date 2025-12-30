@@ -55,43 +55,44 @@ export async function POST(request: NextRequest) {
         try {
           // Get subscription details
           let subscriptionId = null;
-          if (invoice.subscription) {
+          const invoiceData = invoice as any;
+          if (invoiceData.subscription && typeof invoiceData.subscription === 'string') {
             const subRecords = await db
               .select()
               .from(subscriptions)
-              .where(eq(subscriptions.stripeSubscriptionId, invoice.subscription as string));
+              .where(eq(subscriptions.stripeSubscriptionId, invoiceData.subscription));
             subscriptionId = subRecords[0]?.id || null;
           }
 
-          const paymentIntent = invoice.payment_intent as any;
-          const charge = invoice.charge as any;
+          const paymentIntent = invoiceData.payment_intent as any;
+          const charge = invoiceData.charge as any;
 
           // Only sync paid or failed invoices
           if (invoice.status === 'paid' || invoice.status === 'open' || invoice.status === 'uncollectible') {
             await db.insert(payments).values({
               userId: currentUser.id,
               subscriptionId: subscriptionId,
-              stripeCustomerId: invoice.customer as string || null,
+              stripeCustomerId: invoiceData.customer as string || null,
               stripePaymentIntentId: paymentIntent?.id || null,
               stripeChargeId: charge?.id || null,
               stripeInvoiceId: invoice.id,
-              amount: (invoice.amount_paid || 0) / 100,
-              currency: (invoice.currency || 'gbp').toUpperCase(),
+              amount: (invoiceData.amount_paid || 0) / 100,
+              currency: (invoiceData.currency || 'gbp').toUpperCase(),
               paymentStatus: invoice.status === 'paid' ? 'succeeded' : (invoice.status === 'open' ? 'pending' : 'failed'),
               paymentMethod: (charge as any)?.payment_method_details?.type || 'card',
               paymentMethodBrand: (charge as any)?.payment_method_details?.card?.brand || null,
               paymentMethodLast4: (charge as any)?.payment_method_details?.card?.last4 || null,
-              description: `Invoice #${invoice.number || invoice.id.substring(0, 8)}`,
-              billingReason: invoice.billing_reason || null,
-              receiptUrl: invoice.receipt_url || null,
-              receiptEmail: invoice.receipt_email || null,
+              description: `Invoice #${invoiceData.number || invoice.id.substring(0, 8)}`,
+              billingReason: invoiceData.billing_reason || null,
+              receiptUrl: invoiceData.receipt_url || null,
+              receiptEmail: invoiceData.receipt_email || null,
               failureCode: (paymentIntent as any)?.last_payment_error?.code || null,
               failureMessage: (paymentIntent as any)?.last_payment_error?.message || null,
-              subscriptionPlan: invoice.metadata?.planName || null,
-              metadata: JSON.stringify(invoice.metadata || {}),
+              subscriptionPlan: invoiceData.metadata?.planName || null,
+              metadata: JSON.stringify(invoiceData.metadata || {}),
               stripeEventId: 'manual_sync',
               processedAt: new Date().toISOString(),
-              createdAt: new Date(invoice.created * 1000).toISOString(),
+              createdAt: new Date(invoiceData.created * 1000).toISOString(),
               updatedAt: new Date().toISOString(),
             });
             
@@ -128,15 +129,16 @@ export async function POST(request: NextRequest) {
 
       if (existing.length === 0 && intent.status === 'succeeded') {
         // Create payment record
-        const charge = (intent.charges as any)?.data?.[0];
+        const intentData = intent as any;
+        const charge = intentData.charges?.data?.[0];
         
         try {
           await db.insert(payments).values({
             userId: currentUser.id,
-            stripeCustomerId: intent.customer as string || null,
+            stripeCustomerId: intentData.customer as string || null,
             stripePaymentIntentId: intent.id,
             stripeChargeId: charge?.id || null,
-            stripeInvoiceId: intent.invoice as string || null,
+            stripeInvoiceId: intentData.invoice as string || null,
             amount: intent.amount / 100,
             currency: intent.currency.toUpperCase(),
             paymentStatus: intent.status,
@@ -145,9 +147,9 @@ export async function POST(request: NextRequest) {
             paymentMethodLast4: (charge?.payment_method_details as any)?.card?.last4 || null,
             description: intent.description || 'Payment',
             receiptUrl: charge?.receipt_url || null,
-            receiptEmail: intent.receipt_email || null,
-            failureCode: (intent as any).last_payment_error?.code || null,
-            failureMessage: (intent as any).last_payment_error?.message || null,
+            receiptEmail: intentData.receipt_email || null,
+            failureCode: intentData.last_payment_error?.code || null,
+            failureMessage: intentData.last_payment_error?.message || null,
             metadata: JSON.stringify(intent.metadata || {}),
             stripeEventId: 'manual_sync',
             processedAt: new Date().toISOString(),

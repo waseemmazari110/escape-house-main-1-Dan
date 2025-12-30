@@ -3,6 +3,8 @@
  * Handles cache invalidation and revalidation across the application
  */
 
+'use server';
+
 import { revalidatePath, revalidateTag } from 'next/cache';
 
 /**
@@ -46,10 +48,10 @@ export const CacheTags = {
  */
 export function revalidateOwnerDashboard(userId: string) {
   revalidatePath('/owner/dashboard');
-  revalidateTag(CacheTags.OWNER_DASHBOARD(userId));
-  revalidateTag(CacheTags.OWNER_PROPERTIES(userId));
-  revalidateTag(CacheTags.OWNER_BOOKINGS(userId));
-  revalidateTag(CacheTags.OWNER_PAYMENTS(userId));
+  revalidateTag(CacheTags.OWNER_DASHBOARD(userId), {});
+  revalidateTag(CacheTags.OWNER_PROPERTIES(userId), {});
+  revalidateTag(CacheTags.OWNER_BOOKINGS(userId), {});
+  revalidateTag(CacheTags.OWNER_PAYMENTS(userId), {});
 }
 
 /**
@@ -57,11 +59,11 @@ export function revalidateOwnerDashboard(userId: string) {
  */
 export function revalidateAdminDashboard() {
   revalidatePath('/admin/dashboard');
-  revalidateTag(CacheTags.ADMIN_DASHBOARD);
-  revalidateTag(CacheTags.PROPERTIES);
-  revalidateTag(CacheTags.BOOKINGS);
-  revalidateTag(CacheTags.TRANSACTIONS);
-  revalidateTag(CacheTags.APPROVALS);
+  revalidateTag(CacheTags.ADMIN_DASHBOARD, {});
+  revalidateTag(CacheTags.PROPERTIES, {});
+  revalidateTag(CacheTags.BOOKINGS, {});
+  revalidateTag(CacheTags.TRANSACTIONS, {});
+  revalidateTag(CacheTags.APPROVALS, {});
 }
 
 /**
@@ -70,13 +72,13 @@ export function revalidateAdminDashboard() {
 export function revalidateProperty(propertyId: string, ownerId?: string) {
   revalidatePath('/properties');
   revalidatePath(`/properties/${propertyId}`);
-  revalidateTag(CacheTags.PROPERTIES);
-  revalidateTag(CacheTags.PROPERTY(propertyId));
-  revalidateTag(CacheTags.PROPERTY_BOOKINGS(propertyId));
-  revalidateTag(CacheTags.PROPERTY_APPROVAL(propertyId));
+  revalidateTag(CacheTags.PROPERTIES, {});
+  revalidateTag(CacheTags.PROPERTY(propertyId), {});
+  revalidateTag(CacheTags.PROPERTY_BOOKINGS(propertyId), {});
+  revalidateTag(CacheTags.PROPERTY_APPROVAL(propertyId), {});
   
   if (ownerId) {
-    revalidateTag(CacheTags.OWNER_PROPERTIES(ownerId));
+    revalidateTag(CacheTags.OWNER_PROPERTIES(ownerId), {});
     revalidateOwnerDashboard(ownerId);
   }
 }
@@ -86,13 +88,13 @@ export function revalidateProperty(propertyId: string, ownerId?: string) {
  */
 export function revalidateBooking(bookingId: string, propertyId: string, ownerId?: string) {
   revalidatePath('/bookings');
-  revalidateTag(CacheTags.BOOKINGS);
-  revalidateTag(CacheTags.BOOKING(bookingId));
-  revalidateTag(CacheTags.PROPERTY_BOOKINGS(propertyId));
-  revalidateTag(CacheTags.AVAILABILITY(propertyId));
+  revalidateTag(CacheTags.BOOKINGS, {});
+  revalidateTag(CacheTags.BOOKING(bookingId), {});
+  revalidateTag(CacheTags.PROPERTY_BOOKINGS(propertyId), {});
+  revalidateTag(CacheTags.AVAILABILITY(propertyId), {});
   
   if (ownerId) {
-    revalidateTag(CacheTags.OWNER_BOOKINGS(ownerId));
+    revalidateTag(CacheTags.OWNER_BOOKINGS(ownerId), {});
     revalidateOwnerDashboard(ownerId);
   }
   
@@ -103,9 +105,9 @@ export function revalidateBooking(bookingId: string, propertyId: string, ownerId
  * Revalidate payment/transaction-related cache
  */
 export function revalidatePayment(userId: string) {
-  revalidateTag(CacheTags.PAYMENTS);
-  revalidateTag(CacheTags.TRANSACTIONS);
-  revalidateTag(CacheTags.OWNER_PAYMENTS(userId));
+  revalidateTag(CacheTags.PAYMENTS, {});
+  revalidateTag(CacheTags.TRANSACTIONS, {});
+  revalidateTag(CacheTags.OWNER_PAYMENTS(userId), {});
   revalidateOwnerDashboard(userId);
   revalidateAdminDashboard();
 }
@@ -114,8 +116,8 @@ export function revalidatePayment(userId: string) {
  * Revalidate subscription-related cache
  */
 export function revalidateSubscription(userId: string) {
-  revalidateTag(CacheTags.SUBSCRIPTIONS);
-  revalidateTag(CacheTags.USER_SUBSCRIPTION(userId));
+  revalidateTag(CacheTags.SUBSCRIPTIONS, {});
+  revalidateTag(CacheTags.USER_SUBSCRIPTION(userId), {});
   revalidateOwnerDashboard(userId);
   revalidateAdminDashboard();
 }
@@ -124,8 +126,8 @@ export function revalidateSubscription(userId: string) {
  * Revalidate approval-related cache
  */
 export function revalidateApproval(propertyId: string, ownerId?: string) {
-  revalidateTag(CacheTags.APPROVALS);
-  revalidateTag(CacheTags.PROPERTY_APPROVAL(propertyId));
+  revalidateTag(CacheTags.APPROVALS, {});
+  revalidateTag(CacheTags.PROPERTY_APPROVAL(propertyId), {});
   revalidateProperty(propertyId, ownerId);
   revalidateAdminDashboard();
 }
@@ -134,7 +136,7 @@ export function revalidateApproval(propertyId: string, ownerId?: string) {
  * Revalidate availability calendar
  */
 export function revalidateAvailability(propertyId: string, ownerId?: string) {
-  revalidateTag(CacheTags.AVAILABILITY(propertyId));
+  revalidateTag(CacheTags.AVAILABILITY(propertyId), {});
   
   if (ownerId) {
     revalidateOwnerDashboard(ownerId);

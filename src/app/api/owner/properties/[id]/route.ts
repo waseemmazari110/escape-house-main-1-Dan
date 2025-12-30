@@ -48,7 +48,7 @@ export async function GET(
       .from(properties)
       .where(
         and(
-          eq(properties.id, id),
+          eq(properties.id, parseInt(id)),
           eq(properties.ownerId, session.user.id)
         )
       )
@@ -107,7 +107,7 @@ export async function PUT(
       .from(properties)
       .where(
         and(
-          eq(properties.id, id),
+          eq(properties.id, parseInt(id)),
           eq(properties.ownerId, session.user.id)
         )
       )
@@ -178,7 +178,7 @@ export async function PUT(
       })
       .where(
         and(
-          eq(properties.id, id),
+          eq(properties.id, parseInt(id)),
           eq(properties.ownerId, session.user.id)
         )
       )
@@ -251,7 +251,7 @@ export async function DELETE(
       .from(properties)
       .where(
         and(
-          eq(properties.id, id),
+          eq(properties.id, parseInt(id)),
           eq(properties.ownerId, session.user.id)
         )
       )
@@ -269,7 +269,7 @@ export async function DELETE(
       .delete(properties)
       .where(
         and(
-          eq(properties.id, id),
+          eq(properties.id, parseInt(id)),
           eq(properties.ownerId, session.user.id)
         )
       );

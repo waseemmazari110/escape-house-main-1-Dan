@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     // Get user's subscription
     const subscription = await getUserSubscription(session.user.id);
-    if (!subscription) {
+    if (!subscription || !subscription.stripeSubscriptionId) {
       return NextResponse.json(
         { error: 'No active subscription found' },
         { status: 404 }
@@ -52,7 +52,6 @@ export async function POST(request: NextRequest) {
           subscriptionId: subscription.stripeSubscriptionId,
           immediate,
           cancelledAt: immediate ? nowUKFormatted() : result.subscription.currentPeriodEnd,
-          planId: subscription.planId,
           planName: subscription.planName,
         }
       );

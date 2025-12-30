@@ -142,8 +142,8 @@ export async function POST(
     await logAuditEvent({
       userId: session.user.id,
       action: 'property.update',
-      entityType: 'property',
-      entityId: propertyId.toString(),
+      resourceType: 'property',
+      resourceId: propertyId.toString(),
       details: {
         operation: 'update-amenities',
         amenityCount: amenityIds.length,

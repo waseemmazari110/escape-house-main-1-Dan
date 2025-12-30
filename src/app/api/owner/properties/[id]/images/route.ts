@@ -189,8 +189,8 @@ export async function POST(
       const requestDetails = captureRequestDetails(request);
       await logPropertyAction(
         session.user.id,
-        'property.images.bulk_add',
-        parseInt(id),
+        'property.update',
+        id,
         property[0].title,
         {
           imagesAdded: inserted.length,
@@ -255,8 +255,8 @@ export async function POST(
       const requestDetails = captureRequestDetails(request);
       await logPropertyAction(
         session.user.id,
-        'property.images.add',
-        parseInt(id),
+        'property.update',
+        id,
         property[0].title,
         {
           imageId: inserted[0].id,
@@ -366,8 +366,8 @@ export async function PUT(
       const requestDetails = captureRequestDetails(request);
       await logPropertyAction(
         session.user.id,
-        'property.images.reorder',
-        parseInt(id),
+        'property.update',
+        id,
         property[0].title,
         {
           newOrder: body.imageIds,
@@ -406,8 +406,8 @@ export async function PUT(
       const requestDetails = captureRequestDetails(request);
       await logPropertyAction(
         session.user.id,
-        'property.images.update',
-        parseInt(id),
+        'property.update',
+        id,
         property[0].title,
         {
           imageId,
@@ -496,8 +496,8 @@ export async function DELETE(
       const requestDetails = captureRequestDetails(request);
       await logPropertyAction(
         session.user.id,
-        'property.images.bulk_delete',
-        parseInt(id),
+        'property.delete',
+        id,
         property[0].title,
         {
           imageIds: idsArray,
@@ -526,8 +526,8 @@ export async function DELETE(
       const requestDetails = captureRequestDetails(request);
       await logPropertyAction(
         session.user.id,
-        'property.images.delete',
-        parseInt(id),
+        'property.delete',
+        id,
         property[0].title,
         {
           imageId: parseInt(imageId),

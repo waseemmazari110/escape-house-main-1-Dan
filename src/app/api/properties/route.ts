@@ -14,6 +14,7 @@ import {
   unauthenticatedResponse,
   isPropertyOwner
 } from "@/lib/auth-roles";
+import { revalidateProperty, revalidateOwnerDashboard, revalidateAdminDashboard } from "@/lib/cache";
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     // Single property by ID or slug
     if (id || slug) {
-      let property;
+      let property: any[] = [];
       
       if (id) {
         if (!id || isNaN(parseInt(id))) {
@@ -568,8 +569,10 @@ export async function DELETE(request: NextRequest) {
       .returning();
 
     // Revalidate cache to update UI
-    revalidateProperty(id, existingProperty[0].ownerId);
-    revalidateOwnerDashboard(existingProperty[0].ownerId);
+    if (existingProperty[0].ownerId) {
+      revalidateProperty(id, existingProperty[0].ownerId);
+      revalidateOwnerDashboard(existingProperty[0].ownerId);
+    }
     revalidateAdminDashboard();
 
     return NextResponse.json({

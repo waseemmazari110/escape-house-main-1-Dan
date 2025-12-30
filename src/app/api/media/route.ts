@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
     const userId = searchParams.get('userId'); // Admin can view any user's media
-    const sortBy = searchParams.get('sortBy') || 'createdAt';
+    const sortBy = (searchParams.get('sortBy') || 'createdAt') as 'createdAt' | 'fileName' | 'fileSize';
     const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc';
 
     // Check if user wants their own media or has admin access
@@ -79,8 +79,8 @@ export async function GET(req: NextRequest) {
       mediaList = await listMedia({
         filters: {
           uploadedBy: targetUserId,
-          fileType,
-          folder,
+          ...(fileType && { fileType }),
+          ...(folder && { folder }),
         },
         limit,
         offset,
@@ -93,6 +93,7 @@ export async function GET(req: NextRequest) {
     const includeStats = searchParams.get('includeStats') === 'true';
     const stats = includeStats ? await getMediaStats(targetUserId) : undefined;
 
+    const mediaArray = 'media' in mediaList ? mediaList.media : [];
     return NextResponse.json({
       success: true,
       media: mediaList,
@@ -100,7 +101,7 @@ export async function GET(req: NextRequest) {
       pagination: {
         limit,
         offset,
-        hasMore: mediaList.length === limit,
+        hasMore: mediaArray.length === limit,
       },
     });
   } catch (error: any) {
@@ -162,8 +163,8 @@ export async function POST(req: NextRequest) {
       await logAuditEvent({
         userId: session.user.id,
         action: 'media.delete',
-        entityType: 'media',
-        entityId: 'batch',
+        resourceType: 'media',
+        resourceId: 'batch',
         details: {
           mediaIds,
           successful,

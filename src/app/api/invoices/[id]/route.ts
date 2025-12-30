@@ -30,7 +30,7 @@ export async function GET(
     const format = searchParams.get('format'); // 'json' or 'html'
 
     // Generate invoice data
-    const invoiceData = await generateInvoiceData(params.id);
+    const invoiceData = await generateInvoiceData(id);
 
     if (!invoiceData) {
       return NextResponse.json(

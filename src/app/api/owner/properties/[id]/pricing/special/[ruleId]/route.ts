@@ -112,8 +112,8 @@ export async function POST(
     const requestDetails = captureRequestDetails(request);
     await logPropertyAction(
       session.user.id,
-      'property.pricing.special.create',
-      parseInt(id),
+      'property.create',
+      id,
       property[0].title,
       {
         ruleId: inserted[0].id,
@@ -245,8 +245,8 @@ export async function PUT(
     const requestDetails = captureRequestDetails(request);
     await logPropertyAction(
       session.user.id,
-      'property.pricing.special.update',
-      parseInt(id),
+      'property.update',
+      id,
       property[0].title,
       {
         ruleId: parseInt(ruleId),
@@ -329,8 +329,8 @@ export async function DELETE(
     const requestDetails = captureRequestDetails(request);
     await logPropertyAction(
       session.user.id,
-      'property.pricing.special.delete',
-      parseInt(id),
+      'property.delete',
+      id,
       property[0].title,
       {
         ruleId: parseInt(ruleId),

@@ -36,13 +36,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Get billing cycle info
-    const billingCycle = await getCurrentBillingCycle(subscription.id);
+    const billingCycle = await getCurrentBillingCycle(subscription.id.toString());
 
     // Get retry policy if exists
-    const retryPolicy = await getRetryPolicy(subscription.id);
+    const retryPolicy = await getRetryPolicy(subscription.id.toString());
 
     // Check suspension status
-    const isSuspended = await isAccountSuspended(subscription.id);
+    const isSuspended = await isAccountSuspended(subscription.id.toString());
 
     // Get recent invoices
     const invoices = await getUserInvoices(session.user.id);

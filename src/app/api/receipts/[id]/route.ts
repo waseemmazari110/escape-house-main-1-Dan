@@ -30,7 +30,7 @@ export async function GET(
     const format = searchParams.get('format'); // 'json' or 'html'
 
     // Generate receipt data
-    const receiptData = await generateReceiptData(params.id);
+    const receiptData = await generateReceiptData(id);
 
     if (!receiptData) {
       return NextResponse.json(

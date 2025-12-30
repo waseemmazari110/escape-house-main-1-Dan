@@ -56,6 +56,7 @@ type PropertyFormData = {
   // Media
   images: string[];
   hero_image?: string;
+  hero_video?: string;
   
   // SEO
   meta_title?: string;
@@ -123,7 +124,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
     house_rules: initialData?.house_rules || "",
     
     // Pricing
-    base_price: initialData?.base_price,
+    base_price: initialData?.base_price || 0,
     weekend_price: initialData?.weekend_price,
     cleaning_fee: initialData?.cleaning_fee,
     security_deposit: initialData?.security_deposit,
@@ -131,6 +132,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
     // Media
     images: initialData?.images || [],
     hero_image: initialData?.hero_image,
+    hero_video: initialData?.hero_video,
     
     // SEO
     meta_title: initialData?.meta_title,

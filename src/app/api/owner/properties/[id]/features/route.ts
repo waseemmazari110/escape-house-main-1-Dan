@@ -172,8 +172,8 @@ export async function POST(
       const requestDetails = captureRequestDetails(request);
       await logPropertyAction(
         session.user.id,
-        'property.features.bulk_add',
-        parseInt(id),
+        'property.update',
+        id,
         property[0].title,
         {
           featuresAdded: body.features.length,
@@ -220,8 +220,8 @@ export async function POST(
       const requestDetails = captureRequestDetails(request);
       await logPropertyAction(
         session.user.id,
-        'property.features.add',
-        parseInt(id),
+        'property.update',
+        id,
         property[0].title,
         {
           featureName: body.featureName,
@@ -312,8 +312,8 @@ export async function DELETE(
       const requestDetails = captureRequestDetails(request);
       await logPropertyAction(
         session.user.id,
-        'property.features.delete',
-        parseInt(id),
+        'property.delete',
+        id,
         property[0].title,
         {
           featureId: parseInt(featureId),
@@ -335,8 +335,8 @@ export async function DELETE(
       const requestDetails = captureRequestDetails(request);
       await logPropertyAction(
         session.user.id,
-        'property.features.delete_all',
-        parseInt(id),
+        'property.delete',
+        id,
         property[0].title,
         requestDetails
       );

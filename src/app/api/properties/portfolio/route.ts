@@ -258,8 +258,8 @@ async function handleBulkOperation(req: NextRequest, ownerId: string, body: any)
   await logAuditEvent({
     userId: ownerId,
     action: 'property.update',
-    entityType: 'property',
-    entityId: 'bulk',
+    resourceType: 'property',
+    resourceId: 'bulk',
     details: {
       operation,
       propertyIds,

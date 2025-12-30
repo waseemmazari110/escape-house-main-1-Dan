@@ -150,9 +150,9 @@ export async function PUT(
     // Log audit event
     await logAuditEvent({
       userId: session.user.id,
-      action: 'media.update',
-      entityType: 'media',
-      entityId: mediaId.toString(),
+      action: 'settings.update',
+      resourceType: 'media',
+      resourceId: mediaId.toString(),
       details: {
         mediaId,
         fileName: media.fileName,
@@ -225,8 +225,8 @@ export async function DELETE(
     await logAuditEvent({
       userId: session.user.id,
       action: 'media.delete',
-      entityType: 'media',
-      entityId: mediaId.toString(),
+      resourceType: 'media',
+      resourceId: mediaId.toString(),
       details: {
         mediaId,
         fileName: media.fileName,

@@ -113,13 +113,13 @@ export async function GET(request: NextRequest) {
         memberSince: (session.user as any).createdAt || nowUKFormatted(),
       },
       subscription: {
-        tier: membership.tier,
-        status: membership.status,
-        planName: membership.planName,
-        validUntil: membership.subscriptionEnd || 'N/A',
-        maxProperties: membership.maxProperties,
+        tier: membership?.tier || 'free',
+        status: membership?.status || 'inactive',
+        planName: membership?.planName || 'Free Plan',
+        validUntil: membership?.subscriptionEnd || 'N/A',
+        maxProperties: membership?.maxProperties || 1,
         currentProperties: metrics.overview.totalProperties,
-        remainingProperties: Math.max(0, membership.maxProperties - metrics.overview.totalProperties),
+        remainingProperties: Math.max(0, (membership?.maxProperties || 1) - metrics.overview.totalProperties),
       },
       quickStats: {
         totalProperties: metrics.overview.totalProperties,
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
         responseRate: metrics.overview.responseRate,
       },
       recentProperties: userProperties.map(p => ({
-        id: p.id,
+        id: p.id!.toString(),
         title: p.title,
         status: p.isPublished ? 'published' : 'draft',
         createdAt: p.createdAt,

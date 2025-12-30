@@ -15,7 +15,7 @@ import { eq, and, desc, or, sql, inArray } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { nowUKFormatted } from '@/lib/date-utils';
-import { logPropertyAction, captureRequestDetails } from '@/lib/audit-logger';
+import { logEnquiryAction, captureRequestDetails } from '@/lib/audit-logger';
 
 // ============================================
 // GET - List enquiries for owner's properties
@@ -275,13 +275,11 @@ export async function POST(request: NextRequest) {
 
     // Log audit event
     const requestDetails = captureRequestDetails(request);
-    await logPropertyAction(
+    await logEnquiryAction(
       session.user.id,
-      'enquiry.update',
-      parseInt(id),
-      `Enquiry ${enquiryId}`,
+      'enquiry.respond',
+      enquiryId.toString(),
       {
-        enquiryId,
         notes,
         status,
         ...requestDetails,

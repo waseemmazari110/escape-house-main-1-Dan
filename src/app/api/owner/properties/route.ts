@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { properties } from '@/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { nowUKFormatted } from '@/lib/date-utils';
@@ -36,18 +36,20 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Fetch properties owned by this user
-    let query = db
-      .select()
-      .from(properties)
-      .where(eq(properties.ownerId, session.user.id))
-      .orderBy(desc(properties.createdAt));
-
+    const conditions = [eq(properties.ownerId, session.user.id)];
+    
     // Apply status filter if provided
     if (status) {
-      query = query.where(eq(properties.isPublished, status === 'active')) as any;
+      conditions.push(eq(properties.isPublished, status === 'active'));
     }
 
-    const ownerProperties = await query.limit(limit).offset(offset);
+    const ownerProperties = await db
+      .select()
+      .from(properties)
+      .where(and(...conditions))
+      .orderBy(desc(properties.createdAt))
+      .limit(limit)
+      .offset(offset);
 
     // Get total count
     const totalCount = await db
@@ -149,7 +151,7 @@ export async function POST(request: NextRequest) {
     await logPropertyAction(
       session.user.id,
       'property.create',
-      newProperty[0].id,
+      newProperty[0].id!.toString(),
       title,
       { 
         bedrooms,

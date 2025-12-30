@@ -270,8 +270,8 @@ async function handleCreateSeasonal(req: NextRequest, userId: string, body: any)
   await logAuditEvent({
     userId,
     action: 'property.update',
-    entityType: 'property',
-    entityId: propertyId.toString(),
+    resourceType: 'property',
+    resourceId: propertyId.toString(),
     details: {
       operation: 'create-seasonal-pricing',
       seasonalPricing: {
@@ -345,8 +345,8 @@ async function handleCreateSpecialDate(req: NextRequest, userId: string, body: a
   await logAuditEvent({
     userId,
     action: 'property.update',
-    entityType: 'property',
-    entityId: propertyId.toString(),
+    resourceType: 'property',
+    resourceId: propertyId.toString(),
     details: {
       operation: 'create-special-date-pricing',
       specialDate: {

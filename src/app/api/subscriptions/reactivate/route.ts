@@ -33,11 +33,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if suspended
-    const isSuspended = await isAccountSuspended(subscription.id);
+    const isSuspended = await isAccountSuspended(subscription.id.toString());
 
     if (isSuspended) {
       // Reactivate suspended account (requires payment)
-      await reactivateSuspendedAccount(subscription.id, session.user.id);
+      await reactivateSuspendedAccount(subscription.id.toString(), session.user.id);
       
       console.log(`[${nowUKFormatted()}] Suspended account reactivated`);
 
@@ -48,6 +48,12 @@ export async function POST(request: NextRequest) {
       });
     } else if (subscription.cancelAtPeriodEnd) {
       // Reactivate cancelled subscription
+      if (!subscription.stripeSubscriptionId) {
+        return NextResponse.json(
+          { error: 'Subscription ID not found' },
+          { status: 400 }
+        );
+      }
       const result = await reactivateSubscription(subscription.stripeSubscriptionId);
 
       console.log(`[${nowUKFormatted()}] Cancelled subscription reactivated`);
