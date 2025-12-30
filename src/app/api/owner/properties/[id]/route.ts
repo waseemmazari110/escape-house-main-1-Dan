@@ -147,6 +147,12 @@ export async function PUT(
     if (priceFromMidweek !== undefined && priceFromMidweek !== oldProperty.priceFromMidweek) changes.priceFromMidweek = { old: oldProperty.priceFromMidweek, new: priceFromMidweek };
 
     // Update property
+    // If property is being updated, reset status to pending for re-approval
+    const needsReapproval = Boolean(
+      title || description || sleepsMin !== undefined || 
+      sleepsMax !== undefined || priceFromMidweek !== undefined
+    );
+    
     const updated = await db
       .update(properties)
       .set({
@@ -162,6 +168,12 @@ export async function PUT(
         ...(description && { description }),
         ...(heroImage && { heroImage }),
         ...(isPublished !== undefined && { isPublished }),
+        // Reset to pending if significant changes made
+        ...(needsReapproval && oldProperty.status === 'approved' && { 
+          status: 'pending',
+          approvedBy: null,
+          approvedAt: null,
+        }),
         updatedAt: timestamp,
       })
       .where(

@@ -7,17 +7,33 @@ export default async function OwnerLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
 
-  const user = session?.user as any;
-  const role = user?.role;
+    const user = session?.user as any;
+    const role = user?.role;
 
-  // Redirect if not authenticated or not an owner
-  if (!user || (role !== "owner" && role !== "admin")) {
-    redirect("/owner/login");
+    // Redirect if not authenticated
+    if (!user) {
+      redirect("/auth/signin?redirect=/owner/dashboard");
+    }
+
+    // STRICT: Only owners can access owner routes (not even admins)
+    if (role !== "owner") {
+      // Redirect non-owners to their appropriate dashboard
+      if (role === "admin") {
+        redirect("/admin/dashboard");
+      } else {
+        redirect("/");
+      }
+    }
+
+    return <>{children}</>;
+  } catch (error) {
+    console.error("Session check error:", error);
+    // If there's an error checking session, redirect to signin
+    redirect("/auth/signin?redirect=/owner/dashboard");
   }
-
-  return <>{children}</>;
 }

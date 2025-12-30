@@ -21,6 +21,16 @@ export const bookings = sqliteTable('bookings', {
   specialRequests: text('special_requests'),
   experiencesSelected: text('experiences_selected', { mode: 'json' }),
   adminNotes: text('admin_notes'),
+  
+  // Stripe Payment Integration
+  stripeCustomerId: text('stripe_customer_id'), // Stripe customer ID for guest
+  stripeDepositPaymentIntentId: text('stripe_deposit_payment_intent_id'), // Deposit payment intent
+  stripeBalancePaymentIntentId: text('stripe_balance_payment_intent_id'), // Balance payment intent
+  stripeDepositChargeId: text('stripe_deposit_charge_id'), // Successful deposit charge
+  stripeBalanceChargeId: text('stripe_balance_charge_id'), // Successful balance charge
+  stripeRefundId: text('stripe_refund_id'), // Refund ID if applicable
+  paymentMetadata: text('payment_metadata', { mode: 'json' }), // Additional payment info
+  
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
@@ -120,6 +130,13 @@ export const properties = sqliteTable('properties', {
   ownerId: text('owner_id').references(() => user.id, { onDelete: 'set null' }), // Link to owner user
   ownerContact: text('owner_contact'),
   featured: integer('featured', { mode: 'boolean' }).default(false),
+  
+  // Listing Status & Approval Workflow
+  status: text('status').notNull().default('pending'), // 'pending', 'approved', 'rejected'
+  rejectionReason: text('rejection_reason'), // Admin's reason for rejection
+  approvedBy: text('approved_by').references(() => user.id, { onDelete: 'set null' }), // Admin who approved
+  approvedAt: text('approved_at'), // Approval timestamp
+  
   isPublished: integer('is_published', { mode: 'boolean' }).default(true),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
@@ -430,6 +447,60 @@ export const invoices = sqliteTable('invoices', {
   updatedAt: text('updated_at').notNull(), // DD/MM/YYYY HH:mm:ss
 });
 
+// Payments table - Comprehensive payment tracking for all Stripe transactions
+export const payments = sqliteTable('payments', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+  
+  // Stripe references
+  stripeCustomerId: text('stripe_customer_id'),
+  stripePaymentIntentId: text('stripe_payment_intent_id').unique(),
+  stripeChargeId: text('stripe_charge_id'),
+  stripeInvoiceId: text('stripe_invoice_id'),
+  stripeSubscriptionId: text('stripe_subscription_id'),
+  stripeSessionId: text('stripe_session_id'),
+  subscriptionPlan: text('subscription_plan'),
+  userRole: text('user_role'),
+  
+  // Payment details
+  amount: real('amount').notNull(), // Amount in currency units (e.g., 19.99 for £19.99)
+  currency: text('currency').notNull().default('GBP'),
+  paymentStatus: text('payment_status').notNull(), // 'succeeded', 'pending', 'failed', 'canceled', 'refunded', 'partially_refunded'
+  paymentMethod: text('payment_method'), // 'card', 'bank_transfer', etc.
+  paymentMethodBrand: text('payment_method_brand'), // 'visa', 'mastercard', etc.
+  paymentMethodLast4: text('payment_method_last4'), // Last 4 digits of card
+  
+  // Transaction details
+  description: text('description'),
+  billingReason: text('billing_reason'), // 'subscription_create', 'subscription_cycle', 'subscription_update', 'manual', 'booking'
+  receiptUrl: text('receipt_url'), // Stripe receipt URL
+  receiptEmail: text('receipt_email'),
+  
+  // Refund information
+  refundAmount: real('refund_amount').default(0),
+  refundedAt: text('refunded_at'), // DD/MM/YYYY HH:mm:ss
+  refundReason: text('refund_reason'),
+  
+  // Relations
+  invoiceId: integer('invoice_id').references(() => invoices.id, { onDelete: 'set null' }),
+  subscriptionId: integer('subscription_id').references(() => subscriptions.id, { onDelete: 'set null' }),
+  bookingId: integer('booking_id').references(() => bookings.id, { onDelete: 'set null' }),
+  
+  // Additional metadata
+  failureCode: text('failure_code'), // Stripe failure code if payment failed
+  failureMessage: text('failure_message'),
+  networkStatus: text('network_status'), // 'approved_by_network', 'declined_by_network', etc.
+  riskLevel: text('risk_level'), // 'normal', 'elevated', 'highest'
+  riskScore: integer('risk_score'), // Stripe Radar risk score
+  
+  // Metadata and timestamps
+  metadata: text('metadata', { mode: 'json' }), // Additional Stripe metadata
+  stripeEventId: text('stripe_event_id'), // For idempotency
+  processedAt: text('processed_at'), // DD/MM/YYYY HH:mm:ss - When webhook processed
+  createdAt: text('created_at').notNull(), // DD/MM/YYYY HH:mm:ss
+  updatedAt: text('updated_at').notNull(), // DD/MM/YYYY HH:mm:ss
+});
+
 // ============================================
 // MILESTONE 2 - MEDIA MANAGEMENT
 // ============================================
@@ -500,6 +571,159 @@ export const enquiries = sqliteTable('enquiries', {
   respondedBy: text('responded_by'),
   resolvedAt: text('resolved_at'), // DD/MM/YYYY HH:mm:ss
   metadata: text('metadata', { mode: 'json' }),
+  createdAt: text('created_at').notNull(), // DD/MM/YYYY HH:mm:ss
+  updatedAt: text('updated_at').notNull(), // DD/MM/YYYY HH:mm:ss
+});
+
+// Seasonal Pricing table - Milestone 8
+export const seasonalPricing = sqliteTable('seasonal_pricing', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  propertyId: integer('property_id').notNull().references(() => properties.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(), // e.g., "Summer Peak Season"
+  seasonType: text('season_type').notNull(), // 'peak', 'high', 'mid', 'low', 'off-peak'
+  startDate: text('start_date').notNull(), // DD/MM/YYYY
+  endDate: text('end_date').notNull(), // DD/MM/YYYY
+  pricePerNight: real('price_per_night').notNull(),
+  minimumStay: integer('minimum_stay'), // nights
+  dayType: text('day_type').notNull().default('any'), // 'weekday', 'weekend', 'any'
+  isActive: integer('is_active', { mode: 'boolean' }).default(true),
+  priority: integer('priority').default(0), // Higher priority = applied first
+  createdAt: text('created_at').notNull(), // DD/MM/YYYY HH:mm:ss
+  updatedAt: text('updated_at').notNull(), // DD/MM/YYYY HH:mm:ss
+});
+
+// Special Date Pricing table - Milestone 8
+export const specialDatePricing = sqliteTable('special_date_pricing', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  propertyId: integer('property_id').notNull().references(() => properties.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(), // e.g., "Christmas Week"
+  date: text('date').notNull(), // DD/MM/YYYY
+  endDate: text('end_date'), // For multi-day events, DD/MM/YYYY
+  pricePerNight: real('price_per_night').notNull(),
+  minimumStay: integer('minimum_stay'),
+  isAvailable: integer('is_available', { mode: 'boolean' }).default(true),
+  createdAt: text('created_at').notNull(), // DD/MM/YYYY HH:mm:ss
+  updatedAt: text('updated_at').notNull(), // DD/MM/YYYY HH:mm:ss
+});
+
+// Performance Stats table - Milestone 9
+export const performanceStats = sqliteTable('performance_stats', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  entityType: text('entity_type').notNull(), // 'property', 'owner', 'platform'
+  entityId: text('entity_id'), // Property ID, Owner ID, or null for platform-wide
+  period: text('period').notNull(), // 'daily', 'weekly', 'monthly', 'yearly'
+  periodStart: text('period_start').notNull(), // DD/MM/YYYY
+  periodEnd: text('period_end').notNull(), // DD/MM/YYYY
+  
+  // Traffic Metrics
+  pageViews: integer('page_views').default(0),
+  uniqueVisitors: integer('unique_visitors').default(0),
+  avgSessionDuration: integer('avg_session_duration').default(0), // seconds
+  bounceRate: real('bounce_rate').default(0), // percentage
+  
+  // Enquiry Metrics
+  totalEnquiries: integer('total_enquiries').default(0),
+  newEnquiries: integer('new_enquiries').default(0),
+  inProgressEnquiries: integer('in_progress_enquiries').default(0),
+  resolvedEnquiries: integer('resolved_enquiries').default(0),
+  avgResponseTime: integer('avg_response_time').default(0), // minutes
+  conversionRate: real('conversion_rate').default(0), // percentage
+  
+  // Booking Metrics
+  totalBookings: integer('total_bookings').default(0),
+  confirmedBookings: integer('confirmed_bookings').default(0),
+  cancelledBookings: integer('cancelled_bookings').default(0),
+  pendingBookings: integer('pending_bookings').default(0),
+  totalRevenue: real('total_revenue').default(0),
+  avgBookingValue: real('avg_booking_value').default(0),
+  occupancyRate: real('occupancy_rate').default(0), // percentage
+  
+  // Guest Metrics
+  totalGuests: integer('total_guests').default(0),
+  returningGuests: integer('returning_guests').default(0),
+  avgGuestsPerBooking: real('avg_guests_per_booking').default(0),
+  
+  // Rating Metrics
+  totalReviews: integer('total_reviews').default(0),
+  avgRating: real('avg_rating').default(0),
+  fiveStarReviews: integer('five_star_reviews').default(0),
+  fourStarReviews: integer('four_star_reviews').default(0),
+  threeStarReviews: integer('three_star_reviews').default(0),
+  twoStarReviews: integer('two_star_reviews').default(0),
+  oneStarReviews: integer('one_star_reviews').default(0),
+  
+  // Financial Metrics
+  depositsPaid: real('deposits_paid').default(0),
+  balancesPaid: real('balances_paid').default(0),
+  pendingPayments: real('pending_payments').default(0),
+  refundsIssued: real('refunds_issued').default(0),
+  
+  // Marketing Metrics
+  emailSent: integer('email_sent').default(0),
+  emailOpened: integer('email_opened').default(0),
+  emailClicked: integer('email_clicked').default(0),
+  emailOpenRate: real('email_open_rate').default(0), // percentage
+  emailClickRate: real('email_click_rate').default(0), // percentage
+  
+  // Metadata
+  metadata: text('metadata', { mode: 'json' }), // Additional custom metrics
+  calculatedAt: text('calculated_at').notNull(), // DD/MM/YYYY HH:mm:ss
+  createdAt: text('created_at').notNull(), // DD/MM/YYYY HH:mm:ss
+  updatedAt: text('updated_at').notNull(), // DD/MM/YYYY HH:mm:ss
+});
+
+// Availability Calendar - Milestone 10
+export const availabilityCalendar = sqliteTable('availability_calendar', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  propertyId: integer('property_id').notNull().references(() => properties.id, { onDelete: 'cascade' }),
+  date: text('date').notNull(), // DD/MM/YYYY
+  isAvailable: integer('is_available', { mode: 'boolean' }).default(true),
+  status: text('status').notNull().default('available'), // 'available', 'booked', 'blocked', 'maintenance'
+  price: real('price'), // Price for this specific date (overrides seasonal pricing)
+  minimumStay: integer('minimum_stay').default(1),
+  bookingId: integer('booking_id').references(() => bookings.id, { onDelete: 'set null' }), // Link to booking if booked
+  notes: text('notes'),
+  createdAt: text('created_at').notNull(), // DD/MM/YYYY HH:mm:ss
+  updatedAt: text('updated_at').notNull(), // DD/MM/YYYY HH:mm:ss
+});
+
+// Orchards Payment Integration - Milestone 10
+export const orchardsPayments = sqliteTable('orchards_payments', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  bookingId: integer('booking_id').notNull().references(() => bookings.id, { onDelete: 'cascade' }),
+  orchardsTransactionId: text('orchards_transaction_id').unique(),
+  orchardsPaymentUrl: text('orchards_payment_url'),
+  paymentType: text('payment_type').notNull(), // 'deposit', 'balance', 'full'
+  amount: real('amount').notNull(),
+  currency: text('currency').notNull().default('GBP'),
+  status: text('status').notNull().default('pending'), // 'pending', 'processing', 'completed', 'failed', 'refunded', 'cancelled'
+  paidAt: text('paid_at'), // DD/MM/YYYY HH:mm:ss
+  refundedAt: text('refunded_at'), // DD/MM/YYYY HH:mm:ss
+  failureReason: text('failure_reason'),
+  metadata: text('metadata', { mode: 'json' }), // Orchards API response data
+  createdAt: text('created_at').notNull(), // DD/MM/YYYY HH:mm:ss
+  updatedAt: text('updated_at').notNull(), // DD/MM/YYYY HH:mm:ss
+});
+
+// Property Reviews - Milestone 10
+export const propertyReviews = sqliteTable('property_reviews', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  propertyId: integer('property_id').notNull().references(() => properties.id, { onDelete: 'cascade' }),
+  bookingId: integer('booking_id').references(() => bookings.id, { onDelete: 'set null' }),
+  guestName: text('guest_name').notNull(),
+  guestEmail: text('guest_email'),
+  rating: integer('rating').notNull(), // 1-5
+  title: text('title'),
+  review: text('review').notNull(),
+  cleanliness: integer('cleanliness'), // 1-5
+  accuracy: integer('accuracy'), // 1-5
+  communication: integer('communication'), // 1-5
+  location: integer('location'), // 1-5
+  value: integer('value'), // 1-5
+  isVerified: integer('is_verified', { mode: 'boolean' }).default(false), // Verified booking
+  isPublished: integer('is_published', { mode: 'boolean' }).default(true),
+  ownerResponse: text('owner_response'),
+  respondedAt: text('responded_at'), // DD/MM/YYYY HH:mm:ss
   createdAt: text('created_at').notNull(), // DD/MM/YYYY HH:mm:ss
   updatedAt: text('updated_at').notNull(), // DD/MM/YYYY HH:mm:ss
 });

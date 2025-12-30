@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { nowUKFormatted } from '@/lib/date-utils';
 import { logPropertyAction, captureRequestDetails } from '@/lib/audit-logger';
+import { revalidateProperty, revalidateOwnerDashboard } from '@/lib/cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,10 +21,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Check if user is an owner
-    if ((session.user as any).role !== 'owner') {
+    // Check if user is an owner or admin
+    const userRole = (session.user as any).role;
+    if (userRole !== 'owner' && userRole !== 'admin') {
       return NextResponse.json(
-        { error: 'Access denied. Owner role required.' },
+        { error: 'Access denied. Owner or Admin role required.' },
         { status: 403 }
       );
     }
@@ -55,7 +57,15 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      properties: ownerProperties,
+      properties: ownerProperties.map(prop => ({
+        ...prop,
+        // Include status information for owner visibility
+        statusInfo: {
+          status: prop.status || 'pending',
+          approvedAt: prop.approvedAt,
+          rejectionReason: prop.rejectionReason,
+        },
+      })),
       pagination: {
         total: totalCount.length,
         limit,
@@ -86,10 +96,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user is an owner
-    if ((session.user as any).role !== 'owner') {
+    // Check if user is an owner or admin
+    const userRole = (session.user as any).role;
+    if (userRole !== 'owner' && userRole !== 'admin') {
       return NextResponse.json(
-        { error: 'Access denied. Owner role required.' },
+        { error: 'Access denied. Owner or Admin role required.' },
         { status: 403 }
       );
     }
@@ -112,6 +123,7 @@ export async function POST(request: NextRequest) {
     const timestamp = nowUKFormatted();
 
     // Create new property with UK timestamps
+    // Status is set to 'pending' by default - requires admin approval
     const newProperty = await db.insert(properties).values({
       title,
       slug: title.toLowerCase().replace(/\s+/g, '-'),
@@ -126,6 +138,7 @@ export async function POST(request: NextRequest) {
       description,
       heroImage,
       ownerId: session.user.id,
+      status: 'pending', // New listings require admin approval
       isPublished: false,
       createdAt: timestamp,
       updatedAt: timestamp,
@@ -148,6 +161,10 @@ export async function POST(request: NextRequest) {
         ...requestDetails
       }
     );
+
+    // Revalidate cache to update UI
+    revalidateProperty(newProperty[0].id.toString(), session.user.id);
+    revalidateOwnerDashboard(session.user.id);
 
     return NextResponse.json({
       success: true,

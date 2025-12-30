@@ -5,8 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { createCustomer, createSubscription, getOrCreateCustomer } from '@/lib/stripe-billing';
 import { getPlanById } from '@/lib/subscription-plans';
 import { nowUKFormatted } from '@/lib/date-utils';
@@ -17,7 +16,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Check authentication
-    const session = await getServerSession(authOptions);
+    const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },

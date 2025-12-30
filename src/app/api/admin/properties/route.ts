@@ -2,18 +2,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db';
 import { properties, propertyImages, propertyFeatures } from '@/db/schema';
 import { eq, desc, and, like } from 'drizzle-orm';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
+import { 
+  getCurrentUserWithRole, 
+  isAdmin,
+  unauthorizedResponse,
+  unauthenticatedResponse
+} from "@/lib/auth-roles";
 
 // GET - List all properties for admin
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const currentUser = await getCurrentUserWithRole();
 
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!currentUser) {
+      return unauthenticatedResponse('Please log in to access this resource');
+    }
+
+    // Admin role check
+    if (!isAdmin(currentUser)) {
+      return unauthorizedResponse('Admin access required');
     }
 
     const { searchParams } = new URL(request.url);
@@ -78,22 +85,29 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Create new property
+// POST - Create new property (Admin)
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const currentUser = await getCurrentUserWithRole();
 
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!currentUser) {
+      return unauthenticatedResponse('Please log in to access this resource');
+    }
+
+    // Admin role check
+    if (!isAdmin(currentUser)) {
+      return unauthorizedResponse('Admin access required');
     }
 
     const body = await request.json();
     const now = new Date().toISOString();
 
+    // Admin-created properties are auto-approved
     const result = await db.insert(properties).values({
       ...body,
+      status: 'approved',
+      approvedBy: currentUser.id,
+      approvedAt: now,
       createdAt: now,
       updatedAt: now,
     }).returning();
@@ -108,15 +122,18 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PATCH - Update property
+// PATCH - Update property (Admin)
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const currentUser = await getCurrentUserWithRole();
 
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!currentUser) {
+      return unauthenticatedResponse('Please log in to access this resource');
+    }
+
+    // Admin role check
+    if (!isAdmin(currentUser)) {
+      return unauthorizedResponse('Admin access required');
     }
 
     const { searchParams } = new URL(request.url);
@@ -147,15 +164,18 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
-// DELETE - Delete property
+// DELETE - Delete property (Admin)
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const currentUser = await getCurrentUserWithRole();
 
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!currentUser) {
+      return unauthenticatedResponse('Please log in to access this resource');
+    }
+
+    // Admin role check
+    if (!isAdmin(currentUser)) {
+      return unauthorizedResponse('Admin access required');
     }
 
     const { searchParams } = new URL(request.url);

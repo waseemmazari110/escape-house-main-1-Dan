@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar, User, Minus, Plus } from "lucide-react";
 import { formatDateUKLong } from "@/lib/date-utils";
 import { format } from "date-fns";
-import { GEH_API } from "@/lib/api-client";
 import { toast } from "sonner";
 
 interface BookingModalProps {
@@ -29,6 +29,9 @@ export default function BookingModal({
   const [checkInDate, setCheckInDate] = useState<Date | undefined>(undefined);
   const [checkOutDate, setCheckOutDate] = useState<Date | undefined>(undefined);
   const [guests, setGuests] = useState(2);
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [guestsOpen, setGuestsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -44,54 +47,64 @@ export default function BookingModal({
       return;
     }
 
+    if (!guestName.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+
+    if (!guestEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    if (!guestPhone.trim()) {
+      toast.error("Please enter your phone number");
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
-      // Step 1: Create booking quote
-      const quoteResponse = await GEH_API.post("/bookings/quote", {
-        property_id: propertyId,
-        check_in: format(checkInDate, "yyyy-MM-dd"),
-        check_out: format(checkOutDate, "yyyy-MM-dd"),
-        guests: guests,
-      }) as any;
+      // Create booking directly
+      const response = await fetch("/api/bookings/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          propertyId: parseInt(propertyId),
+          checkInDate: format(checkInDate, "yyyy-MM-dd"),
+          checkOutDate: format(checkOutDate, "yyyy-MM-dd"),
+          numberOfGuests: guests,
+          guestName: guestName.trim(),
+          guestEmail: guestEmail.trim(),
+          guestPhone: guestPhone.trim(),
+        }),
+      });
 
-      if (!quoteResponse.success || !quoteResponse.data?.booking_id) {
-        throw new Error("Failed to create booking quote");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create booking");
       }
 
-      const bookingId = quoteResponse.data.booking_id;
-
-      // Step 2: Create checkout session
-      const checkoutResponse = await GEH_API.post("/payments/checkout-session", {
-        booking_id: bookingId,
-        success_url: `${window.location.origin}/booking/confirmed?bid=${bookingId}`,
-        cancel_url: window.location.href,
-      }) as any;
-
-      if (!checkoutResponse.success || !checkoutResponse.data?.session?.url) {
-        throw new Error("Failed to create checkout session");
-      }
-
-      // Step 3: Redirect to Stripe checkout
-      const sessionUrl = checkoutResponse.data.session.url;
+      // Show success message
+      toast.success("Booking request submitted successfully!");
       
-      // Check if we're in an iframe
-      const isInIframe = window.self !== window.top;
+      // Close modal
+      onOpenChange(false);
       
-      if (isInIframe) {
-        // Post message to parent to open in new tab
-        window.parent.postMessage(
-          { type: "OPEN_EXTERNAL_URL", data: { url: sessionUrl } },
-          "*"
-        );
-      } else {
-        // Direct redirect
-        window.location.href = sessionUrl;
+      // Redirect to confirmation page
+      if (data.booking?.id) {
+        setTimeout(() => {
+          window.location.href = `/booking/success?id=${data.booking.id}`;
+        }, 1000);
       }
 
     } catch (error) {
       console.error("Booking error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to process booking");
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -233,6 +246,53 @@ export default function BookingModal({
             </Popover>
           </div>
 
+          {/* Guest Information */}
+          <div className="space-y-4 pt-4 border-t border-gray-200">
+            <h4 className="font-semibold text-gray-900">Your Information</h4>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Full Name *
+              </label>
+              <Input
+                type="text"
+                placeholder="John Smith"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                className="w-full"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address *
+              </label>
+              <Input
+                type="email"
+                placeholder="john@example.com"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                className="w-full"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number *
+              </label>
+              <Input
+                type="tel"
+                placeholder="+44 1234 567890"
+                value={guestPhone}
+                onChange={(e) => setGuestPhone(e.target.value)}
+                className="w-full"
+                required
+              />
+            </div>
+          </div>
+
           {/* Price Summary */}
           <div className="rounded-lg bg-[var(--color-bg-secondary)] p-4">
             <div className="flex justify-between items-center mb-2">
@@ -261,7 +321,7 @@ export default function BookingModal({
             <Button
               className="flex-1"
               onClick={handleBookNow}
-              disabled={isProcessing || !checkInDate || !checkOutDate}
+              disabled={isProcessing || !checkInDate || !checkOutDate || !guestName.trim() || !guestEmail.trim() || !guestPhone.trim()}
               style={{
                 background: "var(--color-accent-sage)",
                 color: "white",

@@ -41,9 +41,28 @@ export async function GET(request: NextRequest) {
     const propertyIds = ownerProperties.map(p => p.id);
     const propertyNames = ownerProperties.map(p => p.title);
     
-    // Get recent bookings for owner's properties
+    // Get recent bookings for owner's properties (exclude JSON fields to avoid parsing errors)
     const ownerBookings = await db
-      .select()
+      .select({
+        id: bookings.id,
+        propertyId: bookings.propertyId,
+        propertyName: bookings.propertyName,
+        propertyLocation: bookings.propertyLocation,
+        guestName: bookings.guestName,
+        guestEmail: bookings.guestEmail,
+        guestPhone: bookings.guestPhone,
+        checkInDate: bookings.checkInDate,
+        checkOutDate: bookings.checkOutDate,
+        numberOfGuests: bookings.numberOfGuests,
+        totalPrice: bookings.totalPrice,
+        depositPaid: bookings.depositPaid,
+        balanceDue: bookings.balanceDue,
+        paymentStatus: bookings.paymentStatus,
+        bookingStatus: bookings.bookingStatus,
+        specialRequests: bookings.specialRequests,
+        createdAt: bookings.createdAt,
+        updatedAt: bookings.updatedAt,
+      })
       .from(bookings)
       .where(
         sql`${bookings.propertyId} IN ${sql.raw(`(${propertyIds.join(',')})`)} OR ${bookings.propertyName} IN ${sql.raw(`(${propertyNames.map(n => `'${n.replace(/'/g, "''")}'`).join(',')})`)}`

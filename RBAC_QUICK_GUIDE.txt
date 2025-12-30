@@ -1,0 +1,284 @@
+/**
+ * RBAC IMPLEMENTATION GUIDE
+ * ========================
+ * 
+ * A complete guide to implementing and using role-based access control
+ * in your Next.js application with Better-Auth and Drizzle ORM.
+ */
+
+// Role-Based Access Control (RBAC) Implementation Guide
+
+// Overview
+// --------
+// This guide explains how the RBAC system is implemented in your Next.js project. The system consists of:
+// 1. Middleware - Protects routes at the routing level
+// 2. API Auth Utilities - Protects API endpoints
+// 3. Frontend Components - Protects pages and conditionally renders content
+// 4. RBAC Utilities - Helper functions for permissions and role management
+
+// File Structure
+// ===============
+// src/
+// ├── middleware.ts                    # Route-level protection
+// ├── lib/
+// │   ├── auth.ts                     # Better-auth setup
+// │   ├── auth-client.ts              # Client-side auth
+// │   ├── auth-roles.ts               # Role utilities (existing)
+// │   ├── api-auth.ts                 # API endpoint protection [NEW]
+// │   └── rbac-utils.ts               # RBAC helpers & permissions [NEW]
+// ├── components/
+// │   └── ProtectedRoute.tsx           # Frontend route protection
+// └── app/
+//     ├── api/
+//     │   ├── admin/                  # Admin-only endpoints
+//     │   ├── owner/                  # Owner endpoints
+//     │   └── guest/                  # Guest endpoints
+//     └── [admin|owner|guest]/        # Protected pages
+
+// ROLES & PERMISSIONS
+// ====================
+
+// Role Hierarchy:
+// guest (level 1) < owner (level 2) < admin (level 3)
+
+// GUEST permissions:
+// - properties:view
+// - properties:search
+// - bookings:create
+// - bookings:view_own
+// - reviews:view
+
+// OWNER permissions:
+// - All guest permissions +
+// - properties:view_own
+// - properties:create
+// - properties:edit_own
+// - properties:delete_own
+// - bookings:view_property
+// - payments:view_own
+// - analytics:view_own
+// - settings:edit_own
+
+// ADMIN permissions:
+// - All permissions (see src/lib/rbac-utils.ts for complete list)
+
+// QUICK START
+// ===========
+
+// 1. PROTECTING A PAGE
+// --------------------
+// src/app/admin/dashboard/page.tsx
+
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+
+export default function AdminDashboard() {
+  return (
+    <ProtectedRoute allowedRoles={['admin']}>
+      {/* Page content */}
+    </ProtectedRoute>
+  );
+}
+
+// 2. PROTECTING AN API ENDPOINT
+// -----------------------------
+// src/app/api/admin/users/route.ts
+
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/api-auth';
+
+export async function GET(request: NextRequest) {
+  const authResult = await requireAdmin(request);
+  if (!authResult.authorized) {
+    return authResult.response; // Returns 403 Forbidden
+  }
+
+  const user = authResult.user;
+  // Handle request...
+  return NextResponse.json({ users: [] });
+}
+
+// 3. CONDITIONAL RENDERING BY ROLE
+// --------------------------------
+// src/components/MyComponent.tsx
+
+'use client';
+
+import { useHasRole, RoleBasedRender } from '@/components/ProtectedRoute';
+
+function MyComponent() {
+  const { hasRole } = useHasRole(['admin']);
+
+  return (
+    <div>
+      {hasRole && <AdminFeature />}
+
+      <RoleBasedRender allowedRoles={['owner']}>
+        <OwnerFeature />
+      </RoleBasedRender>
+    </div>
+  );
+}
+
+// 4. CHECKING PERMISSIONS
+// ----------------------
+// src/lib/my-component.tsx
+
+import { canPerformAction, canEditResource } from '@/lib/rbac-utils';
+
+function MyComponent() {
+  const userRole = 'owner';
+
+  // Check if can perform action
+  if (canPerformAction(userRole, 'properties:edit_own')) {
+    // Show edit button
+  }
+
+  // Check if can edit resource
+  if (canEditResource(userRole, propertyOwnerId, currentUserId)) {
+    // Show edit form
+  }
+}
+
+// 5. CUSTOM ENDPOINT WITH ROLE + OWNERSHIP CHECK
+// -----------------------------------------------
+// src/app/api/owner/properties/[id]/route.ts
+
+import { requireOwner } from '@/lib/api-auth';
+import { canEditResource } from '@/lib/rbac-utils';
+
+export async function PATCH(request: NextRequest) {
+  const authResult = await requireOwner(request);
+  if (!authResult.authorized) {
+    return authResult.response;
+  }
+
+  const user = authResult.user;
+  const propertyId = request.nextUrl.pathname.split('/').pop();
+
+  // Fetch property to check ownership
+  const property = await db.query.properties.findFirst({
+    where: (p) => eq(p.id, parseInt(propertyId!)),
+  });
+
+  if (!property) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+
+  // Check if user can edit this property
+  if (!canEditResource(user.role, property.ownerId, user.id)) {
+    return NextResponse.json(
+      { error: 'Forbidden: Cannot edit this property' },
+      { status: 403 }
+    );
+  }
+
+  // Update property...
+}
+
+// COMMON PATTERNS
+// ================
+
+// Pattern 1: Admin-Only Endpoints
+// export async function GET(request: NextRequest) {
+//   const authResult = await requireAdmin(request);
+//   if (!authResult.authorized) return authResult.response;
+//   // Admin logic...
+// }
+
+// Pattern 2: Owner + Admin Endpoints
+// export async function GET(request: NextRequest) {
+//   const authResult = await requireAuth(request, ['owner', 'admin']);
+//   if (!authResult.authorized) return authResult.response;
+//   // Shared logic...
+// }
+
+// Pattern 3: Ownership Check
+// if (user.role === 'owner' && resourceOwnerId !== user.id) {
+//   return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+// }
+
+// ADDING NEW ROLES
+// =================
+
+// To add a new role (e.g., 'moderator'):
+
+// 1. Update type: src/lib/auth-roles.ts
+//    export type UserRole = 'guest' | 'owner' | 'admin' | 'moderator';
+
+// 2. Add hierarchy: src/lib/rbac-utils.ts
+//    export const ROLE_HIERARCHY = {
+//      guest: 1, owner: 2, moderator: 2.5, admin: 3,
+//    };
+
+// 3. Define permissions: src/lib/rbac-utils.ts
+//    export const ROLE_PERMISSIONS = {
+//      moderator: new Set(['properties:view', 'bookings:manage', ...]),
+//    };
+
+// 4. Add to middleware: src/middleware.ts
+//    const PROTECTED_ROUTES = {
+//      '/moderator': ['moderator', 'admin'],
+//    };
+
+// 5. Update dashboards: src/lib/rbac-utils.ts
+//    export function getDashboardUrl(role: UserRole): string {
+//      return { guest: '/', owner: '/owner/dashboard', 
+//               moderator: '/moderator/dashboard', admin: '/admin/dashboard' }[role];
+//    }
+
+// TESTING RBAC
+// =============
+
+// Test as different roles:
+// 1. Login as admin → access /admin/dashboard ✓
+// 2. Login as owner → access /owner/dashboard ✓
+// 3. Login as guest → redirected from /admin ✓
+// 4. Call API as owner → get 403 for admin endpoints ✓
+// 5. Check unauthorized logs → should have entries ✓
+
+// SECURITY BEST PRACTICES
+// =========================
+
+// 1. Always check auth first in every endpoint
+// 2. Use specific roles, not "authenticated"
+// 3. Check resource ownership (not just role)
+// 4. Log unauthorized attempts (done automatically)
+// 5. Protect both frontend and backend
+// 6. Use HTTPS in production
+// 7. Validate session regularly
+// 8. Test with different roles
+
+// FILES YOU NOW HAVE
+// ====================
+
+// NEW FILES:
+// ✓ src/middleware.ts - Route protection
+// ✓ src/lib/api-auth.ts - API endpoint utilities
+// ✓ src/lib/rbac-utils.ts - Permission & role helpers
+
+// UPDATED FILES:
+// ✓ src/components/ProtectedRoute.tsx - Enhanced with hooks
+// ✓ src/lib/auth-roles.ts - Already has base setup
+
+// EXAMPLE FILES (Reference only):
+// ✓ src/app/api/RBAC_EXAMPLES.md - API endpoint examples
+// ✓ src/RBAC_FRONTEND_EXAMPLES.ts - Frontend examples
+// ✓ RBAC_IMPLEMENTATION_GUIDE.txt - This guide
+
+// NEXT STEPS
+// ===========
+
+// 1. Review src/middleware.ts for route configuration
+// 2. Review src/lib/api-auth.ts for API protection
+// 3. Review src/lib/rbac-utils.ts for permissions
+// 4. Apply protection to your endpoints:
+//    - src/app/api/admin/* → use requireAdmin()
+//    - src/app/api/owner/* → use requireAuth(['owner', 'admin'])
+//    - Protected pages → use <ProtectedRoute>
+// 5. Test with different roles
+// 6. Review audit logs for unauthorized attempts
+// 7. Extend with custom permissions as needed
+
+// For detailed examples, see:
+// - src/app/api/RBAC_EXAMPLES.md
+// - src/RBAC_FRONTEND_EXAMPLES.ts

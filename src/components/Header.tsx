@@ -48,32 +48,46 @@ function Header() {
   const [authType, setAuthType] = useState<"guest" | "owner">("guest");
   const [userRole, setUserRole] = useState<'guest' | 'owner' | 'admin'>('guest');
 
-  // Fetch user role from profile API
+  // Fetch user role from profile API with caching
   useEffect(() => {
     async function fetchUserRole() {
       if (session?.user) {
+        // Check cache first
+        const cachedRole = sessionStorage.getItem(`user_role_${session.user.id}`);
+        if (cachedRole && ['admin', 'owner', 'guest'].includes(cachedRole)) {
+          setUserRole(cachedRole as 'guest' | 'owner' | 'admin');
+          return;
+        }
+
         try {
           const token = localStorage.getItem("bearer_token");
           const response = await fetch("/api/user/profile", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
+            cache: 'force-cache', // Enable caching
           });
           
           if (response.ok) {
             const profile = await response.json();
-            setUserRole(profile.role || 'guest');
+            const role = profile.role || 'guest';
+            setUserRole(role);
+            // Cache the role
+            sessionStorage.setItem(`user_role_${session.user.id}`, role);
           }
         } catch (error) {
           console.error("Error fetching user role:", error);
+          setUserRole('guest');
         }
       } else {
         setUserRole('guest');
+        // Clear cache when logged out
+        sessionStorage.clear();
       }
     }
     
     fetchUserRole();
-  }, [session]);
+  }, [session?.user?.id]); // Only re-run when user ID changes
 
   const isAdmin = userRole === 'admin';
   const isOwner = userRole === 'owner';
@@ -521,19 +535,29 @@ function Header() {
                 <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse"></div>
               ) : session?.user ? (
                 <>
-                  {/* Plan Badge - MANDATORY: Constantly visible */}
-                  <Link
-                    href="/pricing"
-                    className="flex items-center gap-2 px-3 py-1.5 bg-[var(--color-accent-sage)]/10 hover:bg-[var(--color-accent-sage)]/20 rounded-full transition-all duration-200 border border-[var(--color-accent-sage)]/20"
-                  >
-                    <CreditCard className="w-4 h-4 text-[var(--color-accent-sage)]" />
-                    <span className="text-sm font-medium text-[var(--color-accent-sage)]">
-                      {planName}
-                    </span>
-                  </Link>
+                  {/* Plan Badge - MANDATORY: Constantly visible (hide for admin) */}
+                  {!isAdmin && (
+                    <Link
+                      href="/pricing"
+                      className="flex items-center gap-2 px-3 py-1.5 bg-[var(--color-accent-sage)]/10 hover:bg-[var(--color-accent-sage)]/20 rounded-full transition-all duration-200 border border-[var(--color-accent-sage)]/20"
+                    >
+                      <CreditCard className="w-4 h-4 text-[var(--color-accent-sage)]" />
+                      <span className="text-sm font-medium text-[var(--color-accent-sage)]">
+                        {planName}
+                      </span>
+                    </Link>
+                  )}
 
-                  {/* Owner view: show dashboard CTA instead of name pill */}
-                  {isOwner ? (
+                  {/* Admin view: show admin dashboard */}
+                  {isAdmin ? (
+                    <Link
+                      href="/admin/dashboard"
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium border border-purple-500/30 hover:from-purple-700 hover:to-blue-700 transition-colors shadow-lg"
+                    >
+                      <Home className="w-4 h-4" />
+                      <span>Admin Dashboard</span>
+                    </Link>
+                  ) : isOwner ? (
                     <Link
                       href="/owner/dashboard"
                       className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--color-accent-sage)] text-white font-medium border border-[var(--color-accent-sage)]/30 hover:bg-[var(--color-accent-sage)]/90 transition-colors"
@@ -865,21 +889,43 @@ function Header() {
             ) : session?.user ? (
               <>
                 {/* Plan Badge - Mobile */}
-                <Link
-                  href="/pricing"
-                  className="flex items-center justify-between p-4 bg-white/90 rounded-xl hover:bg-white transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-5 h-5 text-[var(--color-accent-sage)]" />
-                    <span className="font-medium text-[var(--color-text-primary)]">
-                      {planName}
-                    </span>
-                  </div>
-                  <span className="text-sm text-[var(--color-accent-sage)]">Manage →</span>
-                </Link>
+                {/* Plan Badge (hide for admin) */}
+                {!isAdmin && (
+                  <Link
+                    href="/pricing"
+                    className="flex items-center justify-between p-4 bg-white/90 rounded-xl hover:bg-white transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="w-5 h-5 text-[var(--color-accent-sage)]" />
+                      <span className="font-medium text-[var(--color-text-primary)]">
+                        {planName}
+                      </span>
+                    </div>
+                    <span className="text-sm text-[var(--color-accent-sage)]">Manage →</span>
+                  </Link>
+                )}
                 
-                {/* Owner view: dashboard CTA instead of name pill; others keep name */}
-                {isOwner ? (
+                {/* Admin/Owner/Guest view */}
+                {isAdmin ? (
+                  <div className="flex items-center justify-between p-4 bg-white/90 rounded-xl border border-purple-500/20">
+                    <Link
+                      href="/admin/dashboard"
+                      className="inline-flex items-center gap-2 text-purple-600 font-medium"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Home className="w-5 h-5" />
+                      <span>Admin Dashboard</span>
+                    </Link>
+                    <Button
+                      onClick={handleSignOut}
+                      size="sm"
+                      variant="outline"
+                      className="rounded-lg border-red-500 text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : isOwner ? (
                   <div className="flex items-center justify-between p-4 bg-white/90 rounded-xl border border-[var(--color-accent-sage)]/20">
                     <Link
                       href="/owner/dashboard"

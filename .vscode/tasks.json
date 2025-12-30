@@ -12,6 +12,13 @@
 			"type": "shell",
 			"command": "npm run dev",
 			"group": "build"
+		},
+		{
+			"label": "Run Next.js with error logging",
+			"type": "shell",
+			"command": "npm run dev 2>&1 | Tee-Object -FilePath dev-errors.log",
+			"isBackground": true,
+			"problemMatcher": []
 		}
 	]
 }

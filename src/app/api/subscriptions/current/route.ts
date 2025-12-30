@@ -5,8 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { getUserSubscription, getUserInvoices } from '@/lib/stripe-billing';
 import { getCurrentBillingCycle } from '@/lib/billing-cycle';
 import { getRetryPolicy, isAccountSuspended } from '@/lib/payment-retry';
@@ -17,7 +16,7 @@ export async function GET(request: NextRequest) {
   console.log(`[${timestamp}] GET /api/subscriptions/current`);
 
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },

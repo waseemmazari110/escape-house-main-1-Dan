@@ -8,6 +8,8 @@ import { user as userTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
  
 export const auth = betterAuth({
+	baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+	secret: process.env.BETTER_AUTH_SECRET!,
 	database: drizzleAdapter(db, {
 		provider: "sqlite",
 	}),

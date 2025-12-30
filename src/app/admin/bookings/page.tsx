@@ -253,7 +253,7 @@ export default function AdminBookingsPage() {
 
   return (
     <ProtectedRoute allowedRoles={['admin']}>
-      <div className="min-h-screen bg-[var(--color-bg-primary)]">
+      <div className="min-h-screen bg-(--color-bg-primary)">
         <Header />
 
         <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8 mt-20">
@@ -262,7 +262,7 @@ export default function AdminBookingsPage() {
             <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>
               Booking Management
             </h1>
-            <p className="text-lg text-[var(--color-neutral-dark)]">
+            <p className="text-lg text-(--color-neutral-dark)">
               Manage all your property bookings in one place
             </p>
           </div>
@@ -273,7 +273,7 @@ export default function AdminBookingsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-                <Calendar className="w-4 h-4 text-[var(--color-accent-sage)]" />
+                <Calendar className="w-4 h-4 text-(--color-accent-sage)" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.totalBookings}</div>
@@ -286,7 +286,7 @@ export default function AdminBookingsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                <DollarSign className="w-4 h-4 text-[var(--color-accent-gold)]" />
+                <DollarSign className="w-4 h-4 text-(--color-accent-gold)" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">£{stats.totalRevenue.toLocaleString()}</div>
@@ -297,7 +297,7 @@ export default function AdminBookingsPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Pending Bookings</CardTitle>
-                <Users className="w-4 h-4 text-[var(--color-accent-sage)]" />
+                <Users className="w-4 h-4 text-(--color-accent-sage)" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats.pendingBookings}</div>
@@ -463,7 +463,7 @@ export default function AdminBookingsPage() {
                         <span>Sleeps {property.sleepsMax}</span>
                       </div>
                       <div className="mt-2 pt-2 border-t">
-                        <p className="text-sm font-bold text-[var(--color-accent-sage)]">
+                        <p className="text-sm font-bold text-(--color-accent-sage)">
                           £{property.priceFromMidweek}/night
                         </p>
                       </div>
@@ -487,7 +487,7 @@ export default function AdminBookingsPage() {
                 {stats.popularProperties.map((property, index) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[var(--color-accent-sage)]/10 flex items-center justify-center text-sm font-semibold">
+                      <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-sm font-semibold">
                         {index + 1}
                       </div>
                       <span className="font-medium">{property.property}</span>

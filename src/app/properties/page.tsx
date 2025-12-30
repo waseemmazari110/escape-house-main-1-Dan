@@ -73,6 +73,9 @@ function PropertiesContent() {
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
   
+  // Sort state
+  const [sortBy, setSortBy] = useState<string>('newest');
+  
   // Read search params from homepage (destination, checkIn, checkOut, guests, pets)
   const destinationParam = searchParams.get("destination") || searchParams.get("location") || "";
   const guestsParam = searchParams.get("guests") || "0";
@@ -190,12 +193,35 @@ function PropertiesContent() {
       return true;
     });
   }, [filters, properties]);
+  
+  // Sort properties
+  const sortedProperties = useMemo(() => {
+    const sorted = [...filteredProperties];
+    
+    switch (sortBy) {
+      case 'price-asc':
+        return sorted.sort((a, b) => (a.priceFrom || 0) - (b.priceFrom || 0));
+      case 'price-desc':
+        return sorted.sort((a, b) => (b.priceFrom || 0) - (a.priceFrom || 0));
+      case 'sleeps-desc':
+        return sorted.sort((a, b) => (b.sleeps || 0) - (a.sleeps || 0));
+      case 'sleeps-asc':
+        return sorted.sort((a, b) => (a.sleeps || 0) - (b.sleeps || 0));
+      case 'newest':
+      default:
+        return sorted.sort((a, b) => {
+          const aDate = new Date(a.createdAt || 0).getTime();
+          const bDate = new Date(b.createdAt || 0).getTime();
+          return bDate - aDate;
+        });
+    }
+  }, [filteredProperties, sortBy]);
 
-  const visibleProperties = filteredProperties.slice(0, displayedCount);
-  const hasMore = displayedCount < filteredProperties.length;
+  const visibleProperties = sortedProperties.slice(0, displayedCount);
+  const hasMore = displayedCount < sortedProperties.length;
 
   const loadMore = () => {
-    setDisplayedCount(prev => Math.min(prev + 6, filteredProperties.length));
+    setDisplayedCount(prev => Math.min(prev + 6, sortedProperties.length));
   };
 
   return (
@@ -367,11 +393,16 @@ function PropertiesContent() {
                     `Showing ${visibleProperties.length} of ${filteredProperties.length} properties`
                   )}
                 </p>
-                <select className="px-4 py-2 rounded-xl border border-gray-300 text-sm transition-all duration-200 focus:ring-2 focus:ring-[var(--color-accent-sage)] focus:border-transparent">
-                  <option>Sort by: Price (Low to High)</option>
-                  <option>Sort by: Price (High to Low)</option>
-                  <option>Sort by: Sleeps (Most first)</option>
-                  <option>Sort by: Newest</option>
+                <select 
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-4 py-2 rounded-xl border border-gray-300 text-sm transition-all duration-200 focus:ring-2 focus:ring-[var(--color-accent-sage)] focus:border-transparent"
+                >
+                  <option value="newest">Sort by: Newest</option>
+                  <option value="price-asc">Sort by: Price (Low to High)</option>
+                  <option value="price-desc">Sort by: Price (High to Low)</option>
+                  <option value="sleeps-desc">Sort by: Sleeps (Most first)</option>
+                  <option value="sleeps-asc">Sort by: Sleeps (Least first)</option>
                 </select>
               </div>
 

@@ -5,9 +5,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 import { getUserSubscription, cancelSubscription } from '@/lib/stripe-billing';
+import { fullOwnerSyncToCRM } from '@/lib/crm-sync';
 import { nowUKFormatted } from '@/lib/date-utils';
 
 export async function POST(request: NextRequest) {
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   console.log(`[${timestamp}] POST /api/subscriptions/cancel`);
 
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth.api.getSession({ headers: request.headers });
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -42,6 +42,27 @@ export async function POST(request: NextRequest) {
     );
 
     console.log(`[${nowUKFormatted()}] Subscription cancelled`);
+    
+    // Sync subscription cancellation to CRM
+    try {
+      await fullOwnerSyncToCRM(
+        session.user.id,
+        'subscription_cancelled',
+        {
+          subscriptionId: subscription.stripeSubscriptionId,
+          immediate,
+          cancelledAt: immediate ? nowUKFormatted() : result.subscription.currentPeriodEnd,
+          planId: subscription.planId,
+          planName: subscription.planName,
+        }
+      );
+      
+      console.log(`[${nowUKFormatted()}] CRM sync completed for subscription cancellation`);
+    } catch (crmError) {
+      console.error(`[${nowUKFormatted()}] Failed to sync cancellation to CRM:`, 
+        crmError instanceof Error ? crmError.message : 'Unknown error');
+      // Don't fail the API if CRM sync fails
+    }
 
     return NextResponse.json({
       success: true,

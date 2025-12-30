@@ -62,23 +62,26 @@ export default function EditPropertyPage() {
         }
 
         // Fetch property data
-        const response = await fetch(`/api/properties?id=${propertyId}`, { cache: 'no-store' });
+        const response = await fetch(`/api/owner/properties/${propertyId}`, { cache: 'no-store' });
         if (response.ok) {
           const data = await response.json();
+          // Handle both response formats: direct property or wrapped in {property: ...}
+          const propertyData = data.property || data;
+          
           setProperty({
-            title: data.title || "",
-            slug: data.slug || "",
-            location: data.location || "",
-            region: data.region || "United Kingdom",
-            sleepsMin: data.sleepsMin || 1,
-            sleepsMax: data.sleepsMax || 8,
-            bedrooms: data.bedrooms || 1,
-            bathrooms: data.bathrooms || 1,
-            priceFromMidweek: data.priceFromMidweek || 100,
-            priceFromWeekend: data.priceFromWeekend || 100,
-            description: data.description || "",
-            heroImage: data.heroImage || "",
-            isPublished: data.isPublished || false,
+            title: propertyData.title || "",
+            slug: propertyData.slug || "",
+            location: propertyData.location || "",
+            region: propertyData.region || "United Kingdom",
+            sleepsMin: propertyData.sleepsMin || 1,
+            sleepsMax: propertyData.sleepsMax || 8,
+            bedrooms: propertyData.bedrooms || 1,
+            bathrooms: propertyData.bathrooms || 1,
+            priceFromMidweek: propertyData.priceFromMidweek || 100,
+            priceFromWeekend: propertyData.priceFromWeekend || 100,
+            description: propertyData.description || "",
+            heroImage: propertyData.heroImage || "",
+            isPublished: propertyData.isPublished || false,
           });
         } else {
           alert("Property not found");
@@ -100,7 +103,7 @@ export default function EditPropertyPage() {
     setSaving(true);
 
     try {
-      const response = await fetch(`/api/properties?id=${propertyId}`, {
+      const response = await fetch(`/api/owner/properties/${propertyId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -359,7 +362,7 @@ export default function EditPropertyPage() {
               <Button
                 type="submit"
                 disabled={saving}
-                className="px-8 py-3 bg-[#17a2b8] text-white rounded-lg hover:bg-[#138496] disabled:opacity-50"
+                className="px-8 py-3 bg-[#17a2b8] text-white rounded-lg hover:bg-[#138496] disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 {saving ? (
                   <>
