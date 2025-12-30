@@ -46,7 +46,7 @@ export const CacheTags = {
 /**
  * Revalidate owner dashboard and related data
  */
-export function revalidateOwnerDashboard(userId: string) {
+export async function revalidateOwnerDashboard(userId: string) {
   revalidatePath('/owner/dashboard');
   revalidateTag(CacheTags.OWNER_DASHBOARD(userId), {});
   revalidateTag(CacheTags.OWNER_PROPERTIES(userId), {});
@@ -57,7 +57,7 @@ export function revalidateOwnerDashboard(userId: string) {
 /**
  * Revalidate admin dashboard and related data
  */
-export function revalidateAdminDashboard() {
+export async function revalidateAdminDashboard() {
   revalidatePath('/admin/dashboard');
   revalidateTag(CacheTags.ADMIN_DASHBOARD, {});
   revalidateTag(CacheTags.PROPERTIES, {});
@@ -69,7 +69,7 @@ export function revalidateAdminDashboard() {
 /**
  * Revalidate property-related cache
  */
-export function revalidateProperty(propertyId: string, ownerId?: string) {
+export async function revalidateProperty(propertyId: string, ownerId?: string) {
   revalidatePath('/properties');
   revalidatePath(`/properties/${propertyId}`);
   revalidateTag(CacheTags.PROPERTIES, {});
@@ -79,14 +79,14 @@ export function revalidateProperty(propertyId: string, ownerId?: string) {
   
   if (ownerId) {
     revalidateTag(CacheTags.OWNER_PROPERTIES(ownerId), {});
-    revalidateOwnerDashboard(ownerId);
+    await revalidateOwnerDashboard(ownerId);
   }
 }
 
 /**
  * Revalidate booking-related cache
  */
-export function revalidateBooking(bookingId: string, propertyId: string, ownerId?: string) {
+export async function revalidateBooking(bookingId: string, propertyId: string, ownerId?: string) {
   revalidatePath('/bookings');
   revalidateTag(CacheTags.BOOKINGS, {});
   revalidateTag(CacheTags.BOOKING(bookingId), {});
@@ -95,57 +95,57 @@ export function revalidateBooking(bookingId: string, propertyId: string, ownerId
   
   if (ownerId) {
     revalidateTag(CacheTags.OWNER_BOOKINGS(ownerId), {});
-    revalidateOwnerDashboard(ownerId);
+    await revalidateOwnerDashboard(ownerId);
   }
   
-  revalidateAdminDashboard();
+  await revalidateAdminDashboard();
 }
 
 /**
  * Revalidate payment/transaction-related cache
  */
-export function revalidatePayment(userId: string) {
+export async function revalidatePayment(userId: string) {
   revalidateTag(CacheTags.PAYMENTS, {});
   revalidateTag(CacheTags.TRANSACTIONS, {});
   revalidateTag(CacheTags.OWNER_PAYMENTS(userId), {});
-  revalidateOwnerDashboard(userId);
-  revalidateAdminDashboard();
+  await revalidateOwnerDashboard(userId);
+  await revalidateAdminDashboard();
 }
 
 /**
  * Revalidate subscription-related cache
  */
-export function revalidateSubscription(userId: string) {
+export async function revalidateSubscription(userId: string) {
   revalidateTag(CacheTags.SUBSCRIPTIONS, {});
   revalidateTag(CacheTags.USER_SUBSCRIPTION(userId), {});
-  revalidateOwnerDashboard(userId);
-  revalidateAdminDashboard();
+  await revalidateOwnerDashboard(userId);
+  await revalidateAdminDashboard();
 }
 
 /**
  * Revalidate approval-related cache
  */
-export function revalidateApproval(propertyId: string, ownerId?: string) {
+export async function revalidateApproval(propertyId: string, ownerId?: string) {
   revalidateTag(CacheTags.APPROVALS, {});
   revalidateTag(CacheTags.PROPERTY_APPROVAL(propertyId), {});
-  revalidateProperty(propertyId, ownerId);
-  revalidateAdminDashboard();
+  await revalidateProperty(propertyId, ownerId);
+  await revalidateAdminDashboard();
 }
 
 /**
  * Revalidate availability calendar
  */
-export function revalidateAvailability(propertyId: string, ownerId?: string) {
+export async function revalidateAvailability(propertyId: string, ownerId?: string) {
   revalidateTag(CacheTags.AVAILABILITY(propertyId), {});
   
   if (ownerId) {
-    revalidateOwnerDashboard(ownerId);
+    await revalidateOwnerDashboard(ownerId);
   }
 }
 
 /**
  * Clear all cache (use sparingly)
  */
-export function revalidateAll() {
+export async function revalidateAll() {
   revalidatePath('/', 'layout');
 }
