@@ -24,10 +24,11 @@ import { eq } from 'drizzle-orm';
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const propertyId = parseInt(params.id);
+    const { id } = await params;
+    const propertyId = parseInt(id);
     if (isNaN(propertyId)) {
       return NextResponse.json(
         { error: 'Invalid property ID' },
@@ -58,7 +59,7 @@ export async function GET(
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({ headers: req.headers });
@@ -78,7 +79,8 @@ export async function POST(
       );
     }
 
-    const propertyId = parseInt(params.id);
+    const { id } = await params;
+    const propertyId = parseInt(id);
     if (isNaN(propertyId)) {
       return NextResponse.json(
         { error: 'Invalid property ID' },

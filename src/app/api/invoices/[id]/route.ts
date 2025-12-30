@@ -11,10 +11,11 @@ import { nowUKFormatted } from '@/lib/date-utils';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const timestamp = nowUKFormatted();
-  console.log(`[${timestamp}] GET /api/invoices/${params.id}`);
+  console.log(`[${timestamp}] GET /api/invoices/${id}`);
 
   try {
     const session = await auth.api.getSession({ headers: request.headers });

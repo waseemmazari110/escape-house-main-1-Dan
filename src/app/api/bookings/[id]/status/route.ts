@@ -27,10 +27,11 @@ import { sendBookingCancellationEmail } from '@/lib/booking-notifications';
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const bookingId = parseInt(params.id);
+    const { id } = await params;
+    const bookingId = parseInt(id);
 
     if (isNaN(bookingId)) {
       return NextResponse.json(
@@ -91,13 +92,14 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Require owner or admin role
     await requireRole(['owner', 'admin']);
 
-    const bookingId = parseInt(params.id);
+    const { id } = await params;
+    const bookingId = parseInt(id);
 
     if (isNaN(bookingId)) {
       return NextResponse.json(
@@ -209,13 +211,14 @@ export async function PUT(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Require owner or admin role
     await requireRole(['owner', 'admin']);
 
-    const bookingId = parseInt(params.id);
+    const { id } = await params;
+    const bookingId = parseInt(id);
 
     if (isNaN(bookingId)) {
       return NextResponse.json(

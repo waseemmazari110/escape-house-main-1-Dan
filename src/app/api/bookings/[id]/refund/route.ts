@@ -22,13 +22,14 @@ import { requireRole } from '@/lib/auth-roles';
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Require owner or admin role
     await requireRole(['owner', 'admin']);
 
-    const bookingId = parseInt(params.id);
+    const { id } = await params;
+    const bookingId = parseInt(id);
 
     if (isNaN(bookingId)) {
       return NextResponse.json(
@@ -173,10 +174,11 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const bookingId = parseInt(params.id);
+    const { id } = await params;
+    const bookingId = parseInt(id);
 
     if (isNaN(bookingId)) {
       return NextResponse.json(

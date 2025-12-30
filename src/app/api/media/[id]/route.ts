@@ -22,7 +22,7 @@ import { logAuditEvent } from '@/lib/audit-logger';
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({ headers: req.headers });
@@ -34,7 +34,8 @@ export async function GET(
       );
     }
 
-    const mediaId = parseInt(params.id);
+    const { id } = await params;
+    const mediaId = parseInt(id);
     if (isNaN(mediaId)) {
       return NextResponse.json(
         { error: 'Invalid media ID' },
@@ -77,7 +78,7 @@ export async function GET(
  */
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({ headers: req.headers });
@@ -89,7 +90,8 @@ export async function PUT(
       );
     }
 
-    const mediaId = parseInt(params.id);
+    const { id } = await params;
+    const mediaId = parseInt(id);
     if (isNaN(mediaId)) {
       return NextResponse.json(
         { error: 'Invalid media ID' },
@@ -178,7 +180,7 @@ export async function PUT(
  */
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await auth.api.getSession({ headers: req.headers });
@@ -190,7 +192,8 @@ export async function DELETE(
       );
     }
 
-    const mediaId = parseInt(params.id);
+    const { id } = await params;
+    const mediaId = parseInt(id);
     if (isNaN(mediaId)) {
       return NextResponse.json(
         { error: 'Invalid media ID' },
