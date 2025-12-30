@@ -16,7 +16,7 @@
 
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';
-import { nowUKFormatted, parseUKDate, formatUKDate } from './date-utils';
+import { nowUKFormatted, parseUKDate, formatDateUK } from './date-utils';
 
 // ============================================
 // TYPES & INTERFACES
@@ -455,7 +455,7 @@ export async function getAvailabilityCalendar(
     try {
       const nextDay = new Date(currentDate);
       nextDay.setDate(nextDay.getDate() + 1);
-      const quote = await calculatePrice(propertyId, dateStr, formatUKDate(nextDay));
+      const quote = await calculatePrice(propertyId, dateStr, formatDateUK(nextDay));
 
       availability.push({
         date: dateStr,
