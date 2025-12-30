@@ -219,6 +219,11 @@ export function isToday(date: Date | string): boolean {
 }
 
 /**
+ * Format UK date alias (exports formatDateUK as formatUKDate for compatibility)
+ */
+export { formatDateUK as formatUKDate };
+
+/**
  * Parse UK format date string (DD/MM/YYYY) to Date object
  * @param dateStr Date string in DD/MM/YYYY format
  * @returns Date object

@@ -14,11 +14,11 @@ import { auth } from '@/lib/auth';
 import {
   listMedia,
   getMediaById,
-  updateMediaMetadata,
+  updateMediaRecord,
   deleteMediaRecord,
   getMediaStats,
-  getMediaByEntity,
-  searchMedia,
+  getEntityMedia,
+  searchMediaByTags,
 } from '@/lib/media-storage';
 import { logAuditEvent } from '@/lib/audit-logger';
 
@@ -58,21 +58,30 @@ export async function GET(req: NextRequest) {
     let mediaList;
     if (search) {
       // Search media
-      mediaList = await searchMedia(targetUserId, search, {
-        fileType,
-        folder,
+      const searchResults = await searchMediaByTags(search.split(',').map(t => t.trim()));
+      mediaList = {
+        media: searchResults,
+        total: searchResults.length,
         limit,
         offset,
-      });
+      };
     } else if (entityType && entityId) {
       // Get media by entity
-      mediaList = await getMediaByEntity(entityType, entityId);
+      const entityMedia = await getEntityMedia(entityType, entityId);
+      mediaList = {
+        media: entityMedia,
+        total: entityMedia.length,
+        limit,
+        offset,
+      };
     } else {
       // List all media
       mediaList = await listMedia({
-        uploadedBy: targetUserId,
-        fileType,
-        folder,
+        filters: {
+          uploadedBy: targetUserId,
+          fileType,
+          folder,
+        },
         limit,
         offset,
         sortBy,

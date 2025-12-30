@@ -65,3 +65,7 @@ export function useSession(): SessionData {
 
    return { data: session, isPending, error, refetch, isRefetching: false };
 }
+
+// Export sign in/up functions from Better Auth client
+export const signIn = authClient.signIn;
+export const signUp = authClient.signUp;

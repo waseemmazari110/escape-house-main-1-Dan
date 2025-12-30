@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import {
   getMediaById,
-  updateMediaMetadata,
+  updateMediaRecord,
   deleteMediaRecord,
 } from '@/lib/media-storage';
 import { logAuditEvent } from '@/lib/audit-logger';
@@ -129,7 +129,7 @@ export async function PUT(
     } = body;
 
     // Update media
-    const updatedMedia = await updateMediaMetadata(
+    const updatedMedia = await updateMediaRecord(
       mediaId,
       {
         title,
