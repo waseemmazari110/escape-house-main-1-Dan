@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { useRefresh } from "@/hooks/useRefresh";
 import Link from "next/link";
 import Image from "next/image";
 import { 
@@ -24,7 +25,6 @@ import {
   XCircle,
   Clock,
   AlertCircle,
-  Eye,
   Edit2,
   Trash2,
   BedDouble,
@@ -36,7 +36,9 @@ import {
   Bell,
   Star,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Plus,
+  ExternalLink
 } from "lucide-react";
 
 // UK Date formatting utility
@@ -90,12 +92,19 @@ interface OwnerStats {
 interface Booking {
   id: number;
   guestName: string;
+  guestEmail?: string;
+  guestPhone?: string;
   propertyName: string;
+  propertyLocation?: string;
   checkInDate: string;
   checkOutDate: string;
   bookingStatus: string;
+  paymentStatus?: string;
   numberOfGuests?: number;
   totalPrice?: number;
+  specialRequests?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface Property {
@@ -184,6 +193,7 @@ interface StatusCounts {
 function OwnerDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { refresh, isRefreshing } = useRefresh();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<OwnerStats | null>(null);
@@ -265,6 +275,9 @@ function OwnerDashboardContent() {
         setPropertyAvailability(null);
         setActiveView('properties');
       }
+      
+      // Refresh cache to update all views
+      await refresh();
     } catch (e) {
       console.error('Failed to delete property:', e);
       alert('Failed to delete property. Please try again.');
@@ -378,6 +391,19 @@ function OwnerDashboardContent() {
     }
   };
 
+  // Fetch bookings for bookings tab
+  const loadBookings = async () => {
+    try {
+      const allBookingsRes = await fetch('/api/owner/bookings?limit=100', { cache: 'no-store' });
+      if (allBookingsRes.ok) {
+        const allBookingsData = await allBookingsRes.json();
+        setAllBookings(allBookingsData.bookings || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch bookings:', error);
+    }
+  };
+
   useEffect(() => {
     if (activeView === 'approvals') {
       fetchPendingProperties();
@@ -449,9 +475,9 @@ function OwnerDashboardContent() {
   return (
     <div className="flex min-h-screen bg-gray-50 text-black">
       {/* Modern Sidebar - Desktop */}
-      <aside className="hidden lg:flex flex-col w-72 bg-white border-r border-gray-200 shadow-xl fixed h-screen overflow-y-auto">
+      <aside className="hidden lg:flex flex-col w-72 bg-white border-r border-gray-200 shadow-xl fixed h-screen overflow-y-auto text-black">
         {/* Logo Section */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-gray-200 text-black">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center shadow-lg">
               <Home className="w-7 h-7 text-black" />
@@ -464,7 +490,7 @@ function OwnerDashboardContent() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2">
+        <nav className="flex-1 px-4 py-6 space-y-2 text-black">
           {[
             { name: 'Overview', icon: Home, view: 'overview' },
             { name: 'Bookings', icon: Calendar, view: 'bookings' },
@@ -543,7 +569,7 @@ function OwnerDashboardContent() {
         </nav>
 
         {/* User Profile Section */}
-        <div className="border-t border-gray-200 p-4">
+        <div className="border-t border-gray-200 p-4 text-black">
           <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 mb-3">
             <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center shadow-lg">
               <span className="text-base font-bold text-black">
@@ -568,8 +594,8 @@ function OwnerDashboardContent() {
       </aside>
 
       {/* Mobile Header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-lg border-b border-gray-200">
-        <div className="flex items-center justify-between px-4 py-4">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white shadow-lg border-b border-gray-200 text-black">
+        <div className="flex items-center justify-between px-4 py-4 text-black">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
               <Home className="w-6 h-6 text-black" />
@@ -598,7 +624,7 @@ function OwnerDashboardContent() {
               className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
               onClick={() => setIsMobileMenuOpen(false)}
             />
-            <div className="fixed top-[73px] left-0 right-0 bottom-0 bg-white z-50 overflow-y-auto">
+            <div className="fixed top-[73px] left-0 right-0 bottom-0 bg-white z-50 overflow-y-auto text-black">
               <nav className="px-4 py-4 space-y-2">
                 {[
                   { name: 'Overview', icon: Home, view: 'overview' },
@@ -673,9 +699,9 @@ function OwnerDashboardContent() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-72 pt-20 lg:pt-0">
-        <div className="min-h-screen">
-          <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="flex-1 lg:ml-72 pt-20 lg:pt-0 text-black">
+        <div className="min-h-screen text-black">
+          <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 text-black">
             {/* Header */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-2">
@@ -928,13 +954,6 @@ function OwnerDashboardContent() {
                               
                               {/* Action Buttons */}
                               <div className="flex items-center gap-2">
-                                <Link href={`/owner/properties/${property.id}/view`} className="flex-1">
-                                  <button className={`w-full flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-colors ${purpleButtonSoftClass}`}>
-                                    <Eye className="w-3.5 h-3.5" />
-                                    View
-                                  </button>
-                                </Link>
-
                                 <Link
                                   href={`/owner/properties/${property.id}/edit`}
                                   className={`px-3 py-2 rounded-lg font-semibold transition-colors ${purpleButtonSoftClass}`}
@@ -978,13 +997,24 @@ function OwnerDashboardContent() {
 
             {/* Bookings View */}
             {activeView === "bookings" && (
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden">
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-md overflow-hidden text-black">
                 <div className="p-6 border-b border-gray-200 bg-gray-50">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-black" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                        <Calendar className="w-5 h-5 text-black" />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold text-black">All Bookings</h2>
+                        <p className="text-sm text-gray-600">Manage and track all property bookings</p>
+                      </div>
                     </div>
-                    <h2 className="text-xl font-bold text-black">All Bookings</h2>
+                    <button
+                      onClick={loadBookings}
+                      className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${purpleButtonSoftClass}`}
+                    >
+                      Refresh
+                    </button>
                   </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -997,39 +1027,110 @@ function OwnerDashboardContent() {
                       <p className="text-sm text-black">Your bookings will appear here</p>
                     </div>
                   ) : (
-                    <table className="w-full">
-                      <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-black uppercase tracking-wider">Guest</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-black uppercase tracking-wider">Property</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-black uppercase tracking-wider">Check-in</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-black uppercase tracking-wider">Status</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-black uppercase tracking-wider">Total</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {allBookings.map((booking) => (
-                          <tr key={booking.id} className="hover:bg-gray-50 transition-all">
-                            <td className="px-6 py-4">
-                              <p className="text-sm font-semibold text-black">{booking.guestName}</p>
-                              {booking.numberOfGuests && (
-                                <p className="text-xs text-black">{booking.numberOfGuests} guests</p>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 text-sm text-black">{booking.propertyName}</td>
-                            <td className="px-6 py-4 text-sm text-black">{formatUKDate(booking.checkInDate)}</td>
-                            <td className="px-6 py-4">
-                              <span className={`px-3 py-1.5 text-xs font-semibold rounded-full border ${getStatusColor(booking.bookingStatus)}`}>
+                    <div className="p-6 space-y-4">
+                      {allBookings.map((booking) => (
+                        <div key={booking.id} className="border border-gray-200 rounded-xl hover:shadow-lg transition-all overflow-hidden">
+                          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-4 border-b border-gray-200">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-purple-200 flex items-center justify-center">
+                                  <Users className="w-5 h-5 text-purple-700" />
+                                </div>
+                                <div>
+                                  <h3 className="font-bold text-gray-900">{booking.guestName}</h3>
+                                  <p className="text-sm text-gray-600">Booking #{booking.id}</p>
+                                </div>
+                              </div>
+                              <span className={`px-4 py-2 text-xs font-semibold rounded-full ${getStatusColor(booking.bookingStatus)}`}>
                                 {booking.bookingStatus.charAt(0).toUpperCase() + booking.bookingStatus.slice(1)}
                               </span>
-                            </td>
-                            <td className="px-6 py-4 text-sm font-semibold text-black">
-                              {booking.totalPrice ? `£${booking.totalPrice.toLocaleString()}` : '-'}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                            </div>
+                          </div>
+                          
+                          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Property Info */}
+                            <div className="space-y-2">
+                              <h4 className="text-xs font-semibold text-gray-500 uppercase">Property</h4>
+                              <div className="flex items-start gap-2">
+                                <Building className="w-4 h-4 text-purple-600 mt-1" />
+                                <div>
+                                  <p className="font-semibold text-gray-900">{booking.propertyName}</p>
+                                  {booking.propertyLocation && (
+                                    <p className="text-sm text-gray-600 flex items-center gap-1">
+                                      <MapPin className="w-3 h-3" />
+                                      {booking.propertyLocation}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Dates & Guests */}
+                            <div className="space-y-2">
+                              <h4 className="text-xs font-semibold text-gray-500 uppercase">Stay Details</h4>
+                              <div className="space-y-1.5">
+                                <p className="text-sm text-gray-700">
+                                  <span className="font-semibold">Check-in:</span> {formatUKDate(booking.checkInDate)}
+                                </p>
+                                <p className="text-sm text-gray-700">
+                                  <span className="font-semibold">Check-out:</span> {formatUKDate(booking.checkOutDate)}
+                                </p>
+                                {booking.numberOfGuests && (
+                                  <p className="text-sm text-gray-700 flex items-center gap-1">
+                                    <Users className="w-4 h-4" />
+                                    {booking.numberOfGuests} guests
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Contact & Payment */}
+                            <div className="space-y-2">
+                              <h4 className="text-xs font-semibold text-gray-500 uppercase">Contact & Payment</h4>
+                              <div className="space-y-1.5">
+                                {booking.guestEmail && (
+                                  <p className="text-sm text-gray-700 flex items-center gap-1">
+                                    <Mail className="w-4 h-4" />
+                                    {booking.guestEmail}
+                                  </p>
+                                )}
+                                {booking.guestPhone && (
+                                  <p className="text-sm text-gray-700">📞 {booking.guestPhone}</p>
+                                )}
+                                <div className="pt-2 border-t border-gray-200">
+                                  <p className="text-lg font-bold text-purple-700">
+                                    {booking.totalPrice ? `£${booking.totalPrice.toLocaleString()}` : '-'}
+                                  </p>
+                                  {booking.paymentStatus && (
+                                    <p className={`text-xs font-medium ${
+                                      booking.paymentStatus === 'paid' ? 'text-green-600' : 
+                                      booking.paymentStatus === 'pending' ? 'text-amber-600' : 'text-gray-600'
+                                    }`}>
+                                      Payment: {booking.paymentStatus}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {booking.specialRequests && (
+                            <div className="px-6 pb-4">
+                              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                <p className="text-xs font-semibold text-amber-900 mb-1">Special Requests:</p>
+                                <p className="text-sm text-amber-800">{booking.specialRequests}</p>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
+                            <p className="text-xs text-gray-500">
+                              Created: {formatUKDateTime(booking.createdAt || booking.checkInDate)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               </div>
@@ -1037,135 +1138,41 @@ function OwnerDashboardContent() {
 
             {/* Properties View */}
             {activeView === "properties" && (
-              <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-md">
-                {properties.length === 0 ? (
-                  <div className="text-center py-20">
-                    <div className="w-20 h-20 rounded-2xl bg-purple-100 flex items-center justify-center mx-auto mb-4">
-                      <Building className="w-10 h-10 text-purple-500" />
-                    </div>
-                    <p className="text-black font-semibold mb-1">No properties yet</p>
-                    <p className="text-sm text-black mb-4">Start by adding your first property</p>
-                    <Link href="/owner/properties/add">
-                      <button className={`px-6 py-3 rounded-xl font-semibold transition-all ${purpleButtonClass}`}>
-                        Add Property
+              <div className="bg-white rounded-2xl border border-gray-200 shadow-md text-black">
+                <div className="p-12 text-center">
+                  <div className="w-24 h-24 rounded-2xl bg-purple-100 flex items-center justify-center mx-auto mb-6">
+                    <Building className="w-12 h-12 text-purple-600" />
+                  </div>
+                  
+                  <h2 className="text-3xl font-bold text-black mb-3">Property Management</h2>
+                  <p className="text-gray-600 text-lg mb-8 max-w-xl mx-auto">
+                    Add new properties or manage your existing listings. View, edit, and update property details, images, pricing, and availability.
+                  </p>
+                  
+                  <div className="flex flex-wrap items-center justify-center gap-4">
+                    <Link href="/owner/properties/new">
+                      <button className={`px-8 py-4 rounded-xl font-bold text-lg transition-all ${purpleButtonClass} flex items-center gap-3`}>
+                        <Plus className="w-6 h-6" />
+                        Add New Property
+                      </button>
+                    </Link>
+                    
+                    <Link href="/owner/properties">
+                      <button className={`px-8 py-4 rounded-xl font-bold text-lg transition-all ${purpleButtonSoftClass} flex items-center gap-3 border-2 border-purple-300`}>
+                        <Building className="w-6 h-6" />
+                        Manage Properties
                       </button>
                     </Link>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {properties.map((property) => {
-                      const status = property.statusInfo?.status || property.status || 'pending';
-                      const isApproved = status === 'approved';
-                      
-                      return (
-                        <div
-                          key={property.id}
-                          className="group rounded-2xl overflow-hidden border border-gray-200 hover:shadow-2xl transition-all duration-300 bg-white"
-                        >
-                          <div className="relative h-52 bg-gray-100 overflow-hidden">
-                            {property.heroImage ? (
-                              <Image
-                                src={property.heroImage}
-                                alt={property.title}
-                                fill
-                                className="object-cover group-hover:scale-110 transition-transform duration-500"
-                              />
-                            ) : (
-                              <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-                                <Home className="w-16 h-16 text-black" />
-                              </div>
-                            )}
-                            <div className="absolute top-3 right-3">
-                              {status === 'approved' && (
-                                <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-emerald-100 text-black shadow-lg">✓ Approved</span>
-                              )}
-                              {status === 'pending' && (
-                                <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-amber-100 text-black shadow-lg">⏱ Pending</span>
-                              )}
-                              {status === 'rejected' && (
-                                <span className="px-3 py-1.5 text-xs font-bold rounded-full bg-rose-100 text-black shadow-lg">✗ Rejected</span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="p-5">
-                            <h3 className="font-bold text-black mb-2">{property.title}</h3>
-                            <p className="text-sm text-black mb-3 flex items-center gap-1">
-                              <MapPin className="w-4 h-4" />
-                              {property.location}
-                            </p>
-                            <div className="flex flex-wrap items-center gap-3 mb-4 text-xs text-black">
-                              {property.bedrooms && (
-                                <span className="flex items-center gap-1">
-                                  <BedDouble className="w-3.5 h-3.5" />
-                                  {property.bedrooms} bed
-                                </span>
-                              )}
-                              {property.bathrooms && (
-                                <span className="flex items-center gap-1">
-                                  <Bath className="w-3.5 h-3.5" />
-                                  {property.bathrooms} bath
-                                </span>
-                              )}
-                              {property.sleepsMax && (
-                                <span className="flex items-center gap-1">
-                                  <Users className="w-3.5 h-3.5" />
-                                  Sleeps {property.sleepsMax}
-                                </span>
-                              )}
-                            </div>
-                            {property.priceFromWeekend && (
-                              <p className="text-sm font-bold text-black mb-4">
-                                From £{property.priceFromWeekend.toLocaleString()} / weekend
-                              </p>
-                            )}
-                            <div className="flex items-center gap-2">
-                              <Link href={`/owner/properties/${property.id}/view`} className="flex-1">
-                                <button className={`w-full px-4 py-2 rounded-lg font-semibold transition-all ${purpleButtonClass}`}>
-                                  Manage
-                                </button>
-                              </Link>
-
-                              <Link
-                                href={`/owner/properties/${property.id}/edit`}
-                                className={`px-4 py-2 rounded-lg font-semibold transition-all ${purpleButtonClass}`}
-                                title="Edit property"
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </Link>
-
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteProperty(property.id)}
-                                disabled={deletingPropertyId === property.id}
-                                className={`px-4 py-2 rounded-lg font-semibold transition-all ${purpleButtonClass} disabled:opacity-60`}
-                                title="Delete property"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-
-                              {isApproved && (
-                                <button
-                                  onClick={() => handleViewAvailability(property.id)}
-                                  className={`px-4 py-2 rounded-lg font-semibold transition-all ${purpleButtonClass}`}
-                                >
-                                  <Calendar className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                </div>
               </div>
             )}
 
             {/* Approvals View */}
             {activeView === "approvals" && (
-              <div className="space-y-6">
+              <div className="space-y-6 text-black">
                 {/* Status Filter */}
-                <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-md">
+                <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-md text-black">
                   <div className="flex flex-wrap gap-2">
                     {[
                       { key: 'pending', label: 'Pending', icon: Clock, color: 'amber' },
@@ -1198,7 +1205,7 @@ function OwnerDashboardContent() {
 
                 {/* Properties List */}
                 {pendingProperties.length === 0 ? (
-                  <div className="bg-white rounded-2xl p-16 text-center border border-gray-200 shadow-md">
+                  <div className="bg-white rounded-2xl p-16 text-center border border-gray-200 shadow-md text-black">
                     <div className="w-20 h-20 rounded-2xl bg-gray-200 flex items-center justify-center mx-auto mb-4">
                       <ShieldCheck className="w-10 h-10 text-gray-400" />
                     </div>
@@ -1208,9 +1215,9 @@ function OwnerDashboardContent() {
                     <p className="text-sm text-gray-500">Properties will appear here</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-4 text-black">
                     {pendingProperties.map((property) => (
-                      <div key={property.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all">
+                      <div key={property.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all text-black">
                         <div className="flex flex-col md:flex-row">
                           <div className="relative w-full md:w-72 h-56 bg-gray-100">
                             {property.heroImage ? (
@@ -1221,7 +1228,7 @@ function OwnerDashboardContent() {
                               </div>
                             )}
                           </div>
-                          <div className="flex-1 p-6">
+                          <div className="flex-1 p-6 text-black">
                             <div className="flex items-start justify-between mb-4">
                               <div>
                                 <h3 className="text-xl font-bold text-gray-900 mb-2">{property.title}</h3>
@@ -1288,7 +1295,7 @@ function OwnerDashboardContent() {
                             <div className="flex flex-wrap gap-3">
                               <Link href={`/properties/${property.slug}`} target="_blank">
                                 <button className={`px-4 py-2 rounded-lg font-medium text-sm transition-all flex items-center gap-2 ${purpleButtonSoftClass}`}>
-                                  <Eye className="w-4 h-4" />
+                                  <ExternalLink className="w-4 h-4" />
                                   View Listing
                                 </button>
                               </Link>
@@ -1311,9 +1318,9 @@ function OwnerDashboardContent() {
 
             {/* Payments View */}
             {activeView === "payments" && (
-              <div className="space-y-6">
+              <div className="space-y-6 text-black">
                 {loadingPayments ? (
-                  <div className="bg-white rounded-2xl p-16 text-center border border-gray-200 shadow-md">
+                  <div className="bg-white rounded-2xl p-16 text-center border border-gray-200 shadow-md text-black">
                     <div className="relative inline-block">
                       <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-indigo-600"></div>
                       <Sparkles className="w-6 h-6 text-indigo-600 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse" />
@@ -1321,7 +1328,7 @@ function OwnerDashboardContent() {
                     <p className="mt-4 text-black font-semibold">Loading payments...</p>
                   </div>
                 ) : paymentHistory.length === 0 ? (
-                  <div className="bg-white rounded-2xl p-16 text-center border border-gray-200 shadow-md">
+                  <div className="bg-white rounded-2xl p-16 text-center border border-gray-200 shadow-md text-black">
                     <div className="w-20 h-20 rounded-2xl bg-purple-100 flex items-center justify-center mx-auto mb-4">
                       <CreditCard className="w-10 h-10 text-purple-500" />
                     </div>
@@ -1336,7 +1343,7 @@ function OwnerDashboardContent() {
                 ) : (
                   <div className="space-y-4">
                     {paymentHistory.map((payment: any) => (
-                      <div key={payment.id} className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-md transition-all">
+                      <div key={payment.id} className="bg-white rounded-2xl p-6 border border-gray-200 hover:shadow-md transition-all text-black">
                         <div className="flex items-start gap-4">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                             payment.status === 'succeeded' || payment.status === 'paid'
@@ -1392,7 +1399,7 @@ function OwnerDashboardContent() {
 
             {/* Availability View */}
             {activeView === "availability" && (
-              <div className="space-y-6">
+              <div className="space-y-6 text-black">
                 <button
                   onClick={() => setActiveView("properties")}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${purpleButtonSoftClass}`}
@@ -1402,7 +1409,7 @@ function OwnerDashboardContent() {
                 </button>
 
                 {loadingAvailability ? (
-                  <div className="bg-white rounded-2xl p-16 text-center border border-gray-200 shadow-md">
+                  <div className="bg-white rounded-2xl p-16 text-center border border-gray-200 shadow-md text-black">
                     <div className="relative inline-block">
                       <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-200 border-t-indigo-600"></div>
                       <Sparkles className="w-6 h-6 text-indigo-600 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse" />
@@ -1410,7 +1417,7 @@ function OwnerDashboardContent() {
                     <p className="mt-4 text-black font-semibold">Loading availability...</p>
                   </div>
                 ) : !propertyAvailability ? (
-                  <div className="bg-white rounded-2xl p-16 text-center border border-gray-200 shadow-md">
+                  <div className="bg-white rounded-2xl p-16 text-center border border-gray-200 shadow-md text-black">
                     <div className="w-20 h-20 rounded-2xl bg-purple-100 flex items-center justify-center mx-auto mb-4">
                       <Calendar className="w-10 h-10 text-purple-500" />
                     </div>
@@ -1424,9 +1431,9 @@ function OwnerDashboardContent() {
                     </button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 text-black">
                     {/* Calendar View */}
-                    <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-gray-200 shadow-md">
+                    <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-gray-200 shadow-md text-black">
                       <div className="flex items-center justify-between mb-6">
                         <div>
                           <h3 className="text-xl font-bold text-black">
@@ -1519,9 +1526,9 @@ function OwnerDashboardContent() {
                     </div>
 
                     {/* Bookings Sidebar */}
-                    <div className="space-y-4">
+                    <div className="space-y-4 text-black">
                       {/* Upcoming Bookings */}
-                      <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-md">
+                      <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-md text-black">
                         <h3 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
                           <div className="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center">
                             <Calendar className="w-4 h-4 text-black" />
@@ -1548,7 +1555,7 @@ function OwnerDashboardContent() {
                       </div>
 
                       {/* Quick Stats */}
-                      <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-md">
+                      <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-md text-black">
                         <h3 className="text-lg font-bold text-gray-900 mb-4">Availability Stats</h3>
                         <div className="space-y-3">
                           <div className="flex justify-between items-center p-3 bg-rose-50 rounded-xl">

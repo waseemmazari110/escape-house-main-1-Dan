@@ -115,6 +115,8 @@ export default function PropertyApprovals() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log(`PropertyApprovals: Fetched ${data.properties?.length || 0} properties with status filter: ${statusFilter}`);
+        console.log('Property statuses:', data.properties?.map((p: any) => ({ id: p.id, title: p.title, status: p.status })));
         setProperties(data.properties || []);
         setStatusCounts(data.statusCounts || { pending: 0, approved: 0, rejected: 0, all: 0 });
       } else {

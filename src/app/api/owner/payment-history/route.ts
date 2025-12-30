@@ -21,6 +21,8 @@ export async function GET(request: NextRequest) {
       return unauthenticatedResponse('Please log in to access this resource');
     }
 
+    console.log(`[${new Date().toISOString()}] Fetching payment history for user: ${currentUser.id}`);
+
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
@@ -43,6 +45,8 @@ export async function GET(request: NextRequest) {
       .select()
       .from(payments)
       .where(eq(payments.userId, currentUser.id));
+
+    console.log(`[${new Date().toISOString()}] Found ${userPayments.length} payments, total count: ${countResult.length}`);
 
     // Format response with subscription plan details
     const formattedPayments = userPayments.map(({ payment, subscription }) => ({

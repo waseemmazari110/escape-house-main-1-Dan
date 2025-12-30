@@ -11,7 +11,12 @@
         "clear-cache": "pwsh -File clear-cache.ps1",
         "clean": "pwsh -File clear-cache.ps1",
         "fresh-build": "pwsh -File clear-cache.ps1 && next build",
-        "fresh-dev": "pwsh -File clear-cache.ps1 && next dev"
+        "fresh-dev": "pwsh -File clear-cache.ps1 && next dev",
+        "check:payments": "npx tsx check-payments-data.ts",
+        "fix:payments": "npx tsx backfill-missing-payments.ts",
+        "verify:payments": "npx tsx verify-fix-payments.ts",
+        "test:transactions": "npx tsx create-test-transactions.ts",
+        "clean:test-data": "npx tsx remove-test-data.ts"
     },
     "engines": {
         "node": ">=20.0.0 <25"

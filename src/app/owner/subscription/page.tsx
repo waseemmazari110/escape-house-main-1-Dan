@@ -186,11 +186,13 @@ function SubscriptionContent() {
     } catch (err: any) {
       console.error('Subscription error:', err);
       const errorMessage = err.message || 'Failed to start checkout';
-      setError(errorMessage);
+      const backendError = err.response?.data?.message || err.message;
+      
+      setError(backendError || errorMessage);
       showNotification({
         type: 'error',
         title: 'Checkout Error',
-        message: errorMessage,
+        message: backendError || errorMessage,
         duration: 6000
       });
       // Reset state on error

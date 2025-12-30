@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth-client";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Link from "next/link";
 import { ArrowLeft, Building, Plus, Edit2, CheckCircle, Clock, XCircle, AlertCircle, Trash2, Calendar, Loader2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// Purple button styles (matching dashboard)
+const purpleButtonClass = "bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl";
+const purpleButtonSoftClass = "bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200";
 
 interface Property {
   id: number;
@@ -26,7 +28,7 @@ interface Property {
   };
 }
 
-function OwnerPropertiesContent() {
+export default function OwnerPropertiesPage() {
   const router = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,7 +97,7 @@ function OwnerPropertiesContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-accent-sage)] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading properties...</p>
         </div>
       </div>
@@ -118,17 +120,17 @@ function OwnerPropertiesContent() {
               </Button>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
-                  <Building className="w-8 h-8 text-[var(--color-accent-sage)]" />
+                  <Building className="w-8 h-8 text-purple-600" />
                   Manage Properties
                 </h1>
                 <p className="text-sm text-gray-600 mt-1">View, edit, and manage all your listings</p>
               </div>
             </div>
             <Link href="/owner/properties/new">
-              <Button className="inline-flex items-center gap-2 bg-[var(--color-accent-sage)] hover:bg-emerald-700 text-white">
+              <button className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all ${purpleButtonClass}`}>
                 <Plus className="w-5 h-5" />
                 <span className="hidden sm:inline">Add Property</span>
-              </Button>
+              </button>
             </Link>
           </div>
         </div>
@@ -199,14 +201,31 @@ function OwnerPropertiesContent() {
             <h2 className="text-xl font-semibold text-gray-900 mb-2">No properties yet</h2>
             <p className="text-gray-600 mb-6">Get started by adding your first property</p>
             <Link href="/owner/properties/new">
-              <Button className="bg-[var(--color-accent-sage)] hover:bg-emerald-700 text-white">
-                <Plus className="w-5 h-5 mr-2" />
+              <button className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${purpleButtonClass}`}>
+                <Plus className="w-5 h-5" />
                 Add Your First Property
-              </Button>
+              </button>
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-6">
+            {/* Add Property Card */}
+            <Link href="/owner/properties/new">
+              <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl p-8 text-center cursor-pointer hover:shadow-2xl transition-all border-2 border-purple-400 hover:scale-105">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
+                    <Plus className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-2">Add New Property</h3>
+                    <p className="text-purple-100">Click here to create a new property listing</p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+            
+            {/* Properties Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProperties.map((property) => {
               const status = property.statusInfo?.status || property.status || 'pending';
               const isApproved = status === 'approved';
@@ -282,7 +301,7 @@ function OwnerPropertiesContent() {
 
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">
-                      <div className="text-lg font-bold text-[var(--color-accent-sage)]">
+                      <div className="text-lg font-bold text-purple-600">
                         £{property.priceFromWeekend}
                       </div>
                     </div>
@@ -371,16 +390,9 @@ function OwnerPropertiesContent() {
               );
             })}
           </div>
+          </div>
         )}
       </div>
     </div>
-  );
-}
-
-export default function OwnerPropertiesPage() {
-  return (
-    <ProtectedRoute allowedRoles={["owner"]}>
-      <OwnerPropertiesContent />
-    </ProtectedRoute>
   );
 }

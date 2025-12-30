@@ -71,7 +71,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     interval: 'monthly',
     price: 19.99,
     currency: 'GBP',
-    stripePriceId: process.env.STRIPE_PRICE_BASIC_MONTHLY || 'price_basic_monthly',
+    stripePriceId: process.env.STRIPE_PRICE_BASIC_MONTHLY || '',
     features: [
       'Up to 5 property listings',
       'Standard photo gallery (20 photos per property)',
@@ -96,7 +96,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     interval: 'yearly',
     price: 79.99, // Save £159.89 (66.7% discount)
     currency: 'GBP',
-    stripePriceId: process.env.STRIPE_PRICE_BASIC_YEARLY || 'price_basic_yearly',
+    stripePriceId: process.env.STRIPE_PRICE_BASIC_YEARLY || '',
     features: [
       'Up to 5 property listings',
       'Standard photo gallery (20 photos per property)',
@@ -123,7 +123,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     interval: 'monthly',
     price: 29.99,
     currency: 'GBP',
-    stripePriceId: process.env.STRIPE_PRICE_PREMIUM_MONTHLY || 'price_premium_monthly',
+    stripePriceId: process.env.STRIPE_PRICE_PREMIUM_MONTHLY || '',
     features: [
       'Up to 25 property listings',
       'Enhanced photo gallery (50 photos per property)',
@@ -150,7 +150,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     interval: 'yearly',
     price: 99.99, // Save £259.89 (72.2% discount)
     currency: 'GBP',
-    stripePriceId: process.env.STRIPE_PRICE_PREMIUM_YEARLY || 'price_premium_yearly',
+    stripePriceId: process.env.STRIPE_PRICE_PREMIUM_YEARLY || '',
     features: [
       'Up to 25 property listings',
       'Enhanced photo gallery (50 photos per property)',
@@ -179,7 +179,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     interval: 'monthly',
     price: 39.99,
     currency: 'GBP',
-    stripePriceId: process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY || 'price_enterprise_monthly',
+    stripePriceId: process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY || '',
     features: [
       'Unlimited property listings',
       'Unlimited photos per property',
@@ -208,7 +208,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     interval: 'yearly',
     price: 119.99, // Save £359.89 (75% discount)
     currency: 'GBP',
-    stripePriceId: process.env.STRIPE_PRICE_ENTERPRISE_YEARLY || 'price_enterprise_yearly',
+    stripePriceId: process.env.STRIPE_PRICE_ENTERPRISE_YEARLY || '',
     features: [
       'Unlimited property listings',
       'Unlimited photos per property',
@@ -239,7 +239,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     interval: 'monthly',
     price: 1.00,
     currency: 'GBP',
-    stripePriceId: process.env.STRIPE_BASIC || 'price_test_basic',
+    stripePriceId: process.env.STRIPE_BASIC || '',
     features: [
       '🧪 Test Product - £1',
       'Up to 5 property listings',
@@ -263,7 +263,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     interval: 'monthly',
     price: 2.00,
     currency: 'GBP',
-    stripePriceId: process.env.STRIPE_BASIC2 || 'price_test_basic2',
+    stripePriceId: process.env.STRIPE_BASIC2 || '',
     features: [
       '🧪 Test Product - £2',
       'Up to 5 property listings',

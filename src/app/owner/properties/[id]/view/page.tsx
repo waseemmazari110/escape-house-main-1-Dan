@@ -92,10 +92,11 @@ function PropertyViewContent() {
       const data = await res.json();
       console.log('Property data received:', data);
       
-      // API returns a single object when queried by ID
-      const propertyData = Array.isArray(data) ? data[0] : data;
+      // Handle both response formats: direct property or wrapped in {property: ...}
+      const propertyData = data.property || data;
       
       if (!propertyData || !propertyData.id) {
+        console.error('Invalid property data:', data);
         throw new Error('Invalid property data received');
       }
       

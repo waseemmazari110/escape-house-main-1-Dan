@@ -86,8 +86,15 @@ function AvailabilityContent() {
         throw new Error(data.error || 'Property not found');
       }
       const propData = await propRes.json();
-      const prop = Array.isArray(propData) ? propData[0] : propData;
-      if (!prop || !prop.id) throw new Error('Invalid property data');
+      
+      // Handle both response formats: direct property or wrapped in {property: ...}
+      const prop = propData.property || propData;
+      
+      if (!prop || !prop.id) {
+        console.error('Invalid property data received:', propData);
+        throw new Error('Invalid property data');
+      }
+      
       setProperty(prop);
       console.log('Property loaded:', prop.title);
 

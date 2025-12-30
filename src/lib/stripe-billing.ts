@@ -12,6 +12,7 @@ import { db } from '@/db';
 import { subscriptions, invoices, payments, user } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { nowUKFormatted, todayUKFormatted, formatDateUK } from '@/lib/date-utils';
+import { revalidatePayment, revalidateSubscription } from '@/lib/cache';
 
 // Initialize Stripe with test key
 const stripeSecretKey = process.env.STRIPE_TEST_KEY || process.env.STRIPE_SECRET_KEY;
@@ -798,6 +799,9 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
       })
       .where(eq(subscriptions.stripeSubscriptionId, subscription.id));
 
+    // Revalidate cache to update dashboards
+    revalidateSubscription(userId);
+
     logBillingAction('Subscription updated in database', { 
       subscriptionId: subscription.id,
       status: subscription.status 
@@ -1332,6 +1336,9 @@ export async function createOrUpdatePayment(
         paymentIntentId: paymentIntent.id,
       });
 
+      // Revalidate cache to update dashboards
+      revalidatePayment(paymentUserId);
+
       return updated;
     } else {
       // Create new payment
@@ -1347,6 +1354,9 @@ export async function createOrUpdatePayment(
         paymentId: created.id,
         paymentIntentId: paymentIntent.id,
       });
+
+      // Revalidate cache to update dashboards
+      revalidatePayment(paymentUserId);
 
       return created;
     }

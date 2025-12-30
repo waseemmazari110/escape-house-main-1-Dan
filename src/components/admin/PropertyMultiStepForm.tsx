@@ -55,7 +55,7 @@ type PropertyFormData = {
   
   // Media
   images: string[];
-  hero_video?: string;
+  hero_image?: string;
   
   // SEO
   meta_title?: string;
@@ -123,14 +123,14 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
     house_rules: initialData?.house_rules || "",
     
     // Pricing
-    base_price: initialData?.base_price ?? 0,
-    weekend_price: initialData?.weekend_price ?? 0,
+    base_price: initialData?.base_price,
+    weekend_price: initialData?.weekend_price,
     cleaning_fee: initialData?.cleaning_fee,
     security_deposit: initialData?.security_deposit,
     
     // Media
     images: initialData?.images || [],
-    hero_video: initialData?.hero_video,
+    hero_image: initialData?.hero_image,
     
     // SEO
     meta_title: initialData?.meta_title,
@@ -196,7 +196,15 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
         break;
       
       case 6: // Pricing
-        if (formData.base_price <= 0) newErrors.base_price = "Base price must be greater than 0";
+        if (!formData.base_price || formData.base_price <= 0) {
+          newErrors.base_price = "Base price is required and must be greater than 0";
+        }
+        break;
+      
+      case 7: // Media
+        if ((!formData.images || formData.images.length === 0) && !formData.hero_image?.trim()) {
+          newErrors.images = "At least one image is required (upload or provide hero image URL)";
+        }
         break;
     }
 
@@ -302,8 +310,13 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
     if (formData.max_guests < 1) requiredFieldsErrors.max_guests = "Max guests is required";
     if (formData.bedrooms < 1) requiredFieldsErrors.bedrooms = "Bedrooms must be at least 1";
     if (formData.bathrooms < 1) requiredFieldsErrors.bathrooms = "Bathrooms must be at least 1";
-    if (formData.base_price <= 0) requiredFieldsErrors.base_price = "Base price must be greater than 0";
-    if (!formData.images || formData.images.length === 0) requiredFieldsErrors.images = "At least one image is required";
+    if (!formData.base_price || formData.base_price <= 0) {
+      requiredFieldsErrors.base_price = "Base price is required and must be greater than 0";
+    }
+    // Require either uploaded images or hero image URL
+    if ((!formData.images || formData.images.length === 0) && !formData.hero_image?.trim()) {
+      requiredFieldsErrors.images = "At least one image is required (upload or provide hero image URL)";
+    }
 
     if (Object.keys(requiredFieldsErrors).length > 0) {
       setErrors(requiredFieldsErrors);
@@ -633,7 +646,7 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
       case 6: // Pricing
         return (
           <PricingFieldsManager
-            basePrice={formData.base_price || 0}
+            basePrice={formData.base_price}
             weekendPrice={formData.weekend_price}
             cleaningFee={formData.cleaning_fee}
             securityDeposit={formData.security_deposit}
@@ -649,9 +662,9 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
         return (
           <div className="space-y-6">
             <div>
-              <Label className="text-gray-900">Property Images</Label>
+              <Label className="text-gray-900">Property Images *</Label>
               <p className="text-sm text-gray-500 mb-4">
-                Upload images of your property. The first image will be the hero image.
+                Upload images of your property OR provide a hero image URL below. At least one is required.
               </p>
               <PropertyImageUpload
                 images={formData.images}
@@ -659,15 +672,30 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
                 maxImages={20}
                 maxSizeMB={5}
               />
+              {errors.images && (
+                <p className="text-sm text-red-600 mt-2">{errors.images}</p>
+              )}
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">OR</span>
+              </div>
             </div>
 
             <div>
-              <Label htmlFor="hero_video" className="text-gray-900">Hero Video URL (Optional)</Label>
+              <Label htmlFor="hero_image" className="text-gray-900">Hero Image URL</Label>
+              <p className="text-sm text-gray-500 mb-2">
+                Paste a direct URL to an image if you prefer to use a hosted image instead of uploading.
+              </p>
               <Input
-                id="hero_video"
-                value={formData.hero_video || ""}
-                onChange={(e) => updateField("hero_video", e.target.value)}
-                placeholder="https://example.com/video.mp4"
+                id="hero_image"
+                value={formData.hero_image || ""}
+                onChange={(e) => updateField("hero_image", e.target.value)}
+                placeholder="https://example.com/image.jpg"
                 className="text-gray-900"
               />
             </div>
@@ -891,6 +919,3 @@ export function PropertyMultiStepForm({ propertyId, initialData }: PropertyMulti
     </div>
   );
 }
-
-
-

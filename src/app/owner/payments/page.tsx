@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { 
@@ -447,9 +446,5 @@ function OwnerPaymentsContent() {
 }
 
 export default function OwnerPaymentsPage() {
-  return (
-    <ProtectedRoute allowedRoles={["owner"]}>
-      <OwnerPaymentsContent />
-    </ProtectedRoute>
-  );
+  return <OwnerPaymentsContent />;
 }

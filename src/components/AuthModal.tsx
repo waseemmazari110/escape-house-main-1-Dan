@@ -86,19 +86,16 @@ export default function AuthModal({
         if (userResponse.ok) {
           const userData = await userResponse.json();
           if (userData.role !== "owner" && userData.role !== "admin") {
-            toast.error("This login is for property owners only");
+            toast.error("This login is for property owners only. Please use the dedicated owner login page.");
             await authClient.signOut();
             return;
           }
-          toast.success("Welcome back!");
-          onClose();
-          router.push("/owner/dashboard");
-          return;
         }
       }
 
       toast.success("Welcome back!");
       onClose();
+      // Keep users on public site - they should use dedicated login pages for dashboard access
       router.refresh();
     } catch (error) {
       console.error("Login error:", error);

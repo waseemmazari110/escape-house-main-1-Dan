@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { payments } from "@/db/schema";
+import { payments, subscriptions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { 
   getCurrentUserWithRole,
@@ -22,14 +22,95 @@ export async function POST(request: NextRequest) {
       return unauthenticatedResponse('Please log in to access this resource');
     }
 
-    // Get recent payment intents from Stripe for this user
-    // (We can't directly query by metadata, so we'll get all and filter)
+    let syncedCount = 0;
+
+    // ===== SYNC INVOICES (Primary for subscriptions) =====
+    console.log(`[${new Date().toISOString()}] Syncing invoices for user: ${currentUser.id}`);
+    
+    const invoices = await stripe.invoices.list({ 
+      limit: 100,
+      expand: ['data.payment_intent', 'data.charge']
+    });
+
+    // Process each invoice
+    for (const invoice of invoices.data) {
+      // Check if this is for the current user
+      const userId = invoice.metadata?.userId;
+      if (!userId || userId !== currentUser.id) {
+        continue;
+      }
+
+      // Skip draft invoices
+      if (invoice.status === 'draft') {
+        continue;
+      }
+
+      // Check if payment already exists
+      const existing = await db
+        .select()
+        .from(payments)
+        .where(eq(payments.stripeInvoiceId, invoice.id));
+
+      if (existing.length === 0) {
+        try {
+          // Get subscription details
+          let subscriptionId = null;
+          if (invoice.subscription) {
+            const subRecords = await db
+              .select()
+              .from(subscriptions)
+              .where(eq(subscriptions.stripeSubscriptionId, invoice.subscription as string));
+            subscriptionId = subRecords[0]?.id || null;
+          }
+
+          const paymentIntent = invoice.payment_intent as any;
+          const charge = invoice.charge as any;
+
+          // Only sync paid or failed invoices
+          if (invoice.status === 'paid' || invoice.status === 'open' || invoice.status === 'uncollectible') {
+            await db.insert(payments).values({
+              userId: currentUser.id,
+              subscriptionId: subscriptionId,
+              stripeCustomerId: invoice.customer as string || null,
+              stripePaymentIntentId: paymentIntent?.id || null,
+              stripeChargeId: charge?.id || null,
+              stripeInvoiceId: invoice.id,
+              amount: (invoice.amount_paid || 0) / 100,
+              currency: (invoice.currency || 'gbp').toUpperCase(),
+              paymentStatus: invoice.status === 'paid' ? 'succeeded' : (invoice.status === 'open' ? 'pending' : 'failed'),
+              paymentMethod: (charge as any)?.payment_method_details?.type || 'card',
+              paymentMethodBrand: (charge as any)?.payment_method_details?.card?.brand || null,
+              paymentMethodLast4: (charge as any)?.payment_method_details?.card?.last4 || null,
+              description: `Invoice #${invoice.number || invoice.id.substring(0, 8)}`,
+              billingReason: invoice.billing_reason || null,
+              receiptUrl: invoice.receipt_url || null,
+              receiptEmail: invoice.receipt_email || null,
+              failureCode: (paymentIntent as any)?.last_payment_error?.code || null,
+              failureMessage: (paymentIntent as any)?.last_payment_error?.message || null,
+              subscriptionPlan: invoice.metadata?.planName || null,
+              metadata: JSON.stringify(invoice.metadata || {}),
+              stripeEventId: 'manual_sync',
+              processedAt: new Date().toISOString(),
+              createdAt: new Date(invoice.created * 1000).toISOString(),
+              updatedAt: new Date().toISOString(),
+            });
+            
+            syncedCount++;
+            console.log(`[${new Date().toISOString()}] Synced invoice: ${invoice.id}`);
+          }
+        } catch (error) {
+          console.error(`Error inserting invoice payment ${invoice.id}:`, error);
+        }
+      }
+    }
+
+    // ===== SYNC PAYMENT INTENTS (One-time payments) =====
+    console.log(`[${new Date().toISOString()}] Syncing payment intents for user: ${currentUser.id}`);
+    
     const paymentIntents = await stripe.paymentIntents.list({ 
       limit: 100,
       expand: ['data.charges']
     });
-
-    let syncedCount = 0;
 
     // Process each payment intent
     for (const intent of paymentIntents.data) {
@@ -62,7 +143,7 @@ export async function POST(request: NextRequest) {
             paymentMethod: charge?.payment_method_details?.type || null,
             paymentMethodBrand: (charge?.payment_method_details as any)?.card?.brand || null,
             paymentMethodLast4: (charge?.payment_method_details as any)?.card?.last4 || null,
-            description: intent.description || 'Subscription payment',
+            description: intent.description || 'Payment',
             receiptUrl: charge?.receipt_url || null,
             receiptEmail: intent.receipt_email || null,
             failureCode: (intent as any).last_payment_error?.code || null,
@@ -75,11 +156,14 @@ export async function POST(request: NextRequest) {
           });
           
           syncedCount++;
+          console.log(`[${new Date().toISOString()}] Synced payment intent: ${intent.id}`);
         } catch (error) {
-          console.error('Error inserting payment:', error);
+          console.error('Error inserting payment intent:', error);
         }
       }
     }
+
+    console.log(`[${new Date().toISOString()}] Payment sync complete. Total synced: ${syncedCount}`);
 
     return NextResponse.json({
       success: true,

@@ -51,15 +51,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate Stripe Price ID
-    if (!plan.stripePriceId || plan.stripePriceId.includes('REPLACE_ME') || plan.stripePriceId.includes('XXXXXX')) {
-      console.error(`[${nowUKFormatted()}] Invalid Stripe Price ID for plan ${planId}:`, plan.stripePriceId);
+    const isInvalidPriceId = !plan.stripePriceId || 
+                             plan.stripePriceId.includes('REPLACE_ME') || 
+                             plan.stripePriceId.includes('XXXXXX') ||
+                             plan.stripePriceId.startsWith('price_') && 
+                             !plan.stripePriceId.startsWith('price_') ||
+                             (plan.stripePriceId === `price_${plan.tier}_${plan.interval}`);
+    
+    if (isInvalidPriceId || !plan.stripePriceId.startsWith('price_')) {
+      console.error(`[${nowUKFormatted()}] Invalid or unconfigured Stripe Price ID for plan ${planId}:`, plan.stripePriceId);
       return NextResponse.json(
         { 
-          error: 'Stripe price not configured',
-          message: `Please configure STRIPE_PRICE_${plan.tier.toUpperCase()}_${plan.interval.toUpperCase()} in your .env file`,
-          details: 'Visit https://dashboard.stripe.com/test/products to create products and get price IDs'
+          error: 'Checkout not available',
+          message: `Subscription plan "${plan.name}" is not yet available. Please contact support to set up this plan.`,
+          details: `Plan ID: ${planId}, Tier: ${plan.tier}, Interval: ${plan.interval}`
         },
-        { status: 500 }
+        { status: 503 }
       );
     }
 
@@ -106,16 +113,6 @@ export async function POST(request: NextRequest) {
           userEmail: session.user.email || '',
           planId: plan.id,
           tier: plan.tier,
-        },
-      },
-      payment_intent_data: {
-        metadata: {
-          userId: session.user.id,
-          role: 'owner',
-          subscriptionPlan: plan.id,
-          planId: plan.id,
-          tier: plan.tier,
-          billingReason: 'subscription_checkout',
         },
       },
       billing_address_collection: 'auto',

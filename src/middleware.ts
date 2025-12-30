@@ -16,7 +16,7 @@ import { auth } from '@/lib/auth';
 // Define route groups and their required roles
 const PROTECTED_ROUTES: Record<string, string[]> = {
   '/admin': ['admin'],
-  '/owner': ['owner', 'admin'], // Admin can access owner routes (management purposes)
+  '/owner': ['owner'], // Only owners (layout will handle role check)
   '/guest/bookings': ['guest', 'owner', 'admin'], // All authenticated users can view bookings
 };
 
@@ -88,6 +88,12 @@ export async function middleware(request: NextRequest) {
 
   // Allow public routes
   if (isPublicRoute(pathname)) {
+    return NextResponse.next();
+  }
+
+  // For /owner routes, let the layout handle auth checks
+  // This avoids duplicate auth checks and session mismatches
+  if (pathname.startsWith('/owner')) {
     return NextResponse.next();
   }
 

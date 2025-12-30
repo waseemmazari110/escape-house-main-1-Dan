@@ -57,12 +57,13 @@ export default function PropertyDetailPage() {
 
         const propertyData = await propertyResponse.json();
         
-        if (!propertyData || propertyData.length === 0) {
+        // Handle single property response (when fetched by slug)
+        if (!propertyData || !propertyData.id) {
           setError('Property not found');
           return;
         }
 
-        const prop = propertyData[0];
+        const prop = propertyData;
 
         // Transform property data
         const transformedProperty = {
@@ -96,7 +97,10 @@ export default function PropertyDetailPage() {
         if (relatedResponse.ok) {
           const relatedData = await relatedResponse.json();
           
-          const transformedRelated = relatedData
+          // Handle list response format {properties: [...]}
+          const propertiesList = relatedData.properties || relatedData;
+          
+          const transformedRelated = propertiesList
             .filter((p: any) => p.slug !== params.slug)
             .slice(0, 2)
             .map((p: any) => ({

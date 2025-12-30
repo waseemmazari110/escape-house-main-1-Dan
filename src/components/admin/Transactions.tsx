@@ -110,15 +110,20 @@ export default function Transactions() {
     fetchTransactions();
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(date);
+  const formatDate = (dateString: string | null | undefined): string => {
+    // Early return for null/undefined/empty
+    if (!dateString) return 'N/A';
+    
+    const str = String(dateString).trim();
+    if (str === '' || str === 'null' || str === 'undefined') return 'N/A';
+    
+    // Just return the date string as-is if it looks valid
+    // Don't try to format it to avoid any RangeError
+    if (str.length > 8 && (str.includes('/') || str.includes('-') || str.includes('T'))) {
+      return str.replace('T', ' ').split('.')[0]; // Clean format
+    }
+    
+    return 'Invalid Date';
   };
 
   const formatAmount = (amount: number, currency: string) => {
@@ -322,7 +327,7 @@ export default function Transactions() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {filteredTransactions.map((transaction) => (
+                {filteredTransactions.filter(t => t && t.id).map((transaction) => (
                   <tr key={transaction.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="text-sm font-semibold text-gray-900">
@@ -369,7 +374,9 @@ export default function Transactions() {
                       )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap hidden lg:table-cell">
-                      <div className="text-xs text-gray-900">{formatDate(transaction.createdAt)}</div>
+                      <div className="text-xs text-gray-900">
+                        {formatDate(transaction?.createdAt)}
+                      </div>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-2">

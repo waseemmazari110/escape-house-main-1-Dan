@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { 
@@ -412,9 +411,5 @@ function AdminPaymentsContent() {
 }
 
 export default function AdminPaymentsPage() {
-  return (
-    <ProtectedRoute allowedRoles={['admin']}>
-      <AdminPaymentsContent />
-    </ProtectedRoute>
-  );
+  return <AdminPaymentsContent />;
 }

@@ -20,7 +20,7 @@ interface SeasonalPrice {
 }
 
 interface PricingFieldsManagerProps {
-  basePrice: number;
+  basePrice?: number;
   weekendPrice?: number;
   cleaningFee?: number;
   securityDeposit?: number;
@@ -116,7 +116,7 @@ export function PricingFieldsManager({
       seasonType: "mid",
       startDate: "",
       endDate: "",
-      pricePerNight: basePrice || 0,
+      pricePerNight: basePrice || 100,
       dayType: "any",
     };
     const updated = [...localSeasonalPrices, newPrice];
@@ -247,7 +247,11 @@ export function PricingFieldsManager({
             <div className="flex-1">
               <h4 className="font-semibold text-blue-900 text-sm">Pricing Summary</h4>
               <div className="mt-2 space-y-1 text-sm text-blue-800">
-                <p>Midweek: <span className="font-medium">{currency}{formatPrice(basePrice)}</span> per night</p>
+                {basePrice ? (
+                  <p>Midweek: <span className="font-medium">{currency}{formatPrice(basePrice)}</span> per night</p>
+                ) : (
+                  <p className="text-gray-500 italic">Set base price above</p>
+                )}
                 {weekendPrice && (
                   <p>Weekend: <span className="font-medium">{currency}{formatPrice(weekendPrice)}</span> per night</p>
                 )}

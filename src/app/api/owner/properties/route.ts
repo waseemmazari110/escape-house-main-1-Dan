@@ -6,6 +6,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { nowUKFormatted } from '@/lib/date-utils';
 import { logPropertyAction, captureRequestDetails } from '@/lib/audit-logger';
+import { revalidateProperty, revalidateOwnerDashboard } from '@/lib/cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -160,6 +161,10 @@ export async function POST(request: NextRequest) {
         ...requestDetails
       }
     );
+
+    // Revalidate cache to update UI
+    revalidateProperty(newProperty[0].id.toString(), session.user.id);
+    revalidateOwnerDashboard(session.user.id);
 
     return NextResponse.json({
       success: true,

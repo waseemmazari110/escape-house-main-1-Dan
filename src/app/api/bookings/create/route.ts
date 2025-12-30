@@ -39,15 +39,11 @@ export interface CreateBookingInput {
  */
 export async function POST(request: NextRequest) {
   try {
-    // AUTHENTICATION REQUIRED
+    // AUTHENTICATION OPTIONAL FOR GUEST BOOKINGS
     const currentUser = await getCurrentUserWithRole();
     
-    if (!currentUser) {
-      return NextResponse.json(
-        { error: 'You must be logged in to make a booking', code: 'UNAUTHORIZED' },
-        { status: 401 }
-      );
-    }
+    // Allow both authenticated and guest bookings
+    // If user is logged in, associate booking with their account
 
     const body: CreateBookingInput = await request.json();
 

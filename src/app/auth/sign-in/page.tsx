@@ -124,21 +124,13 @@ export default function SignInPage() {
         return;
       }
 
-      // Success! Get session and redirect
-      const session = await authClient.getSession();
-      const userRole = (session?.data?.user as any)?.role;
-
+      // Success! Redirect to properties page (public site)
+      // Note: Admin/Owner users should use dedicated login pages
       toast.success("Welcome back!");
       setStep("complete");
 
       setTimeout(() => {
-        if (userRole === "owner") {
-          router.push("/owner/dashboard");
-        } else if (userRole === "admin") {
-          router.push("/admin/bookings");
-        } else {
-          router.push("/");
-        }
+        router.push("/properties");
       }, 500);
     } catch (error) {
       console.error("Password submission error:", error);

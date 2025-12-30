@@ -19,24 +19,35 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const slug = searchParams.get('slug');
     
     // Get current user for role-based filtering
     const currentUser = await getCurrentUserWithRole();
 
-    // Single property by ID
-    if (id) {
-      if (!id || isNaN(parseInt(id))) {
-        return NextResponse.json(
-          { error: 'Valid ID is required', code: 'INVALID_ID' },
-          { status: 400 }
-        );
-      }
+    // Single property by ID or slug
+    if (id || slug) {
+      let property;
+      
+      if (id) {
+        if (!id || isNaN(parseInt(id))) {
+          return NextResponse.json(
+            { error: 'Valid ID is required', code: 'INVALID_ID' },
+            { status: 400 }
+          );
+        }
 
-      const property = await db
-        .select()
-        .from(properties)
-        .where(eq(properties.id, parseInt(id)))
-        .limit(1);
+        property = await db
+          .select()
+          .from(properties)
+          .where(eq(properties.id, parseInt(id)))
+          .limit(1);
+      } else if (slug) {
+        property = await db
+          .select()
+          .from(properties)
+          .where(eq(properties.slug, slug))
+          .limit(1);
+      }
 
       if (property.length === 0) {
         return NextResponse.json(
@@ -555,6 +566,11 @@ export async function DELETE(request: NextRequest) {
       .delete(properties)
       .where(eq(properties.id, parseInt(id)))
       .returning();
+
+    // Revalidate cache to update UI
+    revalidateProperty(id, existingProperty[0].ownerId);
+    revalidateOwnerDashboard(existingProperty[0].ownerId);
+    revalidateAdminDashboard();
 
     return NextResponse.json({
       message: 'Property deleted successfully',
