@@ -361,7 +361,7 @@ export async function updatePaymentStatus(
   if (status === 'completed') {
     const payment = await getPaymentByTransactionId(transactionId);
     if (payment) {
-      await updateBookingPaymentStatus(payment.bookingId, payment.paymentType);
+      await updateBookingPaymentStatus(payment.bookingId, payment.paymentType as PaymentType);
     }
   }
 
