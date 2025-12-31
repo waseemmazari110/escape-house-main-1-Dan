@@ -437,7 +437,7 @@ export async function updateMediaRecord(
   // Log audit event
   await logAuditEvent({
     userId,
-    action: 'media.update',
+    action: 'settings.update',
     resourceType: 'media',
     resourceId: id.toString(),
     details: {
