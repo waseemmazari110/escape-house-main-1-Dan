@@ -296,7 +296,7 @@ export async function listMedia(options: MediaListOptions = {}): Promise<{
   }
 
   if (filters.isPublic !== undefined) {
-    conditions.push(eq(media.isPublic, filters.isPublic ? 1 : 0));
+    conditions.push(eq(media.isPublic, filters.isPublic));
   }
 
   if (filters.searchTerm) {
