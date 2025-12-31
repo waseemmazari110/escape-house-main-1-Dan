@@ -78,7 +78,7 @@ function isPublicRoute(pathname: string): boolean {
   });
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   
   // Allow API routes to handle their own auth (they use API middleware)
