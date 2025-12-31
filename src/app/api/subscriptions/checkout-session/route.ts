@@ -139,8 +139,6 @@ export async function POST(request: NextRequest) {
     console.error(`[${nowUKFormatted()}] Error creating checkout session:`, {
       message: errorMessage,
       details: errorDetails,
-      planId,
-      stripePriceId: plan?.stripePriceId,
       stripeConfigured: !!process.env.STRIPE_TEST_KEY || !!process.env.STRIPE_SECRET_KEY,
     });
     
