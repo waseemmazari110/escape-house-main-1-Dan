@@ -103,7 +103,7 @@ export async function getCurrentBillingCycle(
     const isRenewalDue = daysUntilRenewal <= 0;
 
     const billingCycle: BillingCycle = {
-      subscriptionId: subscription.id,
+      subscriptionId: subscription.id.toString(),
       userId: subscription.userId,
       currentPeriodStart: subscription.currentPeriodStart,
       currentPeriodEnd: subscription.currentPeriodEnd,
@@ -520,7 +520,7 @@ export async function sendRenewalReminders(): Promise<number> {
       if (billingCycle && billingCycle.daysUntilRenewal === 3) {
         // TODO: Send email reminder
         logBillingCycle('Renewal reminder sent', {
-          subscriptionId: subscription.id,
+          subscriptionId: subscription.id.toString(),
           userId: subscription.userId,
           renewalDate: billingCycle.nextBillingDate,
         });
@@ -564,4 +564,5 @@ export async function getBillingCycleStatistics() {
     return null;
   }
 }
+
 
