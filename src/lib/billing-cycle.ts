@@ -155,8 +155,13 @@ export async function processSubscriptionRenewal(
     }
 
     // Get Stripe subscription
+    if (!subscription.stripeSubscriptionId) {
+      throw new Error('Stripe subscription ID not found');
+    }
+
+    const stripeSubId = subscription.stripeSubscriptionId;
     const stripeSubscription = await stripe.subscriptions.retrieve(
-      subscription.stripeSubscriptionId,
+      stripeSubId,
       { expand: ['latest_invoice'] }
     );
 
@@ -250,7 +255,7 @@ export async function getSubscriptionsDueForRenewal(): Promise<BillingCycle[]> {
     const dueSubscriptions: BillingCycle[] = [];
 
     for (const subscription of activeSubscriptions) {
-      const billingCycle = await getCurrentBillingCycle(subscription.id);
+      const billingCycle = await getCurrentBillingCycle(subscription.id.toString());
       
       if (billingCycle && billingCycle.isRenewalDue) {
         dueSubscriptions.push(billingCycle);
@@ -481,7 +486,7 @@ export async function getUpcomingRenewals(): Promise<BillingCycle[]> {
     const upcoming: BillingCycle[] = [];
 
     for (const subscription of activeSubscriptions) {
-      const billingCycle = await getCurrentBillingCycle(subscription.id);
+      const billingCycle = await getCurrentBillingCycle(subscription.id.toString());
       
       if (billingCycle && billingCycle.daysUntilRenewal <= 7 && billingCycle.daysUntilRenewal > 0) {
         upcoming.push(billingCycle);
@@ -514,7 +519,7 @@ export async function sendRenewalReminders(): Promise<number> {
     let remindersSent = 0;
 
     for (const subscription of activeSubscriptions) {
-      const billingCycle = await getCurrentBillingCycle(subscription.id);
+      const billingCycle = await getCurrentBillingCycle(subscription.id.toString());
       
       // Send reminder 3 days before renewal
       if (billingCycle && billingCycle.daysUntilRenewal === 3) {
@@ -564,5 +569,6 @@ export async function getBillingCycleStatistics() {
     return null;
   }
 }
+
 
 

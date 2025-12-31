@@ -220,6 +220,10 @@ export async function processRetryAttempt(
     }
 
     // Attempt to charge the customer via Stripe
+    if (!subscription.stripeSubscriptionId) {
+      throw new Error('Stripe subscription ID not found');
+    }
+
     const paymentResult = await attemptPayment(subscription.stripeSubscriptionId);
 
     const attempt: PaymentRetryAttempt = {
