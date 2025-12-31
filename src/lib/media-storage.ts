@@ -605,11 +605,12 @@ export async function getMediaStats(userId?: string): Promise<MediaStats> {
     }
 
     // By folder
-    if (!stats.byFolder[record.folder]) {
-      stats.byFolder[record.folder] = { count: 0, size: 0 };
+    const folder = record.folder || 'general';
+    if (!stats.byFolder[folder]) {
+      stats.byFolder[folder] = { count: 0, size: 0 };
     }
-    stats.byFolder[record.folder].count++;
-    stats.byFolder[record.folder].size += record.fileSize;
+    stats.byFolder[folder].count++;
+    stats.byFolder[folder].size += record.fileSize;
 
     // Recent uploads (last 24 hours)
     const createdDate = parseUKDate(record.createdAt);
