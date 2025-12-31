@@ -648,10 +648,10 @@ function formatMediaRecord(record: any): MediaRecord {
     entityId: record.entityId,
     uploadedBy: record.uploadedBy,
     folder: record.folder,
-    tags: record.tags ? JSON.parse(record.tags) : [],
+    tags: Array.isArray(record.tags) ? record.tags : (record.tags ? [] : []),
     isPublic: record.isPublic === 1,
     thumbnailUrl: record.thumbnailUrl,
-    metadata: record.metadata ? JSON.parse(record.metadata) : null,
+    metadata: typeof record.metadata === 'object' ? record.metadata : null,
     storageProvider: record.storageProvider,
     storageKey: record.storageKey,
     createdAt: record.createdAt,
@@ -689,7 +689,7 @@ export async function searchMediaByTags(tags: string[]): Promise<MediaRecord[]> 
   return records
     .filter(record => {
       if (!record.tags) return false;
-      const recordTags = JSON.parse(record.tags);
+      const recordTags = Array.isArray(record.tags) ? record.tags : [];
       return tags.some(tag => recordTags.includes(tag));
     })
     .map(formatMediaRecord);
