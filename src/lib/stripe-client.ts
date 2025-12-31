@@ -13,7 +13,7 @@ if (!stripeSecretKey) {
 }
 
 export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: '2025-10-29.clover',
+  apiVersion: '2024-11-20.acacia',
   typescript: true,
 });
 

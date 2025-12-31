@@ -174,7 +174,9 @@ function SubscriptionContent() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create checkout session');
+        const errorMsg = data.message || data.error || 'Failed to create checkout session';
+        console.error('Checkout session error:', data);
+        throw new Error(errorMsg);
       }
 
       // Redirect to Stripe Checkout
