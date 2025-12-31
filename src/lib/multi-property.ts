@@ -185,7 +185,7 @@ export async function getPropertyPortfolio(ownerId: string): Promise<PropertyPor
  */
 async function getPropertyStats(propertyId: number): Promise<PropertySummary['stats']> {
   // Get bookings count
-  const bookingsResult = await db.execute(
+  const bookingsResult = await db.run(
     sql`SELECT COUNT(*) as count, SUM(total_price) as revenue 
         FROM bookings 
         WHERE property_id = ${propertyId} AND booking_status = 'confirmed'`
@@ -195,7 +195,7 @@ async function getPropertyStats(propertyId: number): Promise<PropertySummary['st
   const totalRevenue = (bookingsResult.rows[0] as any)?.revenue || 0;
 
   // Get last booking date
-  const lastBookingResult = await db.execute(
+  const lastBookingResult = await db.run(
     sql`SELECT created_at FROM bookings 
         WHERE property_id = ${propertyId} AND booking_status = 'confirmed'
         ORDER BY created_at DESC LIMIT 1`
