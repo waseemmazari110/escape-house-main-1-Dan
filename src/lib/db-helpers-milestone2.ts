@@ -5,7 +5,7 @@
 
 import { db } from '@/db';
 import { subscriptions, invoices, media, enquiries } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { nowUKFormatted, todayUKFormatted } from '@/lib/date-utils';
 
 // ============================================
@@ -213,8 +213,7 @@ export async function updateMedia(id: number, data: Partial<CreateMediaData>) {
 export async function getMediaByEntity(entityType: string, entityId: string) {
   return await db.select()
     .from(media)
-    .where(eq(media.entityType, entityType))
-    .where(eq(media.entityId, entityId));
+    .where(and(eq(media.entityType, entityType), eq(media.entityId, entityId)));
 }
 
 export async function deleteMedia(id: number) {

@@ -358,7 +358,7 @@ export async function getBillingHistory(subscriptionId: string): Promise<Billing
     const allInvoices = await db
       .select()
       .from(invoicesTable)
-      .where(eq(invoicesTable.subscriptionId, subscriptionId));
+      .where(eq(invoicesTable.subscriptionId, parseInt(subscriptionId)));
 
     // Build cycle records from invoices
     const cycles: BillingCycleRecord[] = allInvoices.map((invoice, index) => ({
@@ -369,7 +369,7 @@ export async function getBillingHistory(subscriptionId: string): Promise<Billing
       amount: invoice.total || 0,
       currency: invoice.currency || 'GBP',
       status: invoice.status === 'paid' ? 'paid' : invoice.status === 'open' ? 'pending' : 'failed',
-      invoiceId: invoice.id,
+      invoiceId: invoice.id.toString(),
     }));
 
     const totalPaid = cycles

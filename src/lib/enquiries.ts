@@ -207,14 +207,7 @@ export async function getEnquiryById(enquiryId: number) {
  * Get all enquiries with filters
  */
 export async function getEnquiries(filters: EnquiryFilters = {}, limit = 50, offset = 0) {
-  let query = db.select({
-    enquiry: enquiries,
-    property: properties,
-  })
-  .from(enquiries)
-  .leftJoin(properties, eq(enquiries.propertyId, properties.id));
-
-  // Apply filters
+  // Build filter conditions first
   const conditions = [];
 
   if (filters.status) {
@@ -270,9 +263,18 @@ export async function getEnquiries(filters: EnquiryFilters = {}, limit = 50, off
     );
   }
 
-  if (conditions.length > 0) {
-    query = query.where(and(...conditions)!);
-  }
+  // Build query with conditions
+  const baseQuery = db.select({
+    enquiry: enquiries,
+    property: properties,
+  })
+  .from(enquiries)
+  .leftJoin(properties, eq(enquiries.propertyId, properties.id))
+  .$dynamic();
+
+  const query = conditions.length > 0 
+    ? baseQuery.where(and(...conditions)!) 
+    : baseQuery;
 
   const results = await query
     .orderBy(desc(enquiries.createdAt))

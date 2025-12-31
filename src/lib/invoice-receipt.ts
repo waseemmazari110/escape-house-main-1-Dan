@@ -100,7 +100,7 @@ export async function generateInvoiceData(invoiceId: string): Promise<InvoiceDat
     const [invoice] = await db
       .select()
       .from(invoices)
-      .where(eq(invoices.id, invoiceId))
+      .where(eq(invoices.id, parseInt(invoiceId)))
       .limit(1);
 
     if (!invoice) {
@@ -213,7 +213,7 @@ export async function generateReceiptData(invoiceId: string): Promise<ReceiptDat
     const [invoice] = await db
       .select()
       .from(invoices)
-      .where(eq(invoices.id, invoiceId))
+      .where(eq(invoices.id, parseInt(invoiceId)))
       .limit(1);
 
     const receiptData: ReceiptData = {
@@ -737,3 +737,4 @@ export async function getInvoiceByNumber(invoiceNumber: string) {
     return null;
   }
 }
+

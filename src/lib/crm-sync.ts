@@ -240,7 +240,7 @@ export async function getMembershipData(userId: string): Promise<MembershipData 
       role,
       tier,
       planName: subscription?.planName || null,
-      subscriptionId: subscription?.id || null,
+      subscriptionId: subscription?.id ? subscription.id.toString() : null,
       
       subscriptionStart: subscription?.currentPeriodStart || null,
       subscriptionEnd: subscription?.currentPeriodEnd || null,

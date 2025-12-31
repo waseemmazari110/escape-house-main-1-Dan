@@ -140,7 +140,7 @@ export async function createMediaRecord(
     uploadedBy: input.uploadedBy,
     folder: input.folder || 'general',
     tags: input.tags ? JSON.stringify(input.tags) : null,
-    isPublic: input.isPublic !== undefined ? (input.isPublic ? 1 : 0) : 1,
+    isPublic: input.isPublic !== undefined ? input.isPublic : true,
     thumbnailUrl: input.thumbnailUrl,
     metadata: input.metadata ? JSON.stringify(input.metadata) : null,
     storageProvider: input.storageProvider || 's3',
