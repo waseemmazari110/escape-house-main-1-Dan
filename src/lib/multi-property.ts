@@ -385,7 +385,7 @@ export async function compareProperties(
       const stats = await getPropertyStats(id);
 
       const averagePrice = (prop.priceFromMidweek + prop.priceFromWeekend) / 2;
-      const revenuePerNight = stats?.totalBookings > 0 ? stats.totalRevenue / stats.totalBookings : 0;
+      const revenuePerNight = (stats?.totalBookings ?? 0) > 0 ? (stats?.totalRevenue ?? 0) / (stats?.totalBookings ?? 1) : 0;
 
       return {
         id,
