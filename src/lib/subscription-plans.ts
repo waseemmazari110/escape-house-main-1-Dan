@@ -69,7 +69,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Basic Monthly',
     tier: 'basic',
     interval: 'monthly',
-    price: 19.99,
+    price: 9.99,
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_BASIC_MONTHLY || '',
     features: [
@@ -94,7 +94,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Basic Yearly',
     tier: 'basic',
     interval: 'yearly',
-    price: 79.99, // Save £159.89 (66.7% discount)
+    price: 89.99,
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_BASIC_YEARLY || '',
     features: [
@@ -121,7 +121,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Premium Monthly',
     tier: 'premium',
     interval: 'monthly',
-    price: 29.99,
+    price: 15.99,
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_PREMIUM_MONTHLY || '',
     features: [
@@ -148,7 +148,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Premium Yearly',
     tier: 'premium',
     interval: 'yearly',
-    price: 99.99, // Save £259.89 (72.2% discount)
+    price: 109.99,
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_PREMIUM_YEARLY || '',
     features: [
@@ -177,7 +177,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Enterprise Monthly',
     tier: 'enterprise',
     interval: 'monthly',
-    price: 39.99,
+    price: 24.99,
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY || '',
     features: [
@@ -206,7 +206,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Enterprise Yearly',
     tier: 'enterprise',
     interval: 'yearly',
-    price: 119.99, // Save £359.89 (75% discount)
+    price: 199.99,
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_ENTERPRISE_YEARLY || '',
     features: [
