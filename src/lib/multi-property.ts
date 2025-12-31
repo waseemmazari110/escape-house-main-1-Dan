@@ -385,16 +385,16 @@ export async function compareProperties(
       const stats = await getPropertyStats(id);
 
       const averagePrice = (prop.priceFromMidweek + prop.priceFromWeekend) / 2;
-      const revenuePerNight = stats.totalBookings > 0 ? stats.totalRevenue / stats.totalBookings : 0;
+      const revenuePerNight = stats?.totalBookings > 0 ? stats.totalRevenue / stats.totalBookings : 0;
 
       return {
         id,
         title: prop.title,
         metrics: {
-          totalBookings: stats.totalBookings,
-          totalRevenue: stats.totalRevenue,
-          averageRating: stats.averageRating,
-          occupancyRate: stats.occupancyRate,
+          totalBookings: stats?.totalBookings ?? 0,
+          totalRevenue: stats?.totalRevenue ?? 0,
+          averageRating: stats?.averageRating ?? 0,
+          occupancyRate: stats?.occupancyRate ?? 0,
           pricePerNight: averagePrice,
           revenuePerNight,
         },
