@@ -37,7 +37,7 @@ import {
 export async function POST(req: NextRequest) {
   try {
     // Check authentication
-    const session = await auth();
+    const session = await auth.api.getSession({ headers: req.headers });
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -438,7 +438,7 @@ async function processMediaPostUpload(
 export async function GET(req: NextRequest) {
   try {
     // Check authentication
-    const session = await auth();
+    const session = await auth.api.getSession({ headers: req.headers });
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
