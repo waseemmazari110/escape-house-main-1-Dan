@@ -5,7 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { stripe, getOrCreateCustomer } from '@/lib/stripe-billing';
+import { stripe } from '@/lib/stripe-client';
+import { getOrCreateCustomer } from '@/lib/stripe-billing';
 import { getPlanById } from '@/lib/subscription-plans';
 import { nowUKFormatted } from '@/lib/date-utils';
 

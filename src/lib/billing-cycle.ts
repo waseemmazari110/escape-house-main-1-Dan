@@ -17,7 +17,8 @@ import {
   getDaysBetween,
   isDateInPast,
 } from '@/lib/date-utils';
-import { stripe, createInvoiceFromStripe } from '@/lib/stripe-billing';
+import { stripe } from '@/lib/stripe-client';
+import { createInvoiceFromStripe } from '@/lib/stripe-billing';
 import { initializeRetryPolicy } from '@/lib/payment-retry';
 
 // ============================================

@@ -45,11 +45,11 @@ const PUBLIC_ROUTES = [
   '/reviews',
 ];
 
-const ROLE_LOGIN_REDIRECTS: Record<string | null, string> = {
+const ROLE_LOGIN_REDIRECTS: Record<string, string> = {
   admin: '/admin/dashboard',
   owner: '/owner/dashboard',
   guest: '/properties',
-  null: '/auth/sign-in', // Not authenticated
+  'null': '/auth/sign-in', // Not authenticated
 };
 
 /**

@@ -199,14 +199,7 @@ export async function getPublicProperties(
   limit = 50,
   offset = 0
 ): Promise<{ properties: PublicProperty[]; total: number }> {
-  let query = db
-    .select({
-      property: properties,
-    })
-    .from(properties)
-    .where(and(eq(properties.isPublished, true), eq(properties.status, 'approved')));
-
-  // Only show approved and published properties on frontend
+  // Build all conditions first
   const conditions = [
     eq(properties.isPublished, true),
     eq(properties.status, 'approved')
@@ -271,10 +264,13 @@ export async function getPublicProperties(
     conditions.push(eq(properties.featured, filters.featured));
   }
 
-  // Apply all conditions
-  if (conditions.length > 0) {
-    query = query.where(and(...conditions)!) as any;
-  }
+  // Build query with all conditions
+  let query = db
+    .select({
+      property: properties,
+    })
+    .from(properties)
+    .where(and(...conditions)!);
 
   // Sorting
   let orderBy;
@@ -306,7 +302,7 @@ export async function getPublicProperties(
 
   // Fetch related data for each property
   const enrichedProperties = await Promise.all(
-    results.map(async ({ property }) => {
+    results.map(async ({ property }: any) => {
       // Get images
       const images = await db
         .select()

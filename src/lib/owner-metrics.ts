@@ -303,13 +303,13 @@ export async function getRevenueMetrics(userId: string): Promise<RevenueMetrics>
   const sorted = [...userProperties].sort((a, b) => (b.priceFromMidweek || 0) - (a.priceFromMidweek || 0));
   
   const highestPricedProperty = sorted[0] ? {
-    id: sorted[0].id,
+    id: sorted[0].id.toString(),
     name: sorted[0].title,
     price: sorted[0].priceFromMidweek || 0,
   } : null;
 
   const lowestPricedProperty = sorted[sorted.length - 1] ? {
-    id: sorted[sorted.length - 1].id,
+    id: sorted[sorted.length - 1].id.toString(),
     name: sorted[sorted.length - 1].title,
     price: sorted[sorted.length - 1].priceFromMidweek || 0,
   } : null;
@@ -368,7 +368,7 @@ export async function getPropertyAnalytics(
   const property = await db
     .select()
     .from(properties)
-    .where(and(eq(properties.id, propertyId), eq(properties.ownerId, userId)))
+    .where(and(eq(properties.id, parseInt(propertyId)), eq(properties.ownerId, userId)))
     .limit(1);
 
   if (!property || property.length === 0) {

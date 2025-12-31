@@ -12,22 +12,7 @@ import { db } from '@/db';
 import { subscriptions, invoices, payments, user } from '@/db/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { nowUKFormatted, todayUKFormatted, formatDateUK } from '@/lib/date-utils';
-import { revalidatePayment, revalidateSubscription } from '@/lib/cache';
-
-// Initialize Stripe with test key
-const stripeSecretKey = process.env.STRIPE_TEST_KEY || process.env.STRIPE_SECRET_KEY;
-
-if (!stripeSecretKey) {
-  throw new Error('Missing Stripe secret key. Set STRIPE_TEST_KEY in environment variables.');
-}
-
-export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: '2025-10-29.clover',
-  typescript: true,
-});
-
-// Webhook secret for signature verification
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+import { stripe, webhookSecret } from '@/lib/stripe-client';
 
 /**
  * Log billing action with UK timestamp
@@ -799,8 +784,7 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
       })
       .where(eq(subscriptions.stripeSubscriptionId, subscription.id));
 
-    // Revalidate cache to update dashboards
-    revalidateSubscription(userId);
+    // Note: Cache revalidation should be called from API routes
 
     logBillingAction('Subscription updated in database', { 
       subscriptionId: subscription.id,
@@ -1336,8 +1320,7 @@ export async function createOrUpdatePayment(
         paymentIntentId: paymentIntent.id,
       });
 
-      // Revalidate cache to update dashboards
-      revalidatePayment(paymentUserId);
+      // Note: Cache revalidation should be called from API routes
 
       return updated;
     } else {
@@ -1355,8 +1338,7 @@ export async function createOrUpdatePayment(
         paymentIntentId: paymentIntent.id,
       });
 
-      // Revalidate cache to update dashboards
-      revalidatePayment(paymentUserId);
+      // Note: Cache revalidation should be called from API routes
 
       return created;
     }

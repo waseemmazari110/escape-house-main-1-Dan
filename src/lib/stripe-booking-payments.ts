@@ -17,7 +17,7 @@ if (!stripeSecretKey) {
 }
 
 export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-10-29.clover',
   typescript: true,
 });
 
@@ -434,7 +434,7 @@ export async function createBookingRefund(
     return {
       refundId: refund.id,
       amount: refund.amount / 100,
-      status: refund.status,
+      status: refund.status || 'pending',
     };
 
   } catch (error) {

@@ -7,9 +7,9 @@
 import { db } from '@/db';
 import { subscriptions, invoices, user } from '@/db/schema';
 import { eq, and, lt } from 'drizzle-orm';
-import { stripe } from '@/lib/stripe-billing';
+import { stripe } from '@/lib/stripe-client';
 import { nowUKFormatted, formatDateUK, addDaysUK } from '@/lib/date-utils';
-import { syncUserMembershipStatus } from '@/lib/crm-sync';
+import { syncMembershipStatus } from '@/lib/crm-sync';
 import { sendEmail } from '@/lib/email';
 import Stripe from 'stripe';
 
@@ -68,6 +68,10 @@ export async function handlePaymentFailure(params: PaymentFailureParams): Promis
 
     if (!subscription) {
       throw new Error(`Subscription not found: ${params.subscriptionId}`);
+    }
+
+    if (!subscription.stripeSubscriptionId) {
+      throw new Error(`Stripe subscription ID missing for subscription ${subscription.id}`);
     }
 
     // Get user details
@@ -193,11 +197,7 @@ export async function suspendSubscription(
       .where(eq(user.id, subscription.userId));
 
     // Sync CRM status
-    await syncUserMembershipStatus(subscription.userId, {
-      planName: 'free',
-      status: 'cancelled',
-      membershipActive: false,
-    });
+    await syncMembershipStatus(subscription.userId);
 
     logSubscriptionAction('Subscription suspended successfully', {
       subscriptionId: subscription.id,
@@ -285,12 +285,13 @@ export async function reactivateSubscription(
       .where(eq(user.id, params.userId));
 
     // Save new subscription to database
-    const currentPeriodStart = new Date(newStripeSubscription.current_period_start * 1000);
-    const currentPeriodEnd = new Date(newStripeSubscription.current_period_end * 1000);
+    const sub = newStripeSubscription as any; // Stripe SDK typing
+    const currentPeriodStart = new Date(sub.current_period_start * 1000);
+    const currentPeriodEnd = new Date(sub.current_period_end * 1000);
 
     const [newSubscription] = await db.insert(subscriptions).values({
       userId: params.userId,
-      stripeSubscriptionId: newStripeSubscription.id,
+      stripeSubscriptionId: sub.id,
       stripePriceId: oldSubscription.stripePriceId,
       stripeCustomerId: oldSubscription.stripeCustomerId,
       planName: oldSubscription.planName,
@@ -307,11 +308,7 @@ export async function reactivateSubscription(
     }).returning();
 
     // Sync CRM
-    await syncUserMembershipStatus(params.userId, {
-      planName: oldSubscription.planName,
-      status: 'active',
-      membershipActive: true,
-    });
+    await syncMembershipStatus(params.userId);
 
     // Send reactivation email
     await sendEmail({
@@ -346,12 +343,13 @@ export async function processUpcomingRenewals(): Promise<void> {
     logSubscriptionAction('Processing upcoming renewals');
 
     // Get all active subscriptions ending in next 7 days
-    const upcomingDate = addDaysUK(new Date(), 7);
+    const upcomingDateStr = addDaysUK(new Date(), 7);
+    const upcomingDate = new Date(upcomingDateStr.split('/').reverse().join('-'));
     const allSubscriptions = await db.select().from(subscriptions);
 
     const upcomingRenewals = allSubscriptions.filter(sub => {
       if (sub.status !== 'active') return false;
-      const endDate = new Date(sub.currentPeriodEnd);
+      const endDate = new Date(sub.currentPeriodEnd.split('/').reverse().join('-'));
       return endDate <= upcomingDate && endDate > new Date();
     });
 
@@ -421,7 +419,7 @@ function generatePaymentFailureEmail(
   userName: string,
   planName: string,
   attemptCount: number,
-  nextRetryDate: Date,
+  nextRetryDate: string,
   failureReason?: string
 ): string {
   return `

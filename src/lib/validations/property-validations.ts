@@ -231,7 +231,7 @@ export function validateSchema<T>(
   
   const errors: Record<string, string[]> = {};
   
-  result.error.errors.forEach((error) => {
+  result.error.issues.forEach((error) => {
     const path = error.path.join('.');
     if (!errors[path]) {
       errors[path] = [];
@@ -322,9 +322,10 @@ function parseDDMMYYYY(dateStr: string): Date | null {
 // ============================================
 
 export const propertyStatusSchema = z.object({
-  status: z.enum(['pending', 'approved', 'rejected'], {
-    errorMap: () => ({ message: 'Status must be pending, approved, or rejected' })
-  }),
+  status: z.enum(['pending', 'approved', 'rejected']).refine(
+    (val) => ['pending', 'approved', 'rejected'].includes(val),
+    { message: 'Status must be pending, approved, or rejected' }
+  ),
   rejectionReason: z.string()
     .min(10, 'Rejection reason must be at least 10 characters')
     .max(500, 'Rejection reason must not exceed 500 characters')

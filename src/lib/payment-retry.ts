@@ -9,7 +9,7 @@ import { db } from '@/db';
 import { subscriptions, user } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { nowUKFormatted, formatDateTimeUK, addDaysUK } from '@/lib/date-utils';
-import { stripe } from '@/lib/stripe-billing';
+import { stripe } from '@/lib/stripe-client';
 
 // ============================================
 // RETRY CONFIGURATION
@@ -203,8 +203,10 @@ export async function processRetryAttempt(
     }
 
     // Get retry policy from metadata
-    const metadata = JSON.parse(subscription.metadata || '{}');
-    const retryPolicy: RetryPolicy = metadata.retryPolicy;
+    const metadata = typeof subscription.metadata === 'object' && subscription.metadata !== null 
+      ? subscription.metadata 
+      : {};
+    const retryPolicy: RetryPolicy = (metadata as any).retryPolicy;
 
     if (!retryPolicy) {
       throw new Error('Retry policy not found');
@@ -395,8 +397,10 @@ export async function suspendAccount(
       .where(eq(subscriptions.id, parseInt(subscriptionId)))
       .limit(1);
 
-    const metadata = JSON.parse(subscription?.metadata || '{}');
-    const retryPolicy: RetryPolicy = metadata.retryPolicy || {};
+    const metadata = typeof subscription?.metadata === 'object' && subscription?.metadata !== null 
+      ? subscription.metadata 
+      : {};
+    const retryPolicy: RetryPolicy = (metadata as any).retryPolicy || {};
 
     retryPolicy.status = 'suspended';
     retryPolicy.updatedAt = suspendedAt;
@@ -466,21 +470,24 @@ export async function reactivateSuspendedAccount(
       throw new Error('Subscription not found');
     }
 
-    const metadata = JSON.parse(subscription.metadata || '{}');
+    const metadata = typeof subscription.metadata === 'object' && subscription.metadata !== null 
+      ? subscription.metadata 
+      : {};
+    const metadataAny = metadata as any;
 
     // Clear suspension data
-    delete metadata.suspension;
+    delete metadataAny.suspension;
 
-    if (metadata.retryPolicy) {
-      metadata.retryPolicy.status = 'active';
-      metadata.retryPolicy.updatedAt = nowUKFormatted();
+    if (metadataAny.retryPolicy) {
+      metadataAny.retryPolicy.status = 'active';
+      metadataAny.retryPolicy.updatedAt = nowUKFormatted();
     }
 
     await db
       .update(subscriptions)
       .set({
         status: 'active',
-        metadata: JSON.stringify(metadata),
+        metadata: JSON.stringify(metadataAny),
         updatedAt: nowUKFormatted(),
       })
       .where(eq(subscriptions.id, parseInt(subscriptionId)));
@@ -574,8 +581,10 @@ export async function getRetryPolicy(subscriptionId: string): Promise<RetryPolic
 
     if (!subscription?.metadata) return null;
 
-    const metadata = JSON.parse(subscription.metadata);
-    return metadata.retryPolicy || null;
+    const metadata = typeof subscription.metadata === 'object' && subscription.metadata !== null 
+      ? subscription.metadata 
+      : {};
+    return (metadata as any).retryPolicy || null;
   } catch (error) {
     logRetryAction('Failed to get retry policy', {
       error: (error as Error).message,

@@ -223,7 +223,7 @@ export async function savePerformanceStats(data: CreateStatsData) {
  * Get performance stats with filters
  */
 export async function getPerformanceStats(filters: StatsFilters = {}, limit = 100) {
-  let query = db.select().from(performanceStats);
+  const query = db.select().from(performanceStats).$dynamic();
 
   const conditions = [];
 
@@ -247,11 +247,12 @@ export async function getPerformanceStats(filters: StatsFilters = {}, limit = 10
     conditions.push(lte(performanceStats.periodEnd, filters.dateTo));
   }
 
+  let finalQuery = query;
   if (conditions.length > 0) {
-    query = query.where(and(...conditions)!);
+    finalQuery = query.where(and(...conditions)!);
   }
 
-  const results = await query
+  const results = await finalQuery
     .orderBy(desc(performanceStats.periodStart))
     .limit(limit);
 
@@ -392,7 +393,7 @@ export async function calculateOwnerStats(ownerId: string, period: Period = 'mon
   const ownerProperties = await db
     .select()
     .from(properties)
-    .where(eq(properties.userId, ownerId));
+    .where(eq(properties.ownerId, ownerId));
 
   const propertyIds = ownerProperties.map(p => p.id);
 
@@ -695,8 +696,43 @@ export async function comparePerformance(
     dateTo: previousDates.end,
   }, 1);
 
-  const current = currentStats[0] || createEmptyMetrics();
-  const previous = previousStats[0] || createEmptyMetrics();
+  const normalizeStats = (stat: any): any => {
+    if (!stat) return createEmptyMetrics();
+    return {
+      ...stat,
+      pageViews: stat.pageViews ?? 0,
+      uniqueVisitors: stat.uniqueVisitors ?? 0,
+      sessions: stat.sessions ?? 0,
+      bounceRate: stat.bounceRate ?? 0,
+      avgSessionDuration: stat.avgSessionDuration ?? 0,
+      totalClicks: stat.totalClicks ?? 0,
+      searchAppearances: stat.searchAppearances ?? 0,
+      avgSearchPosition: stat.avgSearchPosition ?? 0,
+      ctr: stat.ctr ?? 0,
+      conversions: stat.conversions ?? 0,
+      conversionRate: stat.conversionRate ?? 0,
+      leads: stat.leads ?? 0,
+      leadConversionRate: stat.leadConversionRate ?? 0,
+      bookings: stat.bookings ?? 0,
+      bookingValue: stat.bookingValue ?? 0,
+      avgBookingValue: stat.avgBookingValue ?? 0,
+      revenue: stat.revenue ?? 0,
+      avgRevenuePerBooking: stat.avgRevenuePerBooking ?? 0,
+      occupancyRate: stat.occupancyRate ?? 0,
+      adr: stat.adr ?? 0,
+      revpar: stat.revpar ?? 0,
+      cancellations: stat.cancellations ?? 0,
+      cancellationRate: stat.cancellationRate ?? 0,
+      enquiries: stat.enquiries ?? 0,
+      enquiryResponseTime: stat.enquiryResponseTime ?? 0,
+      enquiryConversionRate: stat.enquiryConversionRate ?? 0,
+      reviews: stat.reviews ?? 0,
+      averageRating: stat.averageRating ?? 0,
+    };
+  };
+
+  const current = normalizeStats(currentStats[0]);
+  const previous = normalizeStats(previousStats[0]);
 
   // Calculate changes
   const changes: any = {};

@@ -357,3 +357,39 @@ export async function sendVerificationEmail(email: string, verificationLink: str
     throw error;
   }
 }
+
+interface GenericEmailOptions {
+  to: string | string[];
+  subject: string;
+  html?: string;
+  text?: string;
+  from?: string;
+  replyTo?: string;
+}
+
+// Lightweight wrapper for transactional emails used by subscription-manager
+export async function sendEmail(options: GenericEmailOptions) {
+  const { to, subject, html, text, from, replyTo } = options;
+  try {
+    const htmlContent = html ?? (text ? `<pre>${text}</pre>` : '<p></p>');
+    const { data: emailData, error } = await resend.emails.send({
+      from: from || 'Group Escape Houses <noreply@groupescapehouses.co.uk>',
+      to: Array.isArray(to) ? to : [to],
+      subject,
+      html: htmlContent,
+      text,
+      replyTo,
+    });
+
+    if (error) {
+      console.error('❌ Failed to send email:', error);
+      throw error;
+    }
+
+    console.log('✅ Email sent successfully:', emailData?.id);
+    return emailData;
+  } catch (error) {
+    console.error('Email sending error:', error);
+    throw error;
+  }
+}
