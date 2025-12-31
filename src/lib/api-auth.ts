@@ -20,7 +20,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { getCurrentUserWithRole, type UserRole } from '@/lib/auth-roles';
-import { auditLog } from '@/lib/audit-logger';
+import { logAuditEvent } from '@/lib/audit-logger';
 
 export interface AuthResult {
   authorized: boolean;
@@ -46,13 +46,14 @@ export async function requireAuth(
 
     // Not authenticated
     if (!user) {
-      await auditLog({
-        action: 'API_UNAUTHORIZED_ACCESS',
-        resource: request.nextUrl.pathname,
-        status: 'unauthorized',
+      await logAuditEvent({
         userId: 'anonymous',
-        ipAddress: request.ip || 'unknown',
-        details: { reason: 'No authentication' },
+        action: 'settings.update',
+        resourceType: 'api',
+        resourceId: request.nextUrl.pathname,
+        details: { reason: 'No authentication', status: 'unauthorized' },
+        ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown',
       });
 
       return {
@@ -69,18 +70,19 @@ export async function requireAuth(
 
     // User doesn't have required role
     if (!userProfile || !allowedRoles.includes(userProfile.role)) {
-      await auditLog({
-        action: 'API_FORBIDDEN_ACCESS',
-        resource: request.nextUrl.pathname,
-        status: 'forbidden',
+      await logAuditEvent({
         userId: user.id,
-        userRole: (user.role as string) || 'unknown',
-        ipAddress: request.ip || 'unknown',
-        details: { 
+        action: 'settings.update',
+        resourceType: 'api',
+        resourceId: request.nextUrl.pathname,
+        details: {
           reason: 'Insufficient permissions',
           requiredRoles: allowedRoles,
           userRole: user.role,
+          status: 'forbidden',
         },
+        ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown',
       });
 
       return {

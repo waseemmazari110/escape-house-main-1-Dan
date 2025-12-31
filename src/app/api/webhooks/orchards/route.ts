@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Handle webhook
     try {
-      const result = await handlePaymentWebhook(webhookData, signature, body);
+      const result = await handlePaymentWebhook(webhookData);
 
       return NextResponse.json({
         success: true,

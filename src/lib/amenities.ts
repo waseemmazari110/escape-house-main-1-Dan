@@ -580,13 +580,13 @@ export async function savePropertyAmenities(
   }
 
   // Delete existing amenities for this property
-  await db.execute(sql`DELETE FROM property_features WHERE property_id = ${propertyId}`);
+  await db.run(sql`DELETE FROM property_features WHERE property_id = ${propertyId}`);
 
   // Insert new amenities
   if (valid.length > 0) {
     for (const amenityId of valid) {
       const amenity = STANDARD_AMENITIES[amenityId];
-      await db.execute(
+      await db.run(
         sql`INSERT INTO property_features (property_id, feature_name, created_at) 
             VALUES (${propertyId}, ${amenity.name}, ${now})`
       );
@@ -598,11 +598,11 @@ export async function savePropertyAmenities(
  * Get property amenities from database
  */
 export async function getPropertyAmenities(propertyId: number): Promise<Amenity[]> {
-  const result = await db.execute(
+  const result = await db.run(
     sql`SELECT feature_name FROM property_features WHERE property_id = ${propertyId}`
   );
 
-  const featureNames = (result.rows as Array<{ feature_name: string }>).map(
+  const featureNames = (result.rows as unknown as Array<{ feature_name: string }>).map(
     row => row.feature_name
   );
 
