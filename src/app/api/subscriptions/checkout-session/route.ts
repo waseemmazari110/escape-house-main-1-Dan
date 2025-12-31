@@ -131,11 +131,24 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error(`[${nowUKFormatted()}] Error creating checkout session:`, (error as Error).message);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorDetails = error instanceof Error && 'type' in error 
+      ? { type: (error as any).type, code: (error as any).code }
+      : {};
+    
+    console.error(`[${nowUKFormatted()}] Error creating checkout session:`, {
+      message: errorMessage,
+      details: errorDetails,
+      planId,
+      stripePriceId: plan?.stripePriceId,
+      stripeConfigured: !!process.env.STRIPE_TEST_KEY || !!process.env.STRIPE_SECRET_KEY,
+    });
+    
     return NextResponse.json(
       {
         error: 'Failed to create checkout session',
-        message: (error as Error).message,
+        message: errorMessage,
+        details: errorDetails,
         timestamp: nowUKFormatted(),
       },
       { status: 500 }
