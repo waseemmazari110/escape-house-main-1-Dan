@@ -3,8 +3,6 @@
  * Handles cache invalidation and revalidation across the application
  */
 
-'use server';
-
 import { revalidatePath, revalidateTag } from 'next/cache';
 
 /**
@@ -47,6 +45,7 @@ export const CacheTags = {
  * Revalidate owner dashboard and related data
  */
 export async function revalidateOwnerDashboard(userId: string) {
+  'use server';
   revalidatePath('/owner/dashboard');
   revalidateTag(CacheTags.OWNER_DASHBOARD(userId), {});
   revalidateTag(CacheTags.OWNER_PROPERTIES(userId), {});
@@ -58,6 +57,7 @@ export async function revalidateOwnerDashboard(userId: string) {
  * Revalidate admin dashboard and related data
  */
 export async function revalidateAdminDashboard() {
+  'use server';
   revalidatePath('/admin/dashboard');
   revalidateTag(CacheTags.ADMIN_DASHBOARD, {});
   revalidateTag(CacheTags.PROPERTIES, {});
@@ -70,6 +70,7 @@ export async function revalidateAdminDashboard() {
  * Revalidate property-related cache
  */
 export async function revalidateProperty(propertyId: string, ownerId?: string) {
+  'use server';
   revalidatePath('/properties');
   revalidatePath(`/properties/${propertyId}`);
   revalidateTag(CacheTags.PROPERTIES, {});
@@ -87,6 +88,7 @@ export async function revalidateProperty(propertyId: string, ownerId?: string) {
  * Revalidate booking-related cache
  */
 export async function revalidateBooking(bookingId: string, propertyId: string, ownerId?: string) {
+  'use server';
   revalidatePath('/bookings');
   revalidateTag(CacheTags.BOOKINGS, {});
   revalidateTag(CacheTags.BOOKING(bookingId), {});
@@ -105,6 +107,7 @@ export async function revalidateBooking(bookingId: string, propertyId: string, o
  * Revalidate payment/transaction-related cache
  */
 export async function revalidatePayment(userId: string) {
+  'use server';
   revalidateTag(CacheTags.PAYMENTS, {});
   revalidateTag(CacheTags.TRANSACTIONS, {});
   revalidateTag(CacheTags.OWNER_PAYMENTS(userId), {});
@@ -116,6 +119,7 @@ export async function revalidatePayment(userId: string) {
  * Revalidate subscription-related cache
  */
 export async function revalidateSubscription(userId: string) {
+  'use server';
   revalidateTag(CacheTags.SUBSCRIPTIONS, {});
   revalidateTag(CacheTags.USER_SUBSCRIPTION(userId), {});
   await revalidateOwnerDashboard(userId);
@@ -126,6 +130,7 @@ export async function revalidateSubscription(userId: string) {
  * Revalidate approval-related cache
  */
 export async function revalidateApproval(propertyId: string, ownerId?: string) {
+  'use server';
   revalidateTag(CacheTags.APPROVALS, {});
   revalidateTag(CacheTags.PROPERTY_APPROVAL(propertyId), {});
   await revalidateProperty(propertyId, ownerId);
@@ -136,6 +141,7 @@ export async function revalidateApproval(propertyId: string, ownerId?: string) {
  * Revalidate availability calendar
  */
 export async function revalidateAvailability(propertyId: string, ownerId?: string) {
+  'use server';
   revalidateTag(CacheTags.AVAILABILITY(propertyId), {});
   
   if (ownerId) {
@@ -147,5 +153,6 @@ export async function revalidateAvailability(propertyId: string, ownerId?: strin
  * Clear all cache (use sparingly)
  */
 export async function revalidateAll() {
+  'use server';
   revalidatePath('/', 'layout');
 }

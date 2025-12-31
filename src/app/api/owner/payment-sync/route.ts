@@ -11,7 +11,7 @@ import {
   getCurrentUserWithRole,
   unauthenticatedResponse
 } from "@/lib/auth-roles";
-import { stripe } from "@/lib/stripe-billing";
+import { stripe } from "@/lib/stripe-client";
 
 export async function POST(request: NextRequest) {
   try {
