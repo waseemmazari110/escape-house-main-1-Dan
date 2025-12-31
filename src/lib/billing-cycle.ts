@@ -80,7 +80,7 @@ export async function getCurrentBillingCycle(
     const [subscription] = await db
       .select()
       .from(subscriptions)
-      .where(eq(subscriptions.id, subscriptionId))
+      .where(eq(subscriptions.id, parseInt(subscriptionId)))
       .limit(1);
 
     if (!subscription) {
@@ -138,7 +138,7 @@ export async function processSubscriptionRenewal(
     const [subscription] = await db
       .select()
       .from(subscriptions)
-      .where(eq(subscriptions.id, subscriptionId))
+      .where(eq(subscriptions.id, parseInt(subscriptionId)))
       .limit(1);
 
     if (!subscription) {
@@ -180,7 +180,7 @@ export async function processSubscriptionRenewal(
           status: 'active',
           updatedAt: nowUKFormatted(),
         })
-        .where(eq(subscriptions.id, subscriptionId));
+        .where(eq(subscriptions.id, parseInt(subscriptionId)));
 
       // Create invoice record in database
       if (latestInvoice) {
@@ -341,7 +341,7 @@ export async function getBillingHistory(subscriptionId: string): Promise<Billing
     const [subscription] = await db
       .select()
       .from(subscriptions)
-      .where(eq(subscriptions.id, subscriptionId))
+      .where(eq(subscriptions.id, parseInt(subscriptionId)))
       .limit(1);
 
     if (!subscription) {
@@ -564,3 +564,4 @@ export async function getBillingCycleStatistics() {
     return null;
   }
 }
+

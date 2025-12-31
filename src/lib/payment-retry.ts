@@ -160,7 +160,7 @@ export async function initializeRetryPolicy(
         }),
         updatedAt: nowUKFormatted(),
       })
-      .where(eq(subscriptions.id, subscriptionId));
+      .where(eq(subscriptions.id, parseInt(subscriptionId)));
 
     logRetryAction('Retry policy initialized', {
       subscriptionId,
@@ -195,7 +195,7 @@ export async function processRetryAttempt(
     const [subscription] = await db
       .select()
       .from(subscriptions)
-      .where(eq(subscriptions.id, subscriptionId))
+      .where(eq(subscriptions.id, parseInt(subscriptionId)))
       .limit(1);
 
     if (!subscription) {
@@ -252,7 +252,7 @@ export async function processRetryAttempt(
           }),
           updatedAt: nowUKFormatted(),
         })
-        .where(eq(subscriptions.id, subscriptionId));
+        .where(eq(subscriptions.id, parseInt(subscriptionId)));
 
       logRetryAction('Payment retry succeeded', {
         subscriptionId,
@@ -282,7 +282,7 @@ export async function processRetryAttempt(
             }),
             updatedAt: nowUKFormatted(),
           })
-          .where(eq(subscriptions.id, subscriptionId));
+          .where(eq(subscriptions.id, parseInt(subscriptionId)));
 
         logRetryAction('Payment retry failed, next retry scheduled', {
           subscriptionId,
@@ -388,7 +388,7 @@ export async function suspendAccount(
     const [subscription] = await db
       .select()
       .from(subscriptions)
-      .where(eq(subscriptions.id, subscriptionId))
+      .where(eq(subscriptions.id, parseInt(subscriptionId)))
       .limit(1);
 
     const metadata = JSON.parse(subscription?.metadata || '{}');
@@ -413,7 +413,7 @@ export async function suspendAccount(
         }),
         updatedAt: suspendedAt,
       })
-      .where(eq(subscriptions.id, subscriptionId));
+      .where(eq(subscriptions.id, parseInt(subscriptionId)));
 
     // Update user account status
     await db
@@ -455,7 +455,7 @@ export async function reactivateSuspendedAccount(
     const [subscription] = await db
       .select()
       .from(subscriptions)
-      .where(eq(subscriptions.id, subscriptionId))
+      .where(eq(subscriptions.id, parseInt(subscriptionId)))
       .limit(1);
 
     if (!subscription) {
@@ -479,7 +479,7 @@ export async function reactivateSuspendedAccount(
         metadata: JSON.stringify(metadata),
         updatedAt: nowUKFormatted(),
       })
-      .where(eq(subscriptions.id, subscriptionId));
+      .where(eq(subscriptions.id, parseInt(subscriptionId)));
 
     // Restore user role
     await db
@@ -519,7 +519,7 @@ export async function permanentlyCloseAccount(
     const [subscription] = await db
       .select()
       .from(subscriptions)
-      .where(eq(subscriptions.id, subscriptionId))
+      .where(eq(subscriptions.id, parseInt(subscriptionId)))
       .limit(1);
 
     if (subscription?.stripeSubscriptionId) {
@@ -534,7 +534,7 @@ export async function permanentlyCloseAccount(
         cancelledAt: nowUKFormatted(),
         updatedAt: nowUKFormatted(),
       })
-      .where(eq(subscriptions.id, subscriptionId));
+      .where(eq(subscriptions.id, parseInt(subscriptionId)));
 
     logRetryAction('Account permanently closed', {
       subscriptionId,
@@ -565,7 +565,7 @@ export async function getRetryPolicy(subscriptionId: string): Promise<RetryPolic
     const [subscription] = await db
       .select()
       .from(subscriptions)
-      .where(eq(subscriptions.id, subscriptionId))
+      .where(eq(subscriptions.id, parseInt(subscriptionId)))
       .limit(1);
 
     if (!subscription?.metadata) return null;
@@ -595,7 +595,7 @@ export async function isAccountSuspended(subscriptionId: string): Promise<boolea
   const [subscription] = await db
     .select()
     .from(subscriptions)
-    .where(eq(subscriptions.id, subscriptionId))
+    .where(eq(subscriptions.id, parseInt(subscriptionId)))
     .limit(1);
 
   return subscription?.status === 'suspended';
@@ -615,3 +615,4 @@ export async function getDaysUntilSuspension(subscriptionId: string): Promise<nu
 
   return diffDays > 0 ? diffDays : 0;
 }
+
