@@ -29,7 +29,10 @@ export type AuditActionType =
   | 'subscription.upgrade'
   | 'subscription.downgrade'
   | 'settings.update'
-  | 'profile.update';
+  | 'profile.update'
+  | 'user.delete'
+  | 'user.update'
+  | 'user.create';
 
 export interface AuditLogEntry {
   id: string;
