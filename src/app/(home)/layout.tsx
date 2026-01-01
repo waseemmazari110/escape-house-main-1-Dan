@@ -59,11 +59,11 @@ export default async function HomeLayout({
 
   // Redirect owners and admins to their dashboards—they should not see the public landing
   if (user && role === "owner") {
-    redirect("/owner/owner-dashboard");
+    redirect("/owner/dashboard");
   }
   
   if (user && role === "admin") {
-    redirect("/admin/admin-dashboard");
+    redirect("/admin/dashboard");
   }
 
   return <>{children}</>;
