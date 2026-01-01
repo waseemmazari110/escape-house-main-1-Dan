@@ -21,14 +21,16 @@ export async function GET() {
       });
     }
     
-    // Check key format
+    // Check key format - show more details
     const keyInfo = {
       length: stripeKey.length,
-      prefix: stripeKey.substring(0, 12) + '...',
+      prefix: stripeKey.substring(0, 20) + '...',
+      suffix: '...' + stripeKey.substring(stripeKey.length - 10),
       isTestKey: stripeKey.startsWith('sk_test_'),
       isLiveKey: stripeKey.startsWith('sk_live_'),
       hasLineBreaks: stripeKey.includes('\n') || stripeKey.includes('\r'),
       hasSpaces: stripeKey.includes(' '),
+      charCodes: stripeKey.substring(0, 30).split('').map(c => c.charCodeAt(0)),
     };
     
     // Try to initialize Stripe and make a simple API call
