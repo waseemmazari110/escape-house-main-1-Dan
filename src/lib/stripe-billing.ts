@@ -790,6 +790,16 @@ async function handleSubscriptionUpdated(event: Stripe.Event) {
       subscriptionId: subscription.id,
       status: subscription.status 
     });
+
+    // Revalidate cache after subscription update
+    try {
+      const { revalidateSubscription } = await import('@/lib/cache');
+      await revalidateSubscription(userId);
+    } catch (cacheError) {
+      logBillingAction('Cache revalidation failed after subscription update', {
+        error: (cacheError as Error).message,
+      });
+    }
   } else {
     logBillingAction('Subscription update skipped - not found in database', { 
       subscriptionId: subscription.id 
@@ -1320,7 +1330,15 @@ export async function createOrUpdatePayment(
         paymentIntentId: paymentIntent.id,
       });
 
-      // Note: Cache revalidation should be called from API routes
+      // Revalidate cache after payment update
+      try {
+        const { revalidatePayment } = await import('@/lib/cache');
+        await revalidatePayment(paymentUserId);
+      } catch (cacheError) {
+        logBillingAction('Cache revalidation failed after payment update', {
+          error: (cacheError as Error).message,
+        });
+      }
 
       return updated;
     } else {
@@ -1338,7 +1356,15 @@ export async function createOrUpdatePayment(
         paymentIntentId: paymentIntent.id,
       });
 
-      // Note: Cache revalidation should be called from API routes
+      // Revalidate cache after payment creation
+      try {
+        const { revalidatePayment } = await import('@/lib/cache');
+        await revalidatePayment(paymentUserId);
+      } catch (cacheError) {
+        logBillingAction('Cache revalidation failed after payment creation', {
+          error: (cacheError as Error).message,
+        });
+      }
 
       return created;
     }
