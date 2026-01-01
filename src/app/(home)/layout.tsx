@@ -57,9 +57,13 @@ export default async function HomeLayout({
   const user = session?.user as any;
   const role = user?.role;
 
-  // Redirect owners to their dashboard—they should not see the public landing
+  // Redirect owners and admins to their dashboards—they should not see the public landing
   if (user && role === "owner") {
-    redirect("/owner/dashboard");
+    redirect("/owner/owner-dashboard");
+  }
+  
+  if (user && role === "admin") {
+    redirect("/admin/admin-dashboard");
   }
 
   return <>{children}</>;
