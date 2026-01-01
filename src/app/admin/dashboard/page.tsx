@@ -19,6 +19,7 @@ import {
   Search,
   Download,
   AlertCircle,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -193,6 +194,35 @@ function AdminDashboardContent() {
     const matchesRole = filterRole === 'all' || u.role === filterRole;
     return matchesSearch && matchesRole;
   });
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!confirm(`Are you sure you want to delete user "${userName}"?\n\nThis will permanently delete:\n- User account\n- All their properties\n- All their bookings\n- All payment records\n\nThis action cannot be undone!`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete user');
+      }
+
+      // Refresh users list
+      const usersRes = await fetch('/api/admin/users', { cache: 'no-store' });
+      if (usersRes.ok) {
+        const data = await usersRes.json();
+        setUsers(data.users || []);
+      }
+
+      alert(`User "${userName}" has been successfully deleted.`);
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert(`Failed to delete user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
 
   const StatCard = ({ icon: Icon, title, value, color }: any) => (
     <div className={`relative overflow-hidden ${color} rounded-2xl p-6 text-black shadow-md transition-all duration-300`}>
@@ -618,11 +648,12 @@ function AdminDashboardContent() {
                       <th className="px-6 py-4 text-left text-xs font-bold text-slate-900 uppercase hidden sm:table-cell">Email</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-slate-900 uppercase">Role</th>
                       <th className="px-6 py-4 text-left text-xs font-bold text-slate-900 uppercase hidden md:table-cell">Status</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-slate-900 uppercase">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
                     {filteredUsers.map((user) => (
-                      <tr key={user.id} className="hover:bg-slate-50 cursor-pointer transition-colors">
+                      <tr key={user.id} className="hover:bg-slate-50 transition-colors">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -645,6 +676,17 @@ function AdminDashboardContent() {
                           }`}>
                             {user.emailVerified ? '✓ Verified' : 'Pending'}
                           </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          {user.role !== 'admin' && (
+                            <button
+                              onClick={() => handleDeleteUser(user.id, user.name || user.email)}
+                              className="px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors flex items-center gap-1"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              Delete
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
