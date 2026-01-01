@@ -1,0 +1,7 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" fill="#E5E7EB"/>
+  <rect x="250" y="180" width="300" height="200" rx="8" fill="#9CA3AF"/>
+  <path d="M290 320L350 260L410 320L450 280L510 340" stroke="#6B7280" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="340" cy="230" r="25" fill="#6B7280"/>
+  <text x="400" y="430" text-anchor="middle" font-family="system-ui, sans-serif" font-size="24" fill="#6B7280">Property Image</text>
+</svg>

@@ -227,7 +227,7 @@ function PropertyViewContent() {
         <div className="bg-white rounded-xl overflow-hidden shadow-sm mb-8">
           <div className="relative h-[400px] md:h-[500px]">
             <Image
-              src={allImages[currentImageIndex] || '/placeholder-property.jpg'}
+              src={allImages[currentImageIndex] || '/placeholder-property.svg'}
               alt={property.title}
               fill
               className="object-cover"
@@ -262,7 +262,7 @@ function PropertyViewContent() {
                   }`}
                 >
                   <Image
-                    src={img || '/placeholder-property.jpg'}
+                    src={img || '/placeholder-property.svg'}
                     alt={`Gallery ${idx + 1}`}
                     fill
                     className="object-cover"
