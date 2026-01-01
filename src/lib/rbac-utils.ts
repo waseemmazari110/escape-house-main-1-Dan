@@ -111,7 +111,7 @@ export function getAccessibleRoutes(role: UserRole): string[] {
       '/account/bookings',
     ],
     owner: [
-      '/owner/dashboard',
+      '/owner/owner-dashboard',
       '/owner/my-properties',
       '/owner/my-properties/[id]',
       '/owner/my-properties/[id]/edit',
@@ -123,7 +123,7 @@ export function getAccessibleRoutes(role: UserRole): string[] {
       '/owner/subscription',
     ],
     admin: [
-      '/admin/dashboard',
+      '/admin/admin-dashboard',
       '/admin/all-properties',
       '/admin/all-properties/pending',
       '/admin/all-bookings',
@@ -143,8 +143,8 @@ export function getAccessibleRoutes(role: UserRole): string[] {
 export function getDashboardUrl(role: UserRole): string {
   const dashboards: Record<UserRole, string> = {
     guest: '/properties',
-    owner: '/owner/dashboard',
-    admin: '/admin/dashboard',
+    owner: '/owner/owner-dashboard',
+    admin: '/admin/admin-dashboard',
   };
   return dashboards[role];
 }
