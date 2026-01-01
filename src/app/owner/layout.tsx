@@ -17,7 +17,7 @@ export default async function OwnerLayout({
 
     // Redirect if not authenticated
     if (!user) {
-      redirect("/auth/signin?redirect=/owner/dashboard");
+      redirect("/auth/sign-in?redirect=/owner/dashboard");
     }
 
     // STRICT: Only owners can access owner routes (not even admins)
@@ -34,6 +34,6 @@ export default async function OwnerLayout({
   } catch (error) {
     console.error("Session check error:", error);
     // If there's an error checking session, redirect to signin
-    redirect("/auth/signin?redirect=/owner/dashboard");
+    redirect("/auth/sign-in?redirect=/owner/dashboard");
   }
 }
