@@ -72,7 +72,8 @@ export async function POST(
     }
 
     // Only owners and admins can update amenities
-    if (session.user.role !== 'owner' && session.user.role !== 'admin') {
+    const userRole = (session.user as any).role;
+    if (userRole !== 'owner' && userRole !== 'admin') {
       return NextResponse.json(
         { error: 'Forbidden: Only property owners can update amenities' },
         { status: 403 }
@@ -102,7 +103,7 @@ export async function POST(
       );
     }
 
-    if (session.user.role !== 'admin' && property[0].ownerId !== session.user.id) {
+    if (userRole !== 'admin' && property[0].ownerId !== session.user.id) {
       return NextResponse.json(
         { error: 'Forbidden: You do not own this property' },
         { status: 403 }
