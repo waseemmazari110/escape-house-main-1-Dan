@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       }, { status: 401 });
     }
 
-    const userRole = session.user.role;
+    const userRole = ((session.user as any).role || 'guest');
     const userId = session.user.id;
 
     // Only admin can access enquiry management
@@ -291,7 +291,7 @@ export async function POST(request: NextRequest) {
       }, { status: 401 });
     }
 
-    const userRole = session.user.role;
+    const userRole = ((session.user as any).role || 'guest');
     const userId = session.user.id;
 
     if (userRole !== 'admin' && userRole !== 'owner') {

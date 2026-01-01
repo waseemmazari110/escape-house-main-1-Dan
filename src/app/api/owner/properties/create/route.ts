@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     // Authenticate user
     const session = await auth.api.getSession({ headers: await headers() });
 
-    if (!session?.user || session.user.role !== 'owner') {
+    if (!session?.user || ((session.user as any).role || 'guest') !== 'owner') {
       return NextResponse.json(
         { error: 'Unauthorized - Owner access required' },
         { status: 401 }

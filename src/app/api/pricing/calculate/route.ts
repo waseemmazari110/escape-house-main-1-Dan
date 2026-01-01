@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Only owners and admins can create pricing
-    if (session.user.role !== 'owner' && session.user.role !== 'admin') {
+    if (((session.user as any).role || 'guest') !== 'owner' && ((session.user as any).role || 'guest') !== 'admin') {
       return NextResponse.json(
         { error: 'Forbidden: Only property owners can manage pricing' },
         { status: 403 }

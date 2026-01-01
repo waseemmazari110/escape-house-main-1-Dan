@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { syncPropertyICalFeed } from '@/lib/ical-sync';
-import { auth } from '@/lib/auth';
+import { auth, type ExtendedSession } from '@/lib/auth';
 import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
@@ -24,7 +24,7 @@ export async function POST(
     // Get session
     const session = await auth.api.getSession({
       headers: await headers(),
-    });
+    }) as ExtendedSession | null;
 
     // Require authentication (owner or admin)
     if (!session?.user) {
@@ -34,7 +34,7 @@ export async function POST(
       );
     }
 
-    const userRole = session.user.role;
+    const userRole = session.user.role || 'guest';
     if (userRole !== 'owner' && userRole !== 'admin') {
       return NextResponse.json(
         { error: 'Access denied. Owner or admin role required.' },

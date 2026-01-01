@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     if (action === 'summary') {
       // Admin only
-      if (session.user.role !== 'admin') {
+      if (((session.user as any).role || 'guest') !== 'admin') {
         return NextResponse.json(
           { error: 'Admin access required' },
           { status: 403 }
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
 
     if (action === 'sync-all') {
       // Admin only
-      if (session.user.role !== 'admin') {
+      if (((session.user as any).role || 'guest') !== 'admin') {
         return NextResponse.json(
           { error: 'Admin access required' },
           { status: 403 }
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
     const targetUserId = userId || session.user.id;
 
     // Only allow syncing own account unless admin
-    if (targetUserId !== session.user.id && session.user.role !== 'admin') {
+    if (targetUserId !== session.user.id && ((session.user as any).role || 'guest') !== 'admin') {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }

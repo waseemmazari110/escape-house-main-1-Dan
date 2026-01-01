@@ -78,7 +78,7 @@ export async function requireAuth(
         details: {
           reason: 'Insufficient permissions',
           requiredRoles: allowedRoles,
-          userRole: user.role,
+          userRole: (user as any).role,
           status: 'forbidden',
         },
         ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',

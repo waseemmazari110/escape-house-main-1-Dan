@@ -23,7 +23,6 @@ export const auth = betterAuth({
 		"https://escape-house-main-1-dan.vercel.app",
 		"https://escape-house-main-7fbg9los-waseem-mazaris-projects.vercel.app",
 		"https://escape-house-main-1-j9r9wzg18-waseem-mazaris-projects.vercel.app",
-		/^https:\/\/escape-house-main-.*\.vercel\.app$/,
 		"https://groupescapehouses.co.uk",
 		"https://www.groupescapehouses.co.uk",
 	],
@@ -45,6 +44,36 @@ export const auth = betterAuth({
 		}
 	}
 });
+
+// Extended user type with role
+export interface ExtendedUser {
+  id: string;
+  email: string;
+  emailVerified: boolean;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+  image?: string | null;
+  role?: string;
+}
+
+// Extended session type
+export interface ExtendedSession {
+  user: ExtendedUser;
+  session: {
+    id: string;
+    userId: string;
+    expiresAt: Date;
+    token: string;
+    ipAddress?: string;
+    userAgent?: string;
+  };
+}
+
+// Helper function to get user role from session
+export function getUserRole(session: any): string {
+  return (session?.user as any)?.role || 'guest';
+}
 
 // Session validation helper
 export async function getCurrentUser(request: NextRequest) {

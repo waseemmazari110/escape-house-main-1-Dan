@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Only owners and admins can view portfolios
-    if (session.user.role !== 'owner' && session.user.role !== 'admin') {
+    if (((session.user as any).role || 'guest') !== 'owner' && ((session.user as any).role || 'guest') !== 'admin') {
       return NextResponse.json(
         { error: 'Forbidden: Only property owners can view portfolios' },
         { status: 403 }
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Only owners and admins can execute bulk operations
-    if (session.user.role !== 'owner' && session.user.role !== 'admin') {
+    if (((session.user as any).role || 'guest') !== 'owner' && ((session.user as any).role || 'guest') !== 'admin') {
       return NextResponse.json(
         { error: 'Forbidden: Only property owners can execute bulk operations' },
         { status: 403 }

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Only allow owners to sync their own payments
-    if (session.user.role !== 'owner' && session.user.role !== 'admin') {
+    if (((session.user as any).role || 'guest') !== 'owner' && ((session.user as any).role || 'guest') !== 'admin') {
       return NextResponse.json(
         { error: 'Forbidden - Owner access required' },
         { status: 403 }

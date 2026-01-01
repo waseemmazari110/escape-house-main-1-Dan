@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
     const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc';
 
     // Check if user wants their own media or has admin access
-    const targetUserId = userId && session.user.role === 'admin' ? userId : session.user.id;
+    const targetUserId = userId && ((session.user as any).role || 'guest') === 'admin' ? userId : session.user.id;
 
     // Handle different query types
     let mediaList;

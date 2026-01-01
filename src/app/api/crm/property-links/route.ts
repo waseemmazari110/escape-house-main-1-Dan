@@ -11,7 +11,7 @@ export async function GET(request: Request) {
       headers: await headers(),
     });
 
-    if (!session?.user || session.user.role !== "owner") {
+    if (!session?.user || ((session.user as any).role || 'guest') !== "owner") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       headers: await headers(),
     });
 
-    if (!session?.user || session.user.role !== "owner") {
+    if (!session?.user || ((session.user as any).role || 'guest') !== "owner") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

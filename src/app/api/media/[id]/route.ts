@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { auth, type ExtendedSession } from '@/lib/auth';
 import {
   getMediaById,
   updateMediaRecord,
@@ -25,7 +25,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers });
+    const session = await auth.api.getSession({ headers: req.headers }) as ExtendedSession | null;
 
     if (!session?.user) {
       return NextResponse.json(
@@ -53,7 +53,7 @@ export async function GET(
     }
 
     // Check ownership (admin can view all)
-    if (media.uploadedBy !== session.user.id && session.user.role !== 'admin') {
+    if (media.uploadedBy !== session.user.id && (session.user.role || 'guest') !== 'admin') {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
@@ -81,7 +81,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers });
+    const session = await auth.api.getSession({ headers: req.headers }) as ExtendedSession | null;
 
     if (!session?.user) {
       return NextResponse.json(
@@ -183,7 +183,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth.api.getSession({ headers: req.headers });
+    const session = await auth.api.getSession({ headers: req.headers }) as ExtendedSession | null;
 
     if (!session?.user) {
       return NextResponse.json(

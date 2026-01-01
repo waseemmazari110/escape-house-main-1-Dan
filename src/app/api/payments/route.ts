@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Check authorization - admins only for now
-        if (session.user.role !== 'admin') {
+        if (((session.user as any).role || 'guest') !== 'admin') {
           return NextResponse.json({
             success: false,
             error: 'Unauthorized to view this payment',
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Check authorization - admins only for now
-        if (session.user.role !== 'admin') {
+        if (((session.user as any).role || 'guest') !== 'admin') {
           return NextResponse.json({
             success: false,
             error: 'Unauthorized to view this booking',
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Check authorization
-        if (session.user.role !== 'admin' && session.user.role !== 'owner') {
+        if (((session.user as any).role || 'guest') !== 'admin' && ((session.user as any).role || 'guest') !== 'owner') {
           return NextResponse.json({
             success: false,
             error: 'Unauthorized',
@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Check authorization - admins only for now
-        if (session.user.role !== 'admin') {
+        if (((session.user as any).role || 'guest') !== 'admin') {
           return NextResponse.json({
             success: false,
             error: 'Unauthorized to create payment for this booking',
@@ -242,7 +242,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Check authorization - admins only for now
-        if (session.user.role !== 'admin') {
+        if (((session.user as any).role || 'guest') !== 'admin') {
           return NextResponse.json({
             success: false,
             error: 'Unauthorized',
@@ -295,7 +295,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Check authorization - admins only for now
-        if (session.user.role !== 'admin') {
+        if (((session.user as any).role || 'guest') !== 'admin') {
           return NextResponse.json({
             success: false,
             error: 'Unauthorized',
@@ -334,7 +334,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Only admin and owners can process refunds
-        if (session.user.role !== 'admin' && session.user.role !== 'owner') {
+        if (((session.user as any).role || 'guest') !== 'admin' && ((session.user as any).role || 'guest') !== 'owner') {
           return NextResponse.json({
             success: false,
             error: 'Unauthorized',
@@ -350,7 +350,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Only admins can process refunds for now
-        if (session.user.role !== 'admin') {
+        if (((session.user as any).role || 'guest') !== 'admin') {
           return NextResponse.json({
             success: false,
             error: 'Unauthorized',
@@ -380,7 +380,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Only admin and owners can cancel payments
-        if (session.user.role !== 'admin' && session.user.role !== 'owner') {
+        if (((session.user as any).role || 'guest') !== 'admin' && ((session.user as any).role || 'guest') !== 'owner') {
           return NextResponse.json({
             success: false,
             error: 'Unauthorized',
@@ -396,7 +396,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Only admins can cancel payments for now
-        if (session.user.role !== 'admin') {
+        if (((session.user as any).role || 'guest') !== 'admin') {
           return NextResponse.json({
             success: false,
             error: 'Unauthorized',

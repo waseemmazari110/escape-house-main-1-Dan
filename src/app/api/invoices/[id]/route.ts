@@ -40,7 +40,7 @@ export async function GET(
     }
 
     // Verify user owns this invoice
-    if (invoiceData.customerId !== session.user.id && session.user.role !== 'admin') {
+    if (invoiceData.customerId !== session.user.id && (session.user as any).role !== 'admin') {
       return NextResponse.json(
         { error: 'Forbidden' },
         { status: 403 }
