@@ -65,6 +65,10 @@ export async function PATCH(
 
     // Verify ownership (admin can modify any, owner can only modify their properties)
     if (!isAdmin(currentUser)) {
+      if (!booking.propertyId) {
+        return unauthorizedResponse('Booking has no associated property');
+      }
+      
       const [property] = await db
         .select()
         .from(properties)
@@ -147,6 +151,10 @@ export async function DELETE(
 
     // Verify ownership (admin can delete any, owner can only delete their properties)
     if (!isAdmin(currentUser)) {
+      if (!booking.propertyId) {
+        return unauthorizedResponse('Booking has no associated property');
+      }
+      
       const [property] = await db
         .select()
         .from(properties)

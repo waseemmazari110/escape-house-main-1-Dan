@@ -67,9 +67,9 @@ export async function POST(request: NextRequest) {
         .limit(1);
 
       if (existingSub.length === 0) {
-        const currentPeriodStart = new Date(stripeSubscription.current_period_start * 1000)
+        const currentPeriodStart = new Date((stripeSubscription as any).current_period_start * 1000)
           .toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-        const currentPeriodEnd = new Date(stripeSubscription.current_period_end * 1000)
+        const currentPeriodEnd = new Date((stripeSubscription as any).current_period_end * 1000)
           .toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
         await db.insert(subscriptions).values({
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
         .limit(1);
 
       if (existingPayment.length === 0) {
-        const charge = paymentIntent.charges?.data[0];
+        const charge = (paymentIntent as any).charges?.data[0];
         
         await db.insert(payments).values({
           userId: session.user.id,
@@ -133,6 +133,7 @@ export async function POST(request: NextRequest) {
           receiptEmail: charge?.receipt_email || session.user.email || null,
           stripeEventId: 'manual_sync',
           createdAt: nowUKFormatted(),
+          updatedAt: nowUKFormatted(),
           processedAt: paymentIntent.status === 'succeeded' ? nowUKFormatted() : null,
         });
 
