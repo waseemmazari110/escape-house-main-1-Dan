@@ -2,6 +2,9 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { headers, cookies } from "next/headers";
 
+// Force dynamic rendering for all owner routes
+export const dynamic = 'force-dynamic';
+
 export default async function OwnerLayout({
   children,
 }: {
