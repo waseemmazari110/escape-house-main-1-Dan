@@ -23,15 +23,7 @@ const PROTECTED_ROUTES: Record<string, string[]> = {
 const PUBLIC_ROUTES = [
   '/',
   '/properties',
-  '/auth/sign-in',
-  '/auth/login',
-  '/auth/admin-login',
-  '/auth/owner-login',
-  '/auth/guest-login',
-  '/auth/sign-up',
-  '/auth/register',
-  '/auth/forgot-password',
-  '/auth/reset-password',
+  '/auth/*',  // All auth routes are public
   '/register',
   '/login',
   '/forgot-password',
