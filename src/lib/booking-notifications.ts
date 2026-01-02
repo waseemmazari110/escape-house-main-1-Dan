@@ -23,7 +23,7 @@ import {
 } from './email-templates/owner-notification';
 
 // Email configuration
-const FROM_EMAIL = process.env.GMAIL_USER || 'mazariwaseem110@gmail.com';
+const FROM_EMAIL = process.env.GMAIL_USER || 'noreply@groupescapehouses.co.uk';
 const FROM_NAME = 'Group Escape Houses';
 
 interface BookingConfirmationParams {

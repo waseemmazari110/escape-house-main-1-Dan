@@ -1,10 +1,12 @@
 import nodemailer from 'nodemailer';
 
-// Create reusable transporter using Gmail SMTP
+// Create reusable transporter using custom domain SMTP
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: false, // true for 465, false for other ports
   auth: {
-    user: 'mazariwaseem110@gmail.com',
+    user: process.env.GMAIL_USER || 'noreply@groupescapehouses.co.uk',
     pass: process.env.GMAIL_SMTP_APP_PASSWORD,
   },
 });
@@ -30,7 +32,7 @@ interface EmailOptions {
 export async function sendGmailEmail({ to, subject, html }: EmailOptions) {
   try {
     const info = await transporter.sendMail({
-      from: '"Group Escape Houses" <mazariwaseem110@gmail.com>',
+      from: '"Group Escape Houses" <noreply@groupescapehouses.co.uk>',
       to,
       subject,
       html,
@@ -189,7 +191,7 @@ export async function sendOtpEmail(email: string, code: string) {
                 <tr>
                   <td style="padding: 30px; background-color: #F9FAFB; text-align: center; border-top: 1px solid #E5E7EB;">
                     <p style="margin: 0 0 10px 0; color: #6B7280; font-size: 14px;">
-                      Need help? Contact us at <a href="mailto:mazariwaseem110@gmail.com" style="color: #89A38F; text-decoration: none;">mazariwaseem110@gmail.com</a>
+                      Need help? Contact us at <a href="mailto:info@groupescapehouses.co.uk" style="color: #89A38F; text-decoration: none;">info@groupescapehouses.co.uk</a>
                     </p>
                     <p style="margin: 0; color: #9CA3AF; font-size: 12px;">
                       © 2025 Group Escape Houses. All rights reserved.
@@ -279,7 +281,7 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string) {
                 <tr>
                   <td style="padding: 30px; background-color: #F9FAFB; text-align: center; border-top: 1px solid #E5E7EB;">
                     <p style="margin: 0 0 10px 0; color: #6B7280; font-size: 14px;">
-                      Need help? Contact us at <a href="mailto:mazariwaseem110@gmail.com" style="color: #89A38F; text-decoration: none;">mazariwaseem110@gmail.com</a>
+                      Need help? Contact us at <a href="mailto:info@groupescapehouses.co.uk" style="color: #89A38F; text-decoration: none;">info@groupescapehouses.co.uk</a>
                     </p>
                     <p style="margin: 0; color: #9CA3AF; font-size: 12px;">
                       © 2025 Group Escape Houses. All rights reserved.
