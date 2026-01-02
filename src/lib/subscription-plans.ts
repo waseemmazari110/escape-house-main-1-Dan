@@ -94,7 +94,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Basic Yearly',
     tier: 'basic',
     interval: 'yearly',
-    price: 89.99,
+    price: 99.99,
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_BASIC_YEARLY || '',
     features: [
@@ -103,7 +103,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
       'Basic analytics',
       'Email support',
       'Mobile responsive design',
-      '💰 Save £159.89 per year',
+      '💰 Save £19.89 per year',
     ],
     maxProperties: 5,
     maxPhotos: 20,
@@ -121,7 +121,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Premium Monthly',
     tier: 'premium',
     interval: 'monthly',
-    price: 15.99,
+    price: 14.99,
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_PREMIUM_MONTHLY || '',
     features: [
@@ -148,7 +148,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Premium Yearly',
     tier: 'premium',
     interval: 'yearly',
-    price: 109.99,
+    price: 149.99,
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_PREMIUM_YEARLY || '',
     features: [
@@ -159,7 +159,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
       'Priority email & chat support',
       'Social media integration',
       'Booking calendar',
-      '💰 Save £259.89 per year',
+      '💰 Save £29.89 per year',
     ],
     maxProperties: 25,
     maxPhotos: 50,
@@ -177,7 +177,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     name: 'Enterprise Monthly',
     tier: 'enterprise',
     interval: 'monthly',
-    price: 24.99,
+    price: 19.99,
     currency: 'GBP',
     stripePriceId: process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY || '',
     features: [
@@ -219,7 +219,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
       'API access',
       'White-label options',
       'Dedicated account manager',
-      '💰 Save £359.89 per year',
+      '💰 Save £39.89 per year',
     ],
     maxProperties: -1, // unlimited
     maxPhotos: -1, // unlimited
@@ -231,7 +231,9 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     description: 'For established property management companies - Save 16.6% annually',
   },
 
-  // TEST PRODUCTS (for development/testing)
+  // TEST PRODUCTS (for development/testing) - Disabled (no price IDs configured)
+  // Uncomment and add STRIPE_BASIC and STRIPE_BASIC2 to .env if you need test products
+  /*
   test_basic: {
     id: 'test_basic',
     name: 'Test Basic - £1',
@@ -279,6 +281,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     apiAccess: false,
     description: 'Test product for £2 - verify payment tracking',
   },
+  */
 };
 
 // ============================================

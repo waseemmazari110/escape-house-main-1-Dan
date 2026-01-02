@@ -226,6 +226,33 @@ function OwnerDashboardContent() {
     if (propertyParam) {
       setSelectedPropertyId(parseInt(propertyParam));
     }
+    
+    // Check for payment success from Stripe redirect
+    const paymentSuccess = searchParams.get('payment_success');
+    const sessionId = searchParams.get('session_id');
+    if (paymentSuccess === 'true' && sessionId) {
+      // Sync payment record from Stripe
+      fetch('/api/subscriptions/sync-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            alert('🎉 Subscription Payment Successful!\n\nYour subscription has been activated and payment history has been recorded.');
+            // Reload payment history
+            fetchPaymentHistory();
+          } else {
+            alert('✅ Subscription Activated!\n\nYour subscription is active. Payment history will sync automatically.');
+          }
+        })
+        .catch(() => {
+          alert('✅ Subscription Activated!\n\nYour subscription is active. Payment history will sync automatically.');
+        });
+      // Clean URL
+      window.history.replaceState({}, '', '/owner/dashboard');
+    }
   }, [searchParams]);
 
   // Fetch property availability
@@ -1123,10 +1150,70 @@ function OwnerDashboardContent() {
                             </div>
                           )}
 
-                          <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
-                            <p className="text-xs text-gray-500">
-                              Created: {formatUKDateTime(booking.createdAt || booking.checkInDate)}
-                            </p>
+                          <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                            <div className="flex items-center justify-between gap-4">
+                              <p className="text-xs text-gray-500">
+                                Created: {formatUKDateTime(booking.createdAt || booking.checkInDate)}
+                              </p>
+                              
+                              <div className="flex items-center gap-2">
+                                {booking.bookingStatus !== 'rejected' && booking.bookingStatus !== 'cancelled' && (
+                                  <button
+                                    onClick={async () => {
+                                      if (confirm('Are you sure you want to reject this booking?')) {
+                                        try {
+                                          const response = await fetch(`/api/owner/bookings/${booking.id}`, {
+                                            method: 'PATCH',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ bookingStatus: 'rejected' }),
+                                          });
+                                          
+                                          if (response.ok) {
+                                            alert('Booking rejected successfully');
+                                            loadBookings();
+                                          } else {
+                                            const error = await response.json();
+                                            alert(error.error || 'Failed to reject booking');
+                                          }
+                                        } catch (error) {
+                                          alert('Failed to reject booking. Please try again.');
+                                        }
+                                      }
+                                    }}
+                                    className="px-4 py-2 text-xs font-semibold text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors flex items-center gap-1.5"
+                                  >
+                                    <XCircle className="w-4 h-4" />
+                                    Reject
+                                  </button>
+                                )}
+                                
+                                <button
+                                  onClick={async () => {
+                                    if (confirm('Are you sure you want to DELETE this booking? This action cannot be undone.')) {
+                                      try {
+                                        const response = await fetch(`/api/owner/bookings/${booking.id}`, {
+                                          method: 'DELETE',
+                                        });
+                                        
+                                        if (response.ok) {
+                                          alert('Booking deleted successfully');
+                                          loadBookings();
+                                        } else {
+                                          const error = await response.json();
+                                          alert(error.error || 'Failed to delete booking');
+                                        }
+                                      } catch (error) {
+                                        alert('Failed to delete booking. Please try again.');
+                                      }
+                                    }
+                                  }}
+                                  className="px-4 py-2 text-xs font-semibold text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors flex items-center gap-1.5"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       ))}

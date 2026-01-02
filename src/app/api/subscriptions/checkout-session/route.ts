@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         },
       ],
       mode: 'subscription',
-      success_url: successUrl || `${baseUrl}/owner/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: successUrl || `${baseUrl}/owner/dashboard?payment_success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl || `${baseUrl}/owner/subscription?canceled=true`,
       metadata: {
         userId: session.user.id,
