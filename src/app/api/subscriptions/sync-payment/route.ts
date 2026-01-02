@@ -115,20 +115,30 @@ export async function POST(request: NextRequest) {
       if (existingPayment.length === 0) {
         const charge = (paymentIntent as any).charges?.data[0];
         
+        const subscriptionRecord = await db
+          .select()
+          .from(subscriptions)
+          .where(eq(subscriptions.stripeSubscriptionId, checkoutSession.subscription as string))
+          .limit(1);
+
         await db.insert(payments).values({
           userId: session.user.id,
+          userRole: checkoutSession.metadata?.role || checkoutSession.metadata?.userRole || 'owner',
+          stripeCustomerId: typeof checkoutSession.customer === 'string' ? checkoutSession.customer : checkoutSession.customer?.id || null,
           stripePaymentIntentId: paymentIntent.id,
           stripeChargeId: charge?.id || null,
+          stripeSubscriptionId: checkoutSession.subscription as string || null,
+          stripeSessionId: sessionId,
           amount: paymentIntent.amount / 100,
           currency: paymentIntent.currency.toUpperCase(),
-          paymentStatus: paymentIntent.status === 'succeeded' ? 'completed' : paymentIntent.status,
+          paymentStatus: paymentIntent.status === 'succeeded' ? 'succeeded' : paymentIntent.status,
           paymentMethod: charge?.payment_method_details?.type || 'card',
           paymentMethodBrand: charge?.payment_method_details?.card?.brand || 'unknown',
           paymentMethodLast4: charge?.payment_method_details?.card?.last4 || '****',
-          description: `Subscription payment - ${checkoutSession.metadata?.subscriptionPlan || 'Plan'}`,
-          billingReason: 'subscription_checkout',
-          subscriptionPlan: checkoutSession.metadata?.subscriptionPlan || null,
-          subscriptionId: null, // Will be linked later
+          description: checkoutSession.metadata?.subscriptionPlan || `Subscription payment - ${checkoutSession.metadata?.planName || 'Plan'}`,
+          billingReason: checkoutSession.metadata?.billingReason || 'subscription_create',
+          subscriptionPlan: checkoutSession.metadata?.subscriptionPlan || checkoutSession.metadata?.planName || null,
+          subscriptionId: subscriptionRecord[0]?.id || null,
           receiptUrl: charge?.receipt_url || null,
           receiptEmail: charge?.receipt_email || session.user.email || null,
           stripeEventId: 'manual_sync',
