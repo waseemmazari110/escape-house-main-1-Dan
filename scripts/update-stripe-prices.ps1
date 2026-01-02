@@ -5,12 +5,12 @@ Write-Host "Updating Stripe Price IDs on Vercel..." -ForegroundColor Cyan
 
 # New Price IDs
 $priceIds = @{
-    "STRIPE_PRICE_BASIC_MONTHLY" = "price_1Sl78LIakKHMdeEkqsJIGSVE"
-    "STRIPE_PRICE_BASIC_YEARLY" = "price_1Sl78oIakKHMdeEkKz8Mimoo"
-    "STRIPE_PRICE_PREMIUM_MONTHLY" = "price_1Sl79LIakKHMdeEkmfiimgdY"
-    "STRIPE_PRICE_PREMIUM_YEARLY" = "price_1Sl79sIakKHMdeEkKbErH5Aj"
-    "STRIPE_PRICE_ENTERPRISE_MONTHLY" = "price_1Sl7A8IakKHMdeEk8dDKQz7h"
-    "STRIPE_PRICE_ENTERPRISE_YEARLY" = "price_1Sl7AdIakKHMdeEkHIzZKd78"
+    "STRIPE_PRICE_BASIC_MONTHLY" = "price_1SlA8rI0J9sqa21Cpr3kyVzE"
+    "STRIPE_PRICE_BASIC_YEARLY" = "price_1SlA97I0J9sqa21Cs4lB88Zd"
+    "STRIPE_PRICE_PREMIUM_MONTHLY" = "price_1SlA9zI0J9sqa21C5otPYqAU"
+    "STRIPE_PRICE_PREMIUM_YEARLY" = "price_1SlAAMI0J9sqa21CgTlHU0xg"
+    "STRIPE_PRICE_ENTERPRISE_MONTHLY" = "price_1SlAAtI0J9sqa21CYrz1BcfW"
+    "STRIPE_PRICE_ENTERPRISE_YEARLY" = "price_1SlABDI0J9sqa21CMj7l3PUz"
 }
 
 # Update each environment variable for all environments
