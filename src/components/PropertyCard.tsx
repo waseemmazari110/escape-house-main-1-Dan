@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Heart, UsersRound, MapPinned } from "lucide-react";
 import { useState, memo, useMemo } from "react";
-import BookingModal from "@/components/BookingModal";
 
 interface PropertyCardProps {
   id: string;
@@ -30,7 +29,6 @@ const PropertyCard = memo(function PropertyCard({
   slug,
 }: PropertyCardProps) {
   const [isSaved, setIsSaved] = useState(false);
-  const [bookingModalOpen, setBookingModalOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
   const isAllowedImageHost = useMemo(() => {
@@ -165,33 +163,22 @@ const PropertyCard = memo(function PropertyCard({
                   color: "var(--color-text-primary)",
                 }}
               >
-                View
+                View Details
               </Link>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  setBookingModalOpen(true);
-                }}
+              <Link
+                href={`/properties/${slug}#enquiry`}
                 className="px-4 py-2 rounded-xl font-medium text-sm transition-all duration-200 hover:shadow-lg"
                 style={{
                   background: "var(--color-accent-sage)",
                   color: "white",
                 }}
               >
-                Book Now
-              </button>
+                Enquire
+              </Link>
             </div>
           </div>
         </div>
       </div>
-
-      <BookingModal
-        open={bookingModalOpen}
-        onOpenChange={setBookingModalOpen}
-        propertyId={id}
-        propertyTitle={title}
-        priceFrom={priceFrom}
-      />
     </>
   );
 });

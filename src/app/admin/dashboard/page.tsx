@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PropertyApprovals from "@/components/admin/PropertyApprovals";
 import Transactions from "@/components/admin/Transactions";
+import MembershipTracking from "@/components/admin/MembershipTracking";
 
 const formatUKDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -91,15 +92,15 @@ function AdminDashboardContent() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeView, setActiveView] = useState<"overview" | "bookings" | "users" | "approvals" | "transactions">("overview");
+  const [activeView, setActiveView] = useState<"overview" | "bookings" | "users" | "approvals" | "transactions" | "memberships">("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [statusCounts, setStatusCounts] = useState<StatusCounts>({ pending: 0, approved: 0, rejected: 0, all: 0 });
 
   useEffect(() => {
     const viewParam = searchParams.get('view');
-    if (viewParam && ['overview', 'bookings', 'users', 'approvals', 'transactions'].includes(viewParam)) {
-      setActiveView(viewParam as "overview" | "bookings" | "users" | "approvals" | "transactions");
+    if (viewParam && ['overview', 'bookings', 'users', 'approvals', 'transactions', 'memberships'].includes(viewParam)) {
+      setActiveView(viewParam as "overview" | "bookings" | "users" | "approvals" | "transactions" | "memberships");
     }
   }, [searchParams]);
 
@@ -261,6 +262,7 @@ function AdminDashboardContent() {
         <nav className="flex-1 px-4 py-6 space-y-2">
           {[ 
             { name: 'Overview', icon: Home, view: 'overview' },
+            { name: 'Memberships', icon: UserCheck, view: 'memberships' },
             { name: 'Bookings', icon: Calendar, view: 'bookings' },
             { name: 'User Management', icon: Users, view: 'users' },
             { name: 'Transactions', icon: Search, view: 'transactions' },
@@ -402,13 +404,15 @@ function AdminDashboardContent() {
               {activeView === "users" && "👥 User Management"}
               {activeView === "approvals" && "🏠 Property Approvals"}
               {activeView === "transactions" && "💳 Transactions"}
+              {activeView === "memberships" && "👤 Memberships"}
             </h1>
             <p className="text-black">
               {activeView === "overview" && "Monitor your platform's performance"}
               {activeView === "bookings" && "View and manage all booking records"}
-              {activeView === "users" && "Manage guests and property owners"}
+              {activeView === "users" && "Manage user accounts and roles"}
               {activeView === "approvals" && "Review and approve property listings"}
               {activeView === "transactions" && "View all payment transactions from owners"}
+              {activeView === "memberships" && "Track membership sign-ups and payment status"}
             </p>
           </div>
 
@@ -699,6 +703,11 @@ function AdminDashboardContent() {
           {/* Transactions Section */}
           {activeView === "transactions" && (
             <Transactions />
+          )}
+
+          {/* Membership Tracking Section */}
+          {activeView === "memberships" && (
+            <MembershipTracking />
           )}
 
           {/* Property Approvals Section */}

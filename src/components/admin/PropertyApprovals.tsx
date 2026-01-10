@@ -274,6 +274,60 @@ export default function PropertyApprovals() {
     }
   };
 
+  /**
+   * Unpublish an approved property
+   * @param propertyId - ID of the property to unpublish
+   * @param event - Click event to prevent propagation
+   */
+  const handleUnpublish = async (propertyId: number, event?: React.MouseEvent) => {
+    event?.stopPropagation();
+    event?.preventDefault();
+    
+    if (!confirm('Are you sure you want to unpublish this property? It will be removed from the public website.')) {
+      return;
+    }
+
+    setActionLoading(propertyId);
+    try {
+      console.log('Unpublishing property:', propertyId);
+      
+      const response = await fetch(`/api/admin/properties/${propertyId}/unpublish`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      console.log('Unpublish response status:', response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Unpublish successful:', data);
+        alert('✅ Property unpublished successfully! It has been removed from the public website.');
+        fetchProperties();
+      } else {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Unpublish failed:', response.status, errorData);
+        
+        let errorMessage = errorData.error || 'Unknown error';
+        if (response.status === 401) {
+          errorMessage = 'Not authenticated. Please log in again.';
+          window.location.href = '/auth/admin-login';
+        } else if (response.status === 403) {
+          errorMessage = 'You do not have permission to unpublish properties. Admin access required.';
+        }
+        
+        alert(`❌ Failed to unpublish: ${errorMessage}`);
+      }
+    } catch (error) {
+      console.error('Unpublish error:', error);
+      alert(`❌ An error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   // ==================== HELPER FUNCTIONS ====================
 
   /**
@@ -429,6 +483,7 @@ export default function PropertyApprovals() {
                   property={property}
                   onApprove={handleApprove}
                   onReject={openRejectionModal}
+                  onUnpublish={handleUnpublish}
                   isLoading={actionLoading === property.id}
                   formatDate={formatDate}
                   getStatusBadge={getStatusBadge}
@@ -468,6 +523,7 @@ interface PropertyCardProps {
   property: Property;
   onApprove: (id: number, event?: React.MouseEvent) => void;
   onReject: (property: Property, event?: React.MouseEvent) => void;
+  onUnpublish: (id: number, event?: React.MouseEvent) => void;
   isLoading: boolean;
   formatDate: (date: string) => string;
   getStatusBadge: (status: string) => string;
@@ -477,6 +533,7 @@ function PropertyCard({
   property, 
   onApprove, 
   onReject, 
+  onUnpublish,
   isLoading, 
   formatDate, 
   getStatusBadge 
@@ -659,6 +716,28 @@ function PropertyCard({
                 )}
               </Button>
             </>
+          )}
+          
+          {property.status === 'approved' && (
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onUnpublish(property.id, e);
+              }}
+              disabled={isLoading}
+              size="sm"
+              className="flex-1 bg-orange-600 hover:bg-orange-700 text-white"
+            >
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  <XCircle className="w-4 h-4 mr-1.5" />
+                  Unpublish
+                </>
+              )}
+            </Button>
           )}
           
           <Link href={`/properties/${property.slug}`} target="_blank" className={property.status === 'pending' ? 'w-full mt-2' : 'w-full'}>

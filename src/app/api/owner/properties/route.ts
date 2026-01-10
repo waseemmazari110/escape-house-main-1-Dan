@@ -7,6 +7,7 @@ import { headers } from 'next/headers';
 import { nowUKFormatted } from '@/lib/date-utils';
 import { logPropertyAction, captureRequestDetails } from '@/lib/audit-logger';
 import { revalidateProperty, revalidateOwnerDashboard } from '@/lib/cache';
+import { canCreateProperty } from '@/lib/payment-verification';
 
 export async function GET(request: NextRequest) {
   try {
@@ -104,6 +105,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Access denied. Owner or Admin role required.' },
         { status: 403 }
+      );
+    }
+
+    // PAYMENT VERIFICATION: Ensure payment is complete before allowing listing submission
+    const paymentCheck = await canCreateProperty(session.user.id);
+    if (!paymentCheck.allowed) {
+      return NextResponse.json(
+        { 
+          error: 'Payment required', 
+          message: paymentCheck.reason,
+          requiresPayment: true 
+        },
+        { status: 402 } // 402 Payment Required
       );
     }
 
