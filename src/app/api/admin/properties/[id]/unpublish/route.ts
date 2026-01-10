@@ -86,18 +86,19 @@ export async function POST(
       .returning();
 
     // Log audit event
-    await logAuditEvent(
-      currentUser.id,
-      'property.unpublished',
-      propertyId.toString(),
-      property.title,
-      {
+    await logAuditEvent({
+      userId: currentUser.id,
+      action: 'property.unpublished',
+      resourceType: 'property',
+      resourceId: propertyId.toString(),
+      resourceName: property.title,
+      details: {
         adminId: currentUser.id,
         adminEmail: currentUser.email,
         previousStatus: property.status,
         ownerId: property.ownerId,
-      }
-    );
+      },
+    });
 
     // Revalidate cache
     revalidateProperty(propertyId.toString(), property.ownerId || '');
