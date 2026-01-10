@@ -88,7 +88,7 @@ export async function POST(
     // Log audit event
     await logAuditEvent({
       userId: currentUser.id,
-      action: 'property.unpublished',
+      action: 'property.unpublish',
       resourceType: 'property',
       resourceId: propertyId.toString(),
       resourceName: property.title,
